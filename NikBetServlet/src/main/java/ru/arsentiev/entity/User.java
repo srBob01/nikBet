@@ -1,9 +1,6 @@
 package ru.arsentiev.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -12,6 +9,7 @@ import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
+@ToString
 public class User {
     private long idUser;
     private String nickname;
