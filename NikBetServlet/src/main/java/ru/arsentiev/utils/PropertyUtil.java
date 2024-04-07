@@ -23,7 +23,6 @@ public class PropertyUtil {
         return PROPERTIES.getProperty(key);
     }
 
-    private PropertyUtil(){
-
+    private PropertyUtil() {
     }
 }

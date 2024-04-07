@@ -13,14 +13,15 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class Game {
-    private final int idGame;
+    private Long idGame;
     private Team homeTeam;
     private Team guestTeam;
     private Integer goalHomeTeam;
     private Integer goalGuestTeam;
     private LocalDateTime gameDate;
     private GameStatus status;
-    private BigDecimal coefficientOnHomeTeam;
-    private BigDecimal coefficientOnGuestTeam;
+    private Float coefficientOnHomeTeam;
+    private Float coefficientOnDraw;
+    private Float coefficientOnGuestTeam;
     private GameResult result;
 }

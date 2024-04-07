@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class Prediction {
-    private final int idPrediction;
+    private Long idPrediction;
     private Game game;
     private User user;
     private LocalDateTime predictionDate;

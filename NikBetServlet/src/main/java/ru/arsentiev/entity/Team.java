@@ -10,7 +10,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class Team {
-    private final int idTeam;
+    private Long idTeam;
     private String title;
     private String abbreviation;
 }

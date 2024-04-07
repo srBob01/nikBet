@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @ToString
 public class User {
-    private long idUser;
+    private Long idUser;
     private String nickname;
     private String firstName;
     private String lastName;
@@ -23,22 +23,4 @@ public class User {
     private BigDecimal accountBalance;
     private final UserRole role;
     private List<Prediction> predictionList;
-
-    @Builder(builderMethodName = "userBuilder")
-    public User(String nickname, String firstName, String lastName, String patronymic,
-                String password, String phoneNumber, String email, LocalDate birthDate,
-                BigDecimal accountBalance, UserRole role, List<Prediction> predictionList) {
-        this.idUser = 0;
-        this.nickname = nickname;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.patronymic = patronymic;
-        this.password = password;
-        this.phoneNumber = phoneNumber;
-        this.email = email;
-        this.birthDate = birthDate;
-        this.accountBalance = accountBalance;
-        this.role = role == null ? UserRole.USER : role;
-        this.predictionList = predictionList;
-    }
 }
