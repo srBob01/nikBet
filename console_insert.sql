@@ -32,27 +32,28 @@ VALUES ('Manchester United', 'MUN'),
        ('Wolverhampton Wanderers', 'WOL');
 
 INSERT INTO games (idHomeTeam, idGuestTeam, goalHomeTeam, goalGuestTeam, gameDate, status, coefficientOnHomeTeam,
+                   coefficientondraw,
                    coefficientOnGuestTeam, result)
 VALUES ((SELECT idTeam FROM teams WHERE abbreviation = 'MUN'), (SELECT idTeam FROM teams WHERE abbreviation = 'LIV'),
-        2, 1, '2024-04-08 15:00:00+00', 'Completed', 1.95, 3.25, 'HomeWin'),
+        2, 1, '2024-04-08 15:00:00+00', 'Completed', 1.95, 3.25, 1.95, 'HomeWin'),
        ((SELECT idTeam FROM teams WHERE abbreviation = 'CHE'), (SELECT idTeam FROM teams WHERE abbreviation = 'ARS'),
-        1, 1, '2024-04-09 15:00:00+00', 'Completed', 2.10, 3.10, 'Draw'),
+        1, 1, '2024-04-09 15:00:00+00', 'Completed', 2.10, 3.10, 1.95, 'Draw'),
        ((SELECT idTeam FROM teams WHERE abbreviation = 'MCI'), (SELECT idTeam FROM teams WHERE abbreviation = 'TOT'),
-        3, 2, '2024-04-10 15:00:00+00', 'Completed', 1.75, 4.00, 'HomeWin'),
+        3, 2, '2024-04-10 15:00:00+00', 'Completed', 1.75, 4.00, 1.95, 'HomeWin'),
        ((SELECT idTeam FROM teams WHERE abbreviation = 'EVE'), (SELECT idTeam FROM teams WHERE abbreviation = 'LEI'),
-        0, 2, '2024-04-11 15:00:00+00', 'Completed', 2.50, 2.75, 'AwayWin'),
+        0, 2, '2024-04-11 15:00:00+00', 'Completed', 2.50, 2.75, 1.95, 'AwayWin'),
        ((SELECT idTeam FROM teams WHERE abbreviation = 'WHU'), (SELECT idTeam FROM teams WHERE abbreviation = 'WOL'),
-        2, 3, '2024-04-12 15:00:00+00', 'Completed', 2.80, 2.50, 'AwayWin'),
+        2, 3, '2024-04-12 15:00:00+00', 'Completed', 2.80, 2.50, 1.95, 'AwayWin'),
        ((SELECT idTeam FROM teams WHERE abbreviation = 'LIV'), (SELECT idTeam FROM teams WHERE abbreviation = 'CHE'),
-        2, 0, '2024-04-13 15:00:00+00', 'Completed', 2.00, 3.50, 'HomeWin'),
+        2, 0, '2024-04-13 15:00:00+00', 'Completed', 2.00, 3.50, 1.95, 'HomeWin'),
        ((SELECT idTeam FROM teams WHERE abbreviation = 'ARS'), (SELECT idTeam FROM teams WHERE abbreviation = 'MCI'),
-        1, 3, '2024-04-14 15:00:00+00', 'Completed', 3.40, 1.90, 'AwayWin'),
+        1, 3, '2024-04-14 15:00:00+00', 'Completed', 3.40, 1.90, 1.95, 'AwayWin'),
        ((SELECT idTeam FROM teams WHERE abbreviation = 'TOT'), (SELECT idTeam FROM teams WHERE abbreviation = 'EVE'),
-        1, 1, '2024-04-15 15:00:00+00', 'Completed', 2.20, 3.30, 'Draw'),
+        1, 1, '2024-04-15 15:00:00+00', 'Completed', 2.20, 3.30, 1.95, 'Draw'),
        ((SELECT idTeam FROM teams WHERE abbreviation = 'LEI'), (SELECT idTeam FROM teams WHERE abbreviation = 'WHU'),
-        1, 2, '2024-04-16 15:00:00+00', 'Completed', 2.60, 2.80, 'AwayWin'),
+        1, 2, '2024-04-16 15:00:00+00', 'Completed', 2.60, 2.80, 1.95, 'AwayWin'),
        ((SELECT idTeam FROM teams WHERE abbreviation = 'WOL'), (SELECT idTeam FROM teams WHERE abbreviation = 'MUN'),
-        0, 1, '2024-04-17 15:00:00+00', 'Completed', 3.75, 1.85, 'AwayWin');
+        0, 1, '2024-04-17 15:00:00+00', 'Completed', 3.75, 1.85, 1.95, 'AwayWin');
 
 
 INSERT INTO predictions (idGame, idUser, summa, prediction)
