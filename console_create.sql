@@ -1,6 +1,6 @@
 CREATE TABLE users
 (
-    idUser         SERIAL PRIMARY KEY,
+    idUser         BIGSERIAL PRIMARY KEY,
     nickname       TEXT UNIQUE      NOT NULL,
     firstName      TEXT             NOT NULL,
     lastName       TEXT             NOT NULL,
@@ -18,29 +18,30 @@ CREATE INDEX users_role_idx ON users (role)
 
 CREATE TABLE teams
 (
-    idTeam       SERIAL PRIMARY KEY,
+    idTeam       BIGSERIAL PRIMARY KEY,
     title        TEXT UNIQUE    NOT NULL,
     abbreviation CHAR(3) UNIQUE NOT NULL
 );
 
 CREATE TABLE games
 (
-    idGame                 SERIAL PRIMARY KEY,
-    idHomeTeam             INT REFERENCES teams (idTeam)
+    idGame                 BIGSERIAL PRIMARY KEY,
+    idHomeTeam             BIGINT REFERENCES teams (idTeam)
         ON DELETE CASCADE
         ON UPDATE CASCADE
-                                       NOT NULL,
-    idGuestTeam            INT REFERENCES teams (idTeam)
+                                     NOT NULL,
+    idGuestTeam            BIGINT REFERENCES teams (idTeam)
         ON DELETE CASCADE
         ON UPDATE CASCADE
-                                       NOT NULL,
+                                     NOT NULL,
     goalHomeTeam           INT,
     goalGuestTeam          INT,
-    gameDate               TIMESTAMPTZ NOT NULL,
-    status                 TEXT        NOT NULL, --enum
+    gameDate               TIMESTAMP NOT NULL,
+    status                 TEXT      NOT NULL, --enum
     coefficientOnHomeTeam  NUMERIC(4, 2),
+    coefficientOnDraw      NUMERIC(4, 2),
     coefficientOnGuestTeam NUMERIC(4, 2),
-    result                 TEXT                  --enum
+    result                 TEXT                --enum
 );
 
 CREATE INDEX games_status_date_idx ON games (gameDate);
@@ -50,20 +51,20 @@ CREATE INDEX games_guest_team_idx ON games (idGuestTeam);
 
 CREATE TABLE predictions
 (
-    idPrediction   SERIAL PRIMARY KEY,
-    idGame         INT REFERENCES games
+    idPrediction   BIGSERIAL PRIMARY KEY,
+    idGame         BIGINT REFERENCES games
         ON DELETE CASCADE
         ON UPDATE CASCADE
-                         NOT NULL,
-    idUser         INT REFERENCES users
+                                    NOT NULL,
+    idUser         BIGINT REFERENCES users
         ON DELETE CASCADE
         ON UPDATE CASCADE
-                         NOT NULL,
-    predictionDate timestamptz
+                                    NOT NULL,
+    predictionDate TIMESTAMP
         DEFAULT current_timestamp
-                         NOT NULL,
-    summa          MONEY NOT NULL,
-    prediction     TEXT  NOT NULL --enum
+                                    NOT NULL,
+    summa          DOUBLE PRECISION NOT NULL,
+    prediction     TEXT             NOT NULL --enum
 );
 
 CREATE INDEX predictions_game_idx ON predictions (idGame);
