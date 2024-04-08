@@ -12,7 +12,6 @@ public class ConnectionManager {
     private static final String USERNAME_KEY = "db.username";
     private static final String PASSWORD_KEY = "db.password";
     private static final int DEFAULT_POOL_SIZE = 10;
-
     private static BlockingQueue<Connection> pool;
 
     static {
@@ -35,7 +34,7 @@ public class ConnectionManager {
 
     }
 
-    public static Connection get() throws InterruptedException {
+    public Connection get() throws InterruptedException {
         return pool.take();
     }
 
@@ -48,8 +47,5 @@ public class ConnectionManager {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private ConnectionManager() {
     }
 }

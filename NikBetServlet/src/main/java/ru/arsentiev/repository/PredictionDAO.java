@@ -1,4 +1,4 @@
-package ru.arsentiev.dao;
+package ru.arsentiev.repository;
 
 import ru.arsentiev.entity.Game;
 import ru.arsentiev.entity.GameResult;
@@ -15,15 +15,15 @@ import java.util.List;
 import java.util.Optional;
 
 public class PredictionDAO implements BaseDAO<Long, Prediction> {
-    private static final PredictionDAO INSTANCE = new PredictionDAO();
-
-    private PredictionDAO() {
+    private final ConnectionManager connectionManager;
+    private final GameDAO gameDAO;
+    private final UserDAO userDAO;
+    private PredictionDAO(ConnectionManager connectionManager,GameDAO gameDAO, UserDAO userDAO) {
+        this.connectionManager = connectionManager;
+        this.gameDAO = gameDAO;
+        this.userDAO = userDAO;
     }
-
-    public static PredictionDAO getInstance() {
-        return INSTANCE;
-    }
-
+    
     //language=PostgreSQL
     private static final String INSERT_PREDICTION = "INSERT INTO predictions (idGame, idUser, predictionDate, summa," +
             " prediction) VALUES (?, ?, ?, ?, ?);";
@@ -46,7 +46,7 @@ public class PredictionDAO implements BaseDAO<Long, Prediction> {
 
     @Override
     public Prediction insert(Prediction prediction) {
-        try (Connection connection = ConnectionManager.get();
+        try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_PREDICTION, Statement.RETURN_GENERATED_KEYS)) {
 
             setStatement(prediction, preparedStatement);
@@ -66,7 +66,7 @@ public class PredictionDAO implements BaseDAO<Long, Prediction> {
     @Override
     public List<Prediction> selectAll() {
         List<Prediction> predictions = new ArrayList<>();
-        try (Connection connection = ConnectionManager.get();
+        try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_PREDICTIONS);
              ResultSet resultSet = preparedStatement.executeQuery()) {
 
@@ -81,7 +81,7 @@ public class PredictionDAO implements BaseDAO<Long, Prediction> {
 
     @Override
     public Optional<Prediction> selectById(Long id) {
-        try (Connection connection = ConnectionManager.get();
+        try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_PREDICTION_BY_ID)) {
 
             preparedStatement.setLong(1, id);
@@ -105,12 +105,12 @@ public class PredictionDAO implements BaseDAO<Long, Prediction> {
         return selectByOtherId(gameId, SELECT_PREDICTIONS_BY_GAME_ID);
     }
 
-    private List<Prediction> selectByOtherId(Long gameId, String selectPredictionsByGameId) {
+    private List<Prediction> selectByOtherId(Long Id, String selectPredictionsById) {
         List<Prediction> predictions = new ArrayList<>();
-        try (Connection connection = ConnectionManager.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(selectPredictionsByGameId)) {
+        try (Connection connection = connectionManager.get();
+             PreparedStatement preparedStatement = connection.prepareStatement(selectPredictionsById)) {
 
-            preparedStatement.setLong(1, gameId);
+            preparedStatement.setLong(1, Id);
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
@@ -125,7 +125,7 @@ public class PredictionDAO implements BaseDAO<Long, Prediction> {
 
     @Override
     public boolean delete(Long id) {
-        try (Connection connection = ConnectionManager.get();
+        try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(DELETE_PREDICTION)) {
 
             preparedStatement.setLong(1, id);
@@ -137,7 +137,7 @@ public class PredictionDAO implements BaseDAO<Long, Prediction> {
 
     @Override
     public boolean update(Prediction prediction) {
-        try (Connection connection = ConnectionManager.get();
+        try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_PREDICTION)) {
 
             setStatement(prediction, preparedStatement);
@@ -164,9 +164,9 @@ public class PredictionDAO implements BaseDAO<Long, Prediction> {
         BigDecimal summa = resultSet.getBigDecimal("summa");
         String prediction = resultSet.getString("prediction");
 
-        Game game = GameDAO.getInstance().selectById(resultSet.getLong("idGame"),
+        Game game = gameDAO.selectById(resultSet.getLong("idGame"),
                 resultSet.getStatement().getConnection()).orElseThrow(() -> new SQLException("Game not found"));
-        User user = UserDAO.getInstance().selectById(resultSet.getLong("idUser"),
+        User user = userDAO.selectById(resultSet.getLong("idUser"),
                 resultSet.getStatement().getConnection()).orElseThrow(() -> new SQLException("User not found"));
 
         return new Prediction(idPrediction, game, user, predictionDate, summa, GameResult.valueOf(prediction));

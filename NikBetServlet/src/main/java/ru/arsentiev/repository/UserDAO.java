@@ -1,4 +1,4 @@
-package ru.arsentiev.dao;
+package ru.arsentiev.repository;
 
 import ru.arsentiev.entity.User;
 import ru.arsentiev.entity.UserRole;
@@ -13,19 +13,15 @@ import java.util.List;
 import java.util.Optional;
 
 public class UserDAO implements BaseDAO<Long, User> {
-    private static final UserDAO INSTANCE = new UserDAO();
-
-    private UserDAO() {
+    private final ConnectionManager connectionManager;
+    private UserDAO(ConnectionManager connectionManager) {
+        this.connectionManager = connectionManager;
     }
-
-    public static UserDAO getInstance() {
-        return INSTANCE;
-    }
-
+    //language=PostgreSQL
     private static final String INSERT_USER = "INSERT INTO users" +
             "(nickname, firstName, lastName, patronymic, password, phoneNumber, email, birthDate, accountBalance, role)" +
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-
+    //language=PostgreSQL
     private static final String UPDATE_USER = "UPDATE users SET " +
             "email = ?, " +
             "firstName = ?, " +
@@ -36,7 +32,7 @@ public class UserDAO implements BaseDAO<Long, User> {
             "accountBalance = ?, " +
             "password = ? " +
             "WHERE idUser = ?;";
-
+    //language=PostgreSQL
     private static final String UPDATE_DESCRIPTION_USER = "UPDATE users SET " +
             "nickname = ?, " +
             "firstName = ?, " +
@@ -45,30 +41,30 @@ public class UserDAO implements BaseDAO<Long, User> {
             "phoneNumber = ?, " +
             "birthDate = ? " +
             "WHERE idUser = ?;";
-
+    //language=PostgreSQL
     private static final String UPDATE_BALANCE_USER = "UPDATE users SET " +
             "accountBalance = ? " +
             "WHERE idUser = ?;";
-
+    //language=PostgreSQL
     private static final String UPDATE_PAS_USER = "UPDATE users SET password = ? WHERE iduser = ?;";
-
+    //language=PostgreSQL
     private static final String DELETE_USER = "DELETE FROM users WHERE idUser = ?;";
-
+    //language=PostgreSQL
     private static final String SELECT_USER_BY_ID = "SELECT idUser, nickname, firstName, lastName, patronymic," +
             " password, phoneNumber, email, birthDate, accountBalance, role" +
             " FROM users WHERE idUser = ?;";
-
+    //language=PostgreSQL
     private static final String SELECT_ALL_USERS = "SELECT iduser, nickname, firstname, lastname, patronymic," +
             " password, phonenumber, email, birthdate, accountbalance, role" +
             " FROM users ORDER BY iduser;";
-
+    //language=PostgreSQL
     private static final String SELECT_PASSWORD_USER = "SELECT password FROM users WHERE nickname = ?";
-
+    //language=PostgreSQL
     private static final String SELECT_BALANCE_USER = "SELECT accountBalance FROM users WHERE iduser = ?";
 
     @Override
     public User insert(User user) { //INSERT_USER
-        try (Connection connection = ConnectionManager.get();
+        try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_USER, Statement.RETURN_GENERATED_KEYS)) {
 
             preparedStatement.setString(1, user.getNickname());
@@ -97,7 +93,7 @@ public class UserDAO implements BaseDAO<Long, User> {
     @Override
     public List<User> selectAll() { //SELECT_ALL_USERS
         List<User> users = new ArrayList<>();
-        try (Connection connection = ConnectionManager.get();
+        try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_USERS);
              ResultSet rs = preparedStatement.executeQuery()) {
             while (rs.next()) {
@@ -111,7 +107,7 @@ public class UserDAO implements BaseDAO<Long, User> {
 
     @Override
     public Optional<User> selectById(Long id) { //SELECT_INFO_USER_BY_ID
-        try (Connection connection = ConnectionManager.get()) {
+        try (Connection connection = connectionManager.get()) {
             return selectById(id, connection);
         } catch (SQLException | InterruptedException e) {
             throw new DaoException(e);
@@ -134,7 +130,7 @@ public class UserDAO implements BaseDAO<Long, User> {
     }
 
     public Optional<String> selectPasswordByNickname(String nickname) { //SELECT_PASSWORD_USER
-        try (Connection connection = ConnectionManager.get();
+        try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_PASSWORD_USER)) {
             String result = null;
             preparedStatement.setString(1, nickname);
@@ -150,7 +146,7 @@ public class UserDAO implements BaseDAO<Long, User> {
     }
 
     public Optional<BigDecimal> selectBalanceById(Long idUser) { //SELECT_BALANCE_USER
-        try (Connection connection = ConnectionManager.get();
+        try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_BALANCE_USER)) {
             BigDecimal result = null;
             preparedStatement.setLong(1, idUser);
@@ -167,7 +163,7 @@ public class UserDAO implements BaseDAO<Long, User> {
 
     @Override
     public boolean delete(Long id) { //DELETE_USER
-        try (Connection connection = ConnectionManager.get();
+        try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(DELETE_USER)) {
 
             preparedStatement.setLong(1, id);
@@ -180,7 +176,7 @@ public class UserDAO implements BaseDAO<Long, User> {
 
     @Override
     public boolean update(User user) { //UPDATE_USER
-        try (Connection connection = ConnectionManager.get();
+        try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_USER)) {
 
             preparedStatement.setString(1, user.getEmail());
@@ -199,7 +195,7 @@ public class UserDAO implements BaseDAO<Long, User> {
     }
 
     public boolean updateDescriptionBiId(Long idUser, User newUser) { //UPDATE_DESCRIPTION_USER
-        try (Connection connection = ConnectionManager.get();
+        try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_DESCRIPTION_USER)) {
 
             preparedStatement.setString(1, newUser.getFirstName());
@@ -216,7 +212,7 @@ public class UserDAO implements BaseDAO<Long, User> {
     }
 
     public boolean updateBalanceById(Integer idUser, BigDecimal balance) { //UPDATE_BALANCE_USER
-        try (Connection connection = ConnectionManager.get();
+        try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_BALANCE_USER)) {
 
             preparedStatement.setBigDecimal(1, balance);
@@ -229,7 +225,7 @@ public class UserDAO implements BaseDAO<Long, User> {
     }
 
     public boolean updatePasswordById(Long idUser, String newPassword) { //UPDATE_PAS_USER
-        try (Connection connection = ConnectionManager.get();
+        try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_PAS_USER)) {
 
             preparedStatement.setString(1, newPassword);

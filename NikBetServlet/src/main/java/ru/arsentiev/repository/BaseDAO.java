@@ -1,4 +1,4 @@
-package ru.arsentiev.dao;
+package ru.arsentiev.repository;
 
 import java.util.List;
 import java.util.Optional;

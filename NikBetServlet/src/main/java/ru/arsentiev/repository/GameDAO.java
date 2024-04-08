@@ -1,4 +1,4 @@
-package ru.arsentiev.dao;
+package ru.arsentiev.repository;
 
 import ru.arsentiev.entity.Game;
 import ru.arsentiev.entity.GameResult;
@@ -14,14 +14,12 @@ import java.util.List;
 import java.util.Optional;
 
 public class GameDAO implements BaseDAO<Long, Game> {
-    private static final GameDAO INSTANCE = new GameDAO();
-    private final TeamDAO teamDAO = TeamDAO.getInstance();
+    private final TeamDAO teamDAO;
+    private final ConnectionManager connectionManager;
 
-    private GameDAO() {
-    }
-
-    public static GameDAO getInstance() {
-        return INSTANCE;
+    public GameDAO(ConnectionManager connectionManager, TeamDAO teamDAO) {
+        this.connectionManager = connectionManager;
+        this.teamDAO = teamDAO;
     }
 
     //language=PostgreSQL
@@ -59,7 +57,7 @@ public class GameDAO implements BaseDAO<Long, Game> {
 
     @Override
     public Game insert(Game game) {
-        try (Connection connection = ConnectionManager.get();
+        try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_GAME, Statement.RETURN_GENERATED_KEYS)) {
 
             setStatement(game, preparedStatement);
@@ -79,7 +77,7 @@ public class GameDAO implements BaseDAO<Long, Game> {
     @Override
     public List<Game> selectAll() {
         List<Game> games = new ArrayList<>();
-        try (Connection connection = ConnectionManager.get();
+        try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_GAMES);
              ResultSet resultSet = preparedStatement.executeQuery()) {
 
@@ -94,7 +92,7 @@ public class GameDAO implements BaseDAO<Long, Game> {
 
     @Override
     public Optional<Game> selectById(Long id) {
-        try (Connection connection = ConnectionManager.get()) {
+        try (Connection connection = connectionManager.get()) {
             return selectById(id, connection);
         } catch (SQLException | InterruptedException e) {
             throw new DaoException(e);
@@ -117,7 +115,7 @@ public class GameDAO implements BaseDAO<Long, Game> {
 
     public List<Game> selectByTeamId(Long teamId) {
         List<Game> games = new ArrayList<>();
-        try (Connection connection = ConnectionManager.get();
+        try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_GAMES_BY_TEAM_ID)) {
 
             preparedStatement.setLong(1, teamId);
@@ -136,7 +134,7 @@ public class GameDAO implements BaseDAO<Long, Game> {
 
     @Override
     public boolean delete(Long id) {
-        try (Connection connection = ConnectionManager.get();
+        try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(DELETE_GAME)) {
             preparedStatement.setLong(1, id);
             return preparedStatement.executeUpdate() > 0;
@@ -147,7 +145,7 @@ public class GameDAO implements BaseDAO<Long, Game> {
 
     @Override
     public boolean update(Game game) {
-        try (Connection connection = ConnectionManager.get();
+        try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_GAME)) {
 
             setStatement(game, preparedStatement);
@@ -160,7 +158,7 @@ public class GameDAO implements BaseDAO<Long, Game> {
     }
 
     public boolean updateCoefficients(Long idGame, Float coefficientOnHomeTeam, Float coefficientOnDraw, Float coefficientOnGuestTeam) {
-        try (Connection connection = ConnectionManager.get();
+        try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_COEFFICIENT_GAME)) {
 
             preparedStatement.setFloat(1, coefficientOnHomeTeam);
@@ -175,7 +173,7 @@ public class GameDAO implements BaseDAO<Long, Game> {
     }
 
     public boolean updateGoals(Long idGame, Integer goalHomeTeam, Integer goalGuestTeam) {
-        try (Connection connection = ConnectionManager.get();
+        try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_GOALS_GAME)) {
 
             preparedStatement.setInt(1, goalHomeTeam);
@@ -189,7 +187,7 @@ public class GameDAO implements BaseDAO<Long, Game> {
     }
 
     public boolean updateResultAndStatus(Long idGame, GameStatus status, GameResult result) {
-        try (Connection connection = ConnectionManager.get();
+        try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_RESULT_STATUS_GAME)) {
 
             preparedStatement.setString(1, status.name());
