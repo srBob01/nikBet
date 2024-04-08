@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -24,4 +25,5 @@ public class Game {
     private Float coefficientOnDraw;
     private Float coefficientOnGuestTeam;
     private GameResult result;
+    private List<Prediction> predictions;
 }

@@ -1,5 +1,6 @@
 package ru.arsentiev.repository;
 
+import ru.arsentiev.entity.Game;
 import ru.arsentiev.entity.Team;
 import ru.arsentiev.exception.DaoException;
 import ru.arsentiev.utils.ConnectionManager;
@@ -11,9 +12,11 @@ import java.util.Optional;
 
 public class TeamDAO implements BaseDAO<Long, Team> {
     private final ConnectionManager connectionManager;
+    private final GameDAO gameDAO;
 
-    public TeamDAO(ConnectionManager connectionManager) {
+    public TeamDAO(ConnectionManager connectionManager, GameDAO gameDAO) {
         this.connectionManager = connectionManager;
+        this.gameDAO = gameDAO;
     }
     //language=PostgreSQL
     private static final String INSERT_TEAM = "INSERT INTO teams (title, abbreviation) VALUES (?, ?);";
@@ -109,6 +112,7 @@ public class TeamDAO implements BaseDAO<Long, Team> {
         Long id = resultSet.getLong("idTeam");
         String title = resultSet.getString("title");
         String abbreviation = resultSet.getString("abbreviation");
-        return new Team(id, title, abbreviation);
+        List<Game> games = gameDAO.selectByTeamId(id);
+        return new Team(id, title, abbreviation, games);
     }
 }

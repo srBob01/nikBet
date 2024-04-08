@@ -1,9 +1,6 @@
 package ru.arsentiev.repository;
 
-import ru.arsentiev.entity.Game;
-import ru.arsentiev.entity.GameResult;
-import ru.arsentiev.entity.GameStatus;
-import ru.arsentiev.entity.Team;
+import ru.arsentiev.entity.*;
 import ru.arsentiev.exception.DaoException;
 import ru.arsentiev.utils.ConnectionManager;
 
@@ -15,11 +12,13 @@ import java.util.Optional;
 
 public class GameDAO implements BaseDAO<Long, Game> {
     private final TeamDAO teamDAO;
+    private final PredictionDAO predictionDAO;
     private final ConnectionManager connectionManager;
 
-    public GameDAO(ConnectionManager connectionManager, TeamDAO teamDAO) {
+    public GameDAO(ConnectionManager connectionManager, TeamDAO teamDAO, PredictionDAO predictionDAO) {
         this.connectionManager = connectionManager;
         this.teamDAO = teamDAO;
+        this.predictionDAO = predictionDAO;
     }
 
     //language=PostgreSQL
@@ -228,7 +227,7 @@ public class GameDAO implements BaseDAO<Long, Game> {
         Float coefficientOnDraw = resultSet.getFloat("coefficientOnDraw");
         Float coefficientOnGuestTeam = resultSet.getFloat("coefficientOnGuestTeam");
         GameResult result = GameResult.valueOf(resultSet.getString("result"));
-
-        return new Game(idGame, homeTeam, guestTeam, goalHomeTeam, goalGuestTeam, gameDate, status, coefficientOnHomeTeam, coefficientOnDraw, coefficientOnGuestTeam, result);
+        List<Prediction> predictions = predictionDAO.selectByGameId(idGame);
+        return new Game(idGame, homeTeam, guestTeam, goalHomeTeam, goalGuestTeam, gameDate, status, coefficientOnHomeTeam, coefficientOnDraw, coefficientOnGuestTeam, result, predictions);
     }
 }

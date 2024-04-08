@@ -1,5 +1,6 @@
 package ru.arsentiev.repository;
 
+import ru.arsentiev.entity.Prediction;
 import ru.arsentiev.entity.User;
 import ru.arsentiev.entity.UserRole;
 import ru.arsentiev.exception.DaoException;
@@ -14,8 +15,10 @@ import java.util.Optional;
 
 public class UserDAO implements BaseDAO<Long, User> {
     private final ConnectionManager connectionManager;
-    private UserDAO(ConnectionManager connectionManager) {
+    private final PredictionDAO predictionDAO;
+    private UserDAO(ConnectionManager connectionManager, PredictionDAO predictionDAO) {
         this.connectionManager = connectionManager;
+        this.predictionDAO =  predictionDAO;
     }
     //language=PostgreSQL
     private static final String INSERT_USER = "INSERT INTO users" +
@@ -250,7 +253,8 @@ public class UserDAO implements BaseDAO<Long, User> {
         BigDecimal accountBalance = rs.getBigDecimal("accountBalance");
         String roleString = rs.getString("role");
         UserRole role = UserRole.valueOf(roleString);
+        List<Prediction> predictions = predictionDAO.selectByUserId(idUser);
         return new User(idUser, nickname, firstName, lastName, patronymic,
-                password, phoneNumber, email, birthDate, accountBalance, role, null);
+                password, phoneNumber, email, birthDate, accountBalance, role, predictions);
     }
 }
