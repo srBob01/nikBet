@@ -1,6 +1,5 @@
 package ru.arsentiev.repository;
 
-import ru.arsentiev.entity.Prediction;
 import ru.arsentiev.entity.User;
 import ru.arsentiev.entity.UserRole;
 import ru.arsentiev.exception.DaoException;
@@ -13,9 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class UserDAO implements BaseDAO<Long, User> {
+public class UserDao implements BaseDao<Long, User> {
     private final ConnectionManager connectionManager;
-    public UserDAO(ConnectionManager connectionManager) {
+    public UserDao(ConnectionManager connectionManager) {
         this.connectionManager = connectionManager;
     }
     //language=PostgreSQL

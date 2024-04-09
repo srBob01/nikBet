@@ -1,6 +1,5 @@
 package ru.arsentiev.repository;
 
-import ru.arsentiev.entity.Game;
 import ru.arsentiev.entity.Team;
 import ru.arsentiev.exception.DaoException;
 import ru.arsentiev.utils.ConnectionManager;
@@ -10,9 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class TeamDAO implements BaseDAO<Long, Team> {
+public class TeamDao implements BaseDao<Long, Team> {
     private final ConnectionManager connectionManager;
-    public TeamDAO(ConnectionManager connectionManager) {
+    public TeamDao(ConnectionManager connectionManager) {
         this.connectionManager = connectionManager;
     }
     //language=PostgreSQL

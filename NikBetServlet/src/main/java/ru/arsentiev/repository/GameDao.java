@@ -10,11 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class GameDAO implements BaseDAO<Long, Game> {
-    private final TeamDAO teamDAO;
+public class GameDao implements BaseDao<Long, Game> {
+    private final TeamDao teamDAO;
     private final ConnectionManager connectionManager;
 
-    public GameDAO(ConnectionManager connectionManager, TeamDAO teamDAO) {
+    public GameDao(ConnectionManager connectionManager, TeamDao teamDAO) {
         this.connectionManager = connectionManager;
         this.teamDAO = teamDAO;
     }

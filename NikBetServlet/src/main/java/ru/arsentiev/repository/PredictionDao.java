@@ -14,11 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class PredictionDAO implements BaseDAO<Long, Prediction> {
+public class PredictionDao implements BaseDao<Long, Prediction> {
     private final ConnectionManager connectionManager;
-    private final GameDAO gameDAO;
-    private final UserDAO userDAO;
-    public PredictionDAO(ConnectionManager connectionManager, GameDAO gameDAO, UserDAO userDAO) {
+    private final GameDao gameDAO;
+    private final UserDao userDAO;
+    public PredictionDao(ConnectionManager connectionManager, GameDao gameDAO, UserDao userDAO) {
         this.connectionManager = connectionManager;
         this.gameDAO = gameDAO;
         this.userDAO = userDAO;
