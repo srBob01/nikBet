@@ -1,10 +1,12 @@
 package ru.arsentiev.entity;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 
 @Getter
 @Setter
@@ -22,5 +24,4 @@ public class User {
     private LocalDate birthDate;
     private BigDecimal accountBalance;
     private final UserRole role;
-    private List<Prediction> predictionList;
 }

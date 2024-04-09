@@ -15,5 +15,4 @@ public class Team {
     private Long idTeam;
     private String title;
     private String abbreviation;
-    private List<Game> games;
 }

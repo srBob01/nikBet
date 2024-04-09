@@ -25,5 +25,4 @@ public class Game {
     private Float coefficientOnDraw;
     private Float coefficientOnGuestTeam;
     private GameResult result;
-    private List<Prediction> predictions;
 }

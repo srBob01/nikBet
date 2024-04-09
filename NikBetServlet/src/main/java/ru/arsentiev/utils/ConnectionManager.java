@@ -48,4 +48,12 @@ public class ConnectionManager {
             throw new RuntimeException(e);
         }
     }
+
+    private static void loadDriver() {
+        try {
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("PostgreSQL JDBC driver not found", e);
+        }
+    }
 }

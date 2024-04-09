@@ -18,7 +18,7 @@ public class PredictionDAO implements BaseDAO<Long, Prediction> {
     private final ConnectionManager connectionManager;
     private final GameDAO gameDAO;
     private final UserDAO userDAO;
-    private PredictionDAO(ConnectionManager connectionManager,GameDAO gameDAO, UserDAO userDAO) {
+    public PredictionDAO(ConnectionManager connectionManager, GameDAO gameDAO, UserDAO userDAO) {
         this.connectionManager = connectionManager;
         this.gameDAO = gameDAO;
         this.userDAO = userDAO;
