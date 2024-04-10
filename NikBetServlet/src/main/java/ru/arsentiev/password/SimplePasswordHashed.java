@@ -1,14 +1,21 @@
-package ru.arsentiev.utils;
+package ru.arsentiev.password;
 
-import lombok.experimental.UtilityClass;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-@UtilityClass
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class SimplePasswordHashed {
+    private static final SimplePasswordHashed INSTANCE = new SimplePasswordHashed();
+
+    public static SimplePasswordHashed getInstance() {
+        return INSTANCE;
+    }
+
     //украдено с какого-то сайта
-    public static String hashPassword(String password) {
+    public String hashPassword(String password) {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
 
