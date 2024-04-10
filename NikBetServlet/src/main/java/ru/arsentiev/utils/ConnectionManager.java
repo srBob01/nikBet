@@ -1,5 +1,7 @@
 package ru.arsentiev.utils;
 
+import lombok.Singular;
+
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -15,7 +17,17 @@ public class ConnectionManager {
     private static BlockingQueue<Connection> pool;
 
     static {
+        loadDriver();
         initConnectionPool();
+    }
+
+    // Приватный конструктор предотвращает возможность инстанцирования извне
+    public ConnectionManager() {
+    }
+
+    // Ваши методы для работы с пулом соединений
+    public Connection get() throws InterruptedException {
+        return pool.take();
     }
 
     private static void initConnectionPool() {
@@ -24,18 +36,13 @@ public class ConnectionManager {
         pool = new ArrayBlockingQueue<>(size);
         for (int i = 0; i < size; i++) {
             Connection connection = open();
-            var proxyConnection = (Connection) Proxy.newProxyInstance(ConnectionManager.class.getClassLoader(),
+            Connection proxyConnection = (Connection) Proxy.newProxyInstance(
+                    ConnectionManager.class.getClassLoader(),
                     new Class[]{Connection.class},
-                    ((proxy, method, args) -> method.getName().equals("close") ?
-                            pool.add((Connection) proxy) :
-                            method.invoke(connection, args)));
+                    (proxy, method, args) -> "close".equals(method.getName()) ? pool.add((Connection) proxy) : method.invoke(connection, args)
+            );
             pool.add(proxyConnection);
         }
-
-    }
-
-    public Connection get() throws InterruptedException {
-        return pool.take();
     }
 
     private static Connection open() {
@@ -45,7 +52,7 @@ public class ConnectionManager {
                     PropertyUtil.get(USERNAME_KEY),
                     PropertyUtil.get(PASSWORD_KEY));
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to open database connection", e);
         }
     }
 
