@@ -1,6 +1,8 @@
-package ru.arsentiev.utils;
+package ru.arsentiev.connection;
 
-import lombok.Singular;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import ru.arsentiev.utils.PropertyUtil;
 
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
@@ -9,7 +11,9 @@ import java.sql.SQLException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ConnectionManager {
+    private static final ConnectionManager INSTANCE = new ConnectionManager();
     private static final String URL_KEY = "db.url";
     private static final String USERNAME_KEY = "db.username";
     private static final String PASSWORD_KEY = "db.password";
@@ -21,11 +25,10 @@ public class ConnectionManager {
         initConnectionPool();
     }
 
-    // Приватный конструктор предотвращает возможность инстанцирования извне
-    public ConnectionManager() {
+    public static ConnectionManager getInstance() {
+        return INSTANCE;
     }
 
-    // Ваши методы для работы с пулом соединений
     public Connection get() throws InterruptedException {
         return pool.take();
     }
