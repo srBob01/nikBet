@@ -2,11 +2,11 @@ package ru.arsentiev.utils;
 
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
+import ru.arsentiev.connection.ConnectionManager;
 import ru.arsentiev.repository.*;
 
 @UtilityClass
 public class DaoManager {
-    private static final ConnectionManager connectionManager;
     @Getter
     private static final UserDao userDao;
     @Getter
@@ -17,10 +17,9 @@ public class DaoManager {
     private static final PredictionDao predictionDao;
 
     static {
-        connectionManager = new ConnectionManager();
-        userDao = new UserDao(connectionManager);
-        teamDao = new TeamDao(connectionManager);
-        gameDao = new GameDao(connectionManager, teamDao);
-        predictionDao = new PredictionDao(connectionManager, gameDao, userDao);
+        userDao = new UserDao(ConnectionManager.getInstance());
+        teamDao = new TeamDao(ConnectionManager.getInstance());
+        gameDao = new GameDao(ConnectionManager.getInstance(), teamDao);
+        predictionDao = new PredictionDao(ConnectionManager.getInstance(), gameDao, userDao);
     }
 }

@@ -3,7 +3,7 @@ package ru.arsentiev.repository;
 import ru.arsentiev.entity.User;
 import ru.arsentiev.entity.UserRole;
 import ru.arsentiev.exception.DaoException;
-import ru.arsentiev.utils.ConnectionManager;
+import ru.arsentiev.connection.ConnectionManager;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -19,8 +19,8 @@ public class UserDao implements BaseDao<Long, User> {
     }
     //language=PostgreSQL
     private static final String INSERT_USER = "INSERT INTO users" +
-            "(nickname, firstName, lastName, patronymic, password, phoneNumber, email, birthDate, accountBalance, role)" +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+            "(nickname, firstName, lastName, patronymic, password, phoneNumber, email, birthDate)" +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
     //language=PostgreSQL
     private static final String UPDATE_USER = "UPDATE users SET " +
             "email = ?, " +
@@ -75,8 +75,6 @@ public class UserDao implements BaseDao<Long, User> {
             preparedStatement.setString(6, user.getPhoneNumber());
             preparedStatement.setString(7, user.getEmail());
             preparedStatement.setDate(8, Date.valueOf(user.getBirthDate()));
-            preparedStatement.setBigDecimal(9, user.getAccountBalance());
-            preparedStatement.setString(10, user.getRole().name());
 
             preparedStatement.executeUpdate();
 
