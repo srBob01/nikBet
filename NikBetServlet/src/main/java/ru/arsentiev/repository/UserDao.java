@@ -70,7 +70,12 @@ public class UserDao implements BaseDao<Long, User> {
             preparedStatement.setString(1, user.getNickname());
             preparedStatement.setString(2, user.getFirstName());
             preparedStatement.setString(3, user.getLastName());
-            preparedStatement.setString(4, user.getPatronymic());
+            if(user.getPatronymic().isEmpty()) {
+                preparedStatement.setNull(4, Types.VARCHAR);
+            }
+            else {
+                preparedStatement.setString(4, user.getPatronymic());
+            }
             preparedStatement.setString(5, user.getPassword());
             preparedStatement.setString(6, user.getPhoneNumber());
             preparedStatement.setString(7, user.getEmail());
