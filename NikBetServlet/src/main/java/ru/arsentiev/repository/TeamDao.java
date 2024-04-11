@@ -2,7 +2,7 @@ package ru.arsentiev.repository;
 
 import ru.arsentiev.entity.Team;
 import ru.arsentiev.exception.DaoException;
-import ru.arsentiev.utils.ConnectionManager;
+import ru.arsentiev.singleton.connection.ConnectionManager;
 
 import java.sql.*;
 import java.util.ArrayList;

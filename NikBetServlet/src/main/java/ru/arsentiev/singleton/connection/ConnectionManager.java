@@ -1,4 +1,4 @@
-package ru.arsentiev.connection;
+package ru.arsentiev.singleton.connection;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

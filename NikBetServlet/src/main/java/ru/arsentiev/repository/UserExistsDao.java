@@ -1,6 +1,6 @@
 package ru.arsentiev.repository;
 
-import ru.arsentiev.connection.ConnectionManager;
+import ru.arsentiev.singleton.connection.ConnectionManager;
 import ru.arsentiev.exception.DaoException;
 
 import java.sql.Connection;

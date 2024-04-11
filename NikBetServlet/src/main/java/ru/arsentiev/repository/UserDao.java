@@ -3,7 +3,7 @@ package ru.arsentiev.repository;
 import ru.arsentiev.entity.User;
 import ru.arsentiev.entity.UserRole;
 import ru.arsentiev.exception.DaoException;
-import ru.arsentiev.connection.ConnectionManager;
+import ru.arsentiev.singleton.connection.ConnectionManager;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -14,49 +14,51 @@ import java.util.Optional;
 
 public class UserDao implements BaseDao<Long, User> {
     private final ConnectionManager connectionManager;
+
     public UserDao(ConnectionManager connectionManager) {
         this.connectionManager = connectionManager;
     }
+
     //language=PostgreSQL
     private static final String INSERT_USER = "INSERT INTO users" +
-            "(nickname, firstName, lastName, patronymic, password, phoneNumber, email, birthDate)" +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
+                                              "(nickname, firstName, lastName, patronymic, password, phoneNumber, email, birthDate)" +
+                                              "VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
     //language=PostgreSQL
     private static final String UPDATE_USER = "UPDATE users SET " +
-            "email = ?, " +
-            "firstName = ?, " +
-            "lastName = ?, " +
-            "patronymic = ?, " +
-            "phoneNumber = ?, " +
-            "birthDate = ?, " +
-            "accountBalance = ?, " +
-            "password = ? " +
-            "WHERE idUser = ?;";
+                                              "email = ?, " +
+                                              "firstName = ?, " +
+                                              "lastName = ?, " +
+                                              "patronymic = ?, " +
+                                              "phoneNumber = ?, " +
+                                              "birthDate = ?, " +
+                                              "accountBalance = ?, " +
+                                              "password = ? " +
+                                              "WHERE idUser = ?;";
     //language=PostgreSQL
     private static final String UPDATE_DESCRIPTION_USER = "UPDATE users SET " +
-            "nickname = ?, " +
-            "firstName = ?, " +
-            "lastName = ?, " +
-            "patronymic = ?, " +
-            "phoneNumber = ?, " +
-            "birthDate = ? " +
-            "WHERE idUser = ?;";
+                                                          "nickname = ?, " +
+                                                          "firstName = ?, " +
+                                                          "lastName = ?, " +
+                                                          "patronymic = ?, " +
+                                                          "phoneNumber = ?, " +
+                                                          "birthDate = ? " +
+                                                          "WHERE idUser = ?;";
     //language=PostgreSQL
     private static final String UPDATE_BALANCE_USER = "UPDATE users SET " +
-            "accountBalance = ? " +
-            "WHERE idUser = ?;";
+                                                      "accountBalance = ? " +
+                                                      "WHERE idUser = ?;";
     //language=PostgreSQL
     private static final String UPDATE_PAS_USER = "UPDATE users SET password = ? WHERE iduser = ?;";
     //language=PostgreSQL
     private static final String DELETE_USER = "DELETE FROM users WHERE idUser = ?;";
     //language=PostgreSQL
     private static final String SELECT_USER_BY_ID = "SELECT idUser, nickname, firstName, lastName, patronymic," +
-            " password, phoneNumber, email, birthDate, accountBalance, role" +
-            " FROM users WHERE idUser = ?;";
+                                                    " password, phoneNumber, email, birthDate, accountBalance, role" +
+                                                    " FROM users WHERE idUser = ?;";
     //language=PostgreSQL
     private static final String SELECT_ALL_USERS = "SELECT iduser, nickname, firstname, lastname, patronymic," +
-            " password, phonenumber, email, birthdate, accountbalance, role" +
-            " FROM users ORDER BY iduser;";
+                                                   " password, phonenumber, email, birthdate, accountbalance, role" +
+                                                   " FROM users ORDER BY iduser;";
     //language=PostgreSQL
     private static final String SELECT_PASSWORD_USER = "SELECT password FROM users WHERE nickname = ?";
     //language=PostgreSQL
@@ -70,10 +72,9 @@ public class UserDao implements BaseDao<Long, User> {
             preparedStatement.setString(1, user.getNickname());
             preparedStatement.setString(2, user.getFirstName());
             preparedStatement.setString(3, user.getLastName());
-            if(user.getPatronymic().isEmpty()) {
+            if (user.getPatronymic().isEmpty()) {
                 preparedStatement.setNull(4, Types.VARCHAR);
-            }
-            else {
+            } else {
                 preparedStatement.setString(4, user.getPatronymic());
             }
             preparedStatement.setString(5, user.getPassword());

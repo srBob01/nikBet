@@ -5,7 +5,7 @@ import ru.arsentiev.entity.GameResult;
 import ru.arsentiev.entity.Prediction;
 import ru.arsentiev.entity.User;
 import ru.arsentiev.exception.DaoException;
-import ru.arsentiev.connection.ConnectionManager;
+import ru.arsentiev.singleton.connection.ConnectionManager;
 
 import java.math.BigDecimal;
 import java.sql.*;

@@ -1,4 +1,4 @@
-package ru.arsentiev.check;
+package ru.arsentiev.singleton.check;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

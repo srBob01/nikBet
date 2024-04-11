@@ -1,4 +1,4 @@
-package ru.arsentiev.password;
+package ru.arsentiev.singleton.password;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

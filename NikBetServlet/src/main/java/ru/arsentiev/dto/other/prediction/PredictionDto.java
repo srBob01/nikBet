@@ -1,6 +1,4 @@
-package ru.arsentiev.dto.prediction;
-
-import ru.arsentiev.entity.GameResult;
+package ru.arsentiev.dto.other.prediction;
 
 import java.math.BigDecimal;
 

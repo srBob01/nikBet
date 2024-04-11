@@ -1,4 +1,4 @@
-package ru.arsentiev.dto.game;
+package ru.arsentiev.dto.other.game;
 
 import java.time.LocalDateTime;
 
