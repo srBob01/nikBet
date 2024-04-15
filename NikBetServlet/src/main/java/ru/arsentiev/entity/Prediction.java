@@ -19,4 +19,5 @@ public class Prediction {
     private LocalDateTime predictionDate;
     private BigDecimal summa;
     private GameResult prediction;
+    private PredictionStatus predictionStatus;
 }

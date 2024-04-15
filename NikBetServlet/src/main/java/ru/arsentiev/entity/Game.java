@@ -24,5 +24,6 @@ public class Game {
     private Float coefficientOnHomeTeam;
     private Float coefficientOnDraw;
     private Float coefficientOnGuestTeam;
+    private GameTime time;
     private GameResult result;
 }
