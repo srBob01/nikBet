@@ -1,4 +1,4 @@
-package ru.arsentiev.servlet;
+package ru.arsentiev.servlet.guest;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
