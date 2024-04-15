@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
 <head>
-    <title>Title</title>
+    <title>Registration</title>
 </head>
 <body>
 
@@ -41,6 +41,9 @@
     <input type="date" id="birthDate" name="birthDate" required><br>
 
     <input type="submit" value="Register"><br>
+    <a href="<c:url value='/login'/>">
+        <button type="button">Login</button>
+    </a>
 </form>
 </body>
 </html>
