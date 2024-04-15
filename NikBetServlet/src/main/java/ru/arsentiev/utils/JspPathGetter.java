@@ -12,6 +12,7 @@ public class JspPathGetter {
     public static final String USER_UPDATE_PASSWORD_JSP = "userUpdatePassword";
     public static final String USER_MONEY_DEPOSIT_JSP = "userMoneyDeposit";
     public static final String USER_MONEY_WITHDRAW_JSP = "userMoneyWithdraw";
+    public static final String USER_MATCHES_DEFAULT_JSP = "userMatchesDefault";
     public static final String USER_MONEY_DEFAULT_JSP = "userMoneyDefault";
 
 }
