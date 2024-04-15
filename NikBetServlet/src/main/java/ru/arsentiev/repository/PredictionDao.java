@@ -1,9 +1,6 @@
 package ru.arsentiev.repository;
 
-import ru.arsentiev.entity.Game;
-import ru.arsentiev.entity.GameResult;
-import ru.arsentiev.entity.Prediction;
-import ru.arsentiev.entity.User;
+import ru.arsentiev.entity.*;
 import ru.arsentiev.exception.DaoException;
 import ru.arsentiev.singleton.connection.ConnectionManager;
 
@@ -18,27 +15,28 @@ public class PredictionDao implements BaseDao<Long, Prediction> {
     private final ConnectionManager connectionManager;
     private final GameDao gameDAO;
     private final UserDao userDAO;
+
     public PredictionDao(ConnectionManager connectionManager, GameDao gameDAO, UserDao userDAO) {
         this.connectionManager = connectionManager;
         this.gameDAO = gameDAO;
         this.userDAO = userDAO;
     }
-    
+
     //language=PostgreSQL
     private static final String INSERT_PREDICTION = "INSERT INTO predictions (idGame, idUser, predictionDate, summa," +
-            " prediction) VALUES (?, ?, ?, ?, ?);";
+                                                    " prediction) VALUES (?, ?, ?, ?, ?);";
     //language=PostgreSQL
     private static final String SELECT_ALL_PREDICTIONS = "SELECT idprediction, idgame, iduser, predictiondate, summa," +
-            " prediction FROM predictions;";
+                                                         " prediction FROM predictions;";
     //language=PostgreSQL
     private static final String SELECT_PREDICTION_BY_ID = "SELECT idprediction, idgame, iduser, predictiondate," +
-            " summa, prediction FROM predictions WHERE idPrediction = ?;";
+                                                          " summa, prediction FROM predictions WHERE idPrediction = ?;";
     //language=PostgreSQL
     private static final String SELECT_PREDICTION_BY_USER_ID = "SELECT idprediction, idgame, iduser, predictiondate," +
-            " summa, prediction FROM predictions WHERE iduser = ?;";
+                                                               " summa, prediction FROM predictions WHERE iduser = ?;";
     //language=PostgreSQL
     private static final String SELECT_PREDICTIONS_BY_GAME_ID = "SELECT idprediction, idgame, iduser, predictiondate," +
-            " summa, prediction FROM predictions WHERE idgame = ?;";
+                                                                " summa, prediction FROM predictions WHERE idgame = ?;";
     //language=PostgreSQL
     private static final String DELETE_PREDICTION = "DELETE FROM predictions WHERE idPrediction = ?;";
     //language=PostgreSQL
@@ -169,6 +167,15 @@ public class PredictionDao implements BaseDao<Long, Prediction> {
         User user = userDAO.selectById(resultSet.getLong("idUser"),
                 resultSet.getStatement().getConnection()).orElseThrow(() -> new SQLException("User not found"));
 
-        return new Prediction(idPrediction, game, user, predictionDate, summa, GameResult.valueOf(prediction));
+        String predictionStatus = resultSet.getString("predictionStatus");
+        return Prediction.builder()
+                .idPrediction(idPrediction)
+                .predictionDate(predictionDate)
+                .game(game)
+                .user(user)
+                .summa(summa)
+                .prediction(GameResult.valueOf(prediction))
+                .predictionStatus(PredictionStatus.valueOf(predictionStatus))
+                .build();
     }
 }
