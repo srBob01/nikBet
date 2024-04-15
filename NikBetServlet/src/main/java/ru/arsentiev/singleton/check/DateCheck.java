@@ -15,7 +15,7 @@ public class DateCheck {
         return INSTANCE;
     }
 
-    public boolean check(String date) {
+    public boolean isCorrect(String date) {
         try {
             return Optional.of(date)
                     .map(LocalDateFormatter::format)

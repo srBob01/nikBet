@@ -1,20 +1,20 @@
 package ru.arsentiev.validator;
 
 import ru.arsentiev.singleton.check.NameCheck;
-import ru.arsentiev.dto.jsp.user.UserRegSerConDto;
+import ru.arsentiev.dto.user.UserRegistrationDto;
 import ru.arsentiev.repository.UserExistsDao;
 import ru.arsentiev.utils.LocalDateFormatter;
 import ru.arsentiev.singleton.check.DateCheck;
 import ru.arsentiev.singleton.check.PasswordCheck;
 import ru.arsentiev.singleton.check.PhoneNumberCheck;
-import ru.arsentiev.validator.entity.MyError;
-import ru.arsentiev.validator.entity.TypeError;
-import ru.arsentiev.validator.entity.ValidationResult;
+import ru.arsentiev.validator.entity.load.LoadError;
+import ru.arsentiev.validator.entity.load.TypeLoadError;
+import ru.arsentiev.validator.entity.load.LoadValidationResult;
 
 import java.time.LocalDate;
 import java.time.Period;
 
-public class RegistrationUserValidator implements Validator<UserRegSerConDto> {
+public class RegistrationUserValidator {
     private final UserExistsDao userExistsDao;
     private final DateCheck dateCheck;
     private final PasswordCheck passwordCheck;
@@ -30,60 +30,59 @@ public class RegistrationUserValidator implements Validator<UserRegSerConDto> {
         this.nameCheck = nameCheck;
     }
 
-    @Override
-    public ValidationResult isValid(UserRegSerConDto obj) {
-        ValidationResult result = new ValidationResult();
+    public LoadValidationResult isValid(UserRegistrationDto obj) {
+        LoadValidationResult result = new LoadValidationResult();
 
         if (obj.getNickname() == null || obj.getNickname().trim().isEmpty()) {
-            result.add(MyError.of("nickname", TypeError.EMPTY));
+            result.add(LoadError.of("nickname", TypeLoadError.EMPTY));
         } else if (userExistsDao.existsByNickname(obj.getNickname())) {
-            result.add(MyError.of("nickname", TypeError.NON_UNIQUE));
+            result.add(LoadError.of("nickname", TypeLoadError.NON_UNIQUE));
         }
 
         if (obj.getFirstName() == null || obj.getFirstName().trim().isEmpty()) {
-            result.add(MyError.of("firstName", TypeError.EMPTY));
-        } else if (!nameCheck.check(obj.getFirstName())) {
-            result.add(MyError.of("firstName", TypeError.INCORRECT));
+            result.add(LoadError.of("firstName", TypeLoadError.EMPTY));
+        } else if (nameCheck.isIncorrect(obj.getFirstName())) {
+            result.add(LoadError.of("firstName", TypeLoadError.INCORRECT));
         }
 
 
         if (obj.getLastName() == null || obj.getLastName().trim().isEmpty()) {
-            result.add(MyError.of("lastName", TypeError.EMPTY));
-        } else if (!nameCheck.check(obj.getLastName())) {
-            result.add(MyError.of("lastName", TypeError.INCORRECT));
+            result.add(LoadError.of("lastName", TypeLoadError.EMPTY));
+        } else if (nameCheck.isIncorrect(obj.getLastName())) {
+            result.add(LoadError.of("lastName", TypeLoadError.INCORRECT));
         }
 
 
         if (obj.getPassword() == null || obj.getPassword().trim().isEmpty()) {
-            result.add(MyError.of("password", TypeError.EMPTY));
-        } else if (!passwordCheck.check(obj.getPassword())) {
-            result.add(MyError.of("password", TypeError.INCORRECT));
+            result.add(LoadError.of("password", TypeLoadError.EMPTY));
+        } else if (passwordCheck.isIncorrect(obj.getPassword())) {
+            result.add(LoadError.of("password", TypeLoadError.INCORRECT));
         }
 
 
         if (obj.getPhoneNumber() == null || obj.getPhoneNumber().trim().isEmpty()) {
-            result.add(MyError.of("phoneNumber", TypeError.EMPTY));
-        } else if (!phoneNumberCheck.check(obj.getPhoneNumber())) {
-            result.add(MyError.of("phoneNumber", TypeError.INCORRECT));
+            result.add(LoadError.of("phoneNumber", TypeLoadError.EMPTY));
+        } else if (phoneNumberCheck.isIncorrect(obj.getPhoneNumber())) {
+            result.add(LoadError.of("phoneNumber", TypeLoadError.INCORRECT));
         } else if (userExistsDao.existsByPhoneNumber(obj.getPhoneNumber())) {
-            result.add(MyError.of("phoneNumber", TypeError.NON_UNIQUE));
+            result.add(LoadError.of("phoneNumber", TypeLoadError.NON_UNIQUE));
         }
 
 
         if (obj.getEmail() == null || obj.getEmail().trim().isEmpty()) {
-            result.add(MyError.of("email", TypeError.EMPTY));
+            result.add(LoadError.of("email", TypeLoadError.EMPTY));
         } else if (userExistsDao.existsByEmail(obj.getEmail())) {
-            result.add(MyError.of("email", TypeError.NON_UNIQUE));
+            result.add(LoadError.of("email", TypeLoadError.NON_UNIQUE));
         }
 
         if (obj.getBirthDate() == null || obj.getBirthDate().trim().isEmpty()) {
-            result.add(MyError.of("birthDate", TypeError.EMPTY));
-        } else if (!dateCheck.check(obj.getBirthDate())) {
-            result.add(MyError.of("birthDate", TypeError.INCORRECT));
+            result.add(LoadError.of("birthDate", TypeLoadError.EMPTY));
+        } else if (!dateCheck.isCorrect(obj.getBirthDate())) {
+            result.add(LoadError.of("birthDate", TypeLoadError.INCORRECT));
         } else {
             Period period = Period.between(LocalDateFormatter.format(obj.getBirthDate()), LocalDate.now());
             if (period.getYears() < 18) {
-                result.add(MyError.of("birthDate", TypeError.YOUNG_USER));
+                result.add(LoadError.of("birthDate", TypeLoadError.YOUNG_USER));
             }
         }
 

@@ -1,11 +1,11 @@
-package ru.arsentiev.dto.jsp.user;
+package ru.arsentiev.dto.user;
 
 import lombok.Builder;
 import lombok.Value;
 
 @Value
 @Builder
-public class UserRegSerConDto {
+public class UserRegistrationDto {
     String nickname;
     String firstName;
     String lastName;

@@ -1,6 +1,6 @@
-package ru.arsentiev.validator.entity;
+package ru.arsentiev.validator.entity.load;
 
-public enum TypeError {
+public enum TypeLoadError {
     NON_UNIQUE("Non-unique value"),
     EMPTY("Empty value"),
     INCORRECT("Incorrect value"),
@@ -8,7 +8,7 @@ public enum TypeError {
 
     private final String description;
 
-    TypeError(String description) {
+    TypeLoadError(String description) {
         this.description = description;
     }
 
