@@ -1,18 +1,14 @@
 package ru.arsentiev.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @EqualsAndHashCode
+@Builder
 public class Game {
     private Long idGame;
     private Team homeTeam;
