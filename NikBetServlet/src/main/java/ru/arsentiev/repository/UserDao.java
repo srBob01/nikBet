@@ -1,9 +1,13 @@
 package ru.arsentiev.repository;
 
+import ru.arsentiev.dto.user.UserLogoPasDto;
+import ru.arsentiev.dto.user.UserMoneyControllerDto;
 import ru.arsentiev.entity.User;
 import ru.arsentiev.entity.UserRole;
 import ru.arsentiev.exception.DaoException;
 import ru.arsentiev.singleton.connection.ConnectionManager;
+import ru.arsentiev.singleton.query.UserQueryCreator;
+import ru.arsentiev.validator.entity.update.UpdatedUserFields;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -14,41 +18,37 @@ import java.util.Optional;
 
 public class UserDao implements BaseDao<Long, User> {
     private final ConnectionManager connectionManager;
+    private final UserQueryCreator userQueryCreator;
 
-    public UserDao(ConnectionManager connectionManager) {
+    public UserDao(ConnectionManager connectionManager, UserQueryCreator userQueryCreator) {
         this.connectionManager = connectionManager;
+        this.userQueryCreator = userQueryCreator;
     }
 
     //language=PostgreSQL
     private static final String INSERT_USER = "INSERT INTO users" +
                                               "(nickname, firstName, lastName, patronymic, password, phoneNumber, email, birthDate)" +
-                                              "VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
+                                              "VALUES (?, ?, ?, ?, ?, ?, ?, TO_DATE(?, 'YYYY-MM-DD'));";
     //language=PostgreSQL
     private static final String UPDATE_USER = "UPDATE users SET " +
+                                              "nickname = ?, " +
                                               "email = ?, " +
                                               "firstName = ?, " +
                                               "lastName = ?, " +
                                               "patronymic = ?, " +
                                               "phoneNumber = ?, " +
-                                              "birthDate = ?, " +
-                                              "accountBalance = ?, " +
-                                              "password = ? " +
+                                              "birthDate = TO_DATE(?, 'YYYY-MM-DD') " +
                                               "WHERE idUser = ?;";
     //language=PostgreSQL
-    private static final String UPDATE_DESCRIPTION_USER = "UPDATE users SET " +
-                                                          "nickname = ?, " +
-                                                          "firstName = ?, " +
-                                                          "lastName = ?, " +
-                                                          "patronymic = ?, " +
-                                                          "phoneNumber = ?, " +
-                                                          "birthDate = ? " +
-                                                          "WHERE idUser = ?;";
+    private static final String DEPOSIT_BALANCE_USER = "UPDATE users SET " +
+                                                       "accountBalance = accountBalance + ? " +
+                                                       "WHERE idUser = ?;";
     //language=PostgreSQL
-    private static final String UPDATE_BALANCE_USER = "UPDATE users SET " +
-                                                      "accountBalance = ? " +
-                                                      "WHERE idUser = ?;";
+    private static final String WITHDRAW_BALANCE_USER = "UPDATE users SET " +
+                                                       "accountBalance = accountBalance - ? " +
+                                                       "WHERE idUser = ?;";
     //language=PostgreSQL
-    private static final String UPDATE_PAS_USER = "UPDATE users SET password = ? WHERE iduser = ?;";
+    private static final String UPDATE_PAS_USER = "UPDATE users SET password = ? WHERE email = ?;";
     //language=PostgreSQL
     private static final String DELETE_USER = "DELETE FROM users WHERE idUser = ?;";
     //language=PostgreSQL
@@ -60,9 +60,13 @@ public class UserDao implements BaseDao<Long, User> {
                                                    " password, phonenumber, email, birthdate, accountbalance, role" +
                                                    " FROM users ORDER BY iduser;";
     //language=PostgreSQL
-    private static final String SELECT_PASSWORD_USER = "SELECT password FROM users WHERE nickname = ?";
+    private static final String SELECT_PASSWORD_USER = "SELECT password FROM users WHERE email = ?";
     //language=PostgreSQL
     private static final String SELECT_BALANCE_USER = "SELECT accountBalance FROM users WHERE iduser = ?";
+    //language=PostgreSQL
+    private static final String SELECT_USER_BY_LOGIN = "SELECT idUser, nickname, firstName, lastName, patronymic," +
+                                                       " password, phoneNumber, email, birthDate, accountBalance, role" +
+                                                       " FROM users WHERE email = ?;";
 
     @Override
     public User insert(User user) { //INSERT_USER
@@ -133,11 +137,26 @@ public class UserDao implements BaseDao<Long, User> {
         }
     }
 
-    public Optional<String> selectPasswordByNickname(String nickname) { //SELECT_PASSWORD_USER
+    public User selectByLogin(String login) { //SELECT_USER_BY_LOGIN
+        try (Connection connection = connectionManager.get();
+             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_USER_BY_LOGIN)) {
+            preparedStatement.setString(1, login);
+            try (ResultSet rs = preparedStatement.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSetToUserWithoutPassword(rs);
+                }
+            }
+            return null;
+        } catch (SQLException | InterruptedException e) {
+            throw new DaoException(e);
+        }
+    }
+
+    public Optional<String> selectPasswordByLogin(String login) { //SELECT_PASSWORD_USER
         try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_PASSWORD_USER)) {
             String result = null;
-            preparedStatement.setString(1, nickname);
+            preparedStatement.setString(1, login);
             try (ResultSet rs = preparedStatement.executeQuery()) {
                 if (rs.next()) {
                     result = rs.getString("password");
@@ -152,14 +171,13 @@ public class UserDao implements BaseDao<Long, User> {
     public Optional<BigDecimal> selectBalanceById(Long idUser) { //SELECT_BALANCE_USER
         try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_BALANCE_USER)) {
-            BigDecimal result = null;
             preparedStatement.setLong(1, idUser);
             try (ResultSet rs = preparedStatement.executeQuery()) {
                 if (rs.next()) {
-                    result = rs.getBigDecimal("accountBalance");
+                    return Optional.of(rs.getBigDecimal("accountBalance"));
                 }
             }
-            return Optional.ofNullable(result);
+            return Optional.empty();
         } catch (SQLException | InterruptedException e) {
             throw new DaoException(e);
         }
@@ -183,78 +201,103 @@ public class UserDao implements BaseDao<Long, User> {
         try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_USER)) {
 
-            preparedStatement.setString(1, user.getEmail());
-            preparedStatement.setString(2, user.getFirstName());
-            preparedStatement.setString(3, user.getLastName());
-            preparedStatement.setString(4, user.getPatronymic());
-            preparedStatement.setString(5, user.getPhoneNumber());
-            preparedStatement.setDate(6, Date.valueOf(user.getBirthDate()));
-            preparedStatement.setBigDecimal(7, user.getAccountBalance());
-            preparedStatement.setString(8, user.getPassword());
-            preparedStatement.setLong(9, user.getIdUser());
+            preparedStatement.setString(1, user.getNickname());
+            preparedStatement.setString(2, user.getEmail());
+            preparedStatement.setString(3, user.getFirstName());
+            preparedStatement.setString(4, user.getLastName());
+            preparedStatement.setString(5, user.getPatronymic());
+            preparedStatement.setString(6, user.getPhoneNumber());
+            preparedStatement.setDate(7, Date.valueOf(user.getBirthDate()));
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException | InterruptedException e) {
             throw new DaoException(e);
         }
     }
 
-    public boolean updateDescriptionBiId(Long idUser, User newUser) { //UPDATE_DESCRIPTION_USER
+    public void updateDescriptionWithDynamicCreation(User user, UpdatedUserFields fields) {
+        Optional<String> sql = userQueryCreator.createUserUpdateQuery(user, fields);
+        if (sql.isEmpty()) {
+            return;
+        }
         try (Connection connection = connectionManager.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_DESCRIPTION_USER)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(sql.get())) {
 
-            preparedStatement.setString(1, newUser.getFirstName());
-            preparedStatement.setString(2, newUser.getLastName());
-            preparedStatement.setString(3, newUser.getPatronymic());
-            preparedStatement.setString(4, newUser.getPhoneNumber());
-            preparedStatement.setDate(5, Date.valueOf(newUser.getBirthDate()));
-            preparedStatement.setLong(6, idUser);
-
-            return preparedStatement.executeUpdate() > 0;
+            preparedStatement.executeUpdate();
         } catch (SQLException | InterruptedException e) {
             throw new DaoException(e);
         }
     }
 
-    public boolean updateBalanceById(Integer idUser, BigDecimal balance) { //UPDATE_BALANCE_USER
+    public void depositMoneyById(UserMoneyControllerDto userMoneyControllerDto) { //UPDATE_BALANCE_USER
         try (Connection connection = connectionManager.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_BALANCE_USER)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(DEPOSIT_BALANCE_USER)) {
 
-            preparedStatement.setBigDecimal(1, balance);
-            preparedStatement.setInt(2, idUser);
+            preparedStatement.setBigDecimal(1, userMoneyControllerDto.summa());
+            preparedStatement.setLong(2, userMoneyControllerDto.idUser());
 
-            return preparedStatement.executeUpdate() > 0;
+            preparedStatement.executeUpdate();
         } catch (SQLException | InterruptedException e) {
             throw new DaoException(e);
         }
     }
 
-    public boolean updatePasswordById(Long idUser, String newPassword) { //UPDATE_PAS_USER
+    public void withdrawMoneyById(UserMoneyControllerDto userMoneyControllerDto) { //UPDATE_BALANCE_USER
+        try (Connection connection = connectionManager.get();
+             PreparedStatement preparedStatement = connection.prepareStatement(WITHDRAW_BALANCE_USER)) {
+
+            preparedStatement.setBigDecimal(1, userMoneyControllerDto.summa());
+            preparedStatement.setLong(2, userMoneyControllerDto.idUser());
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException | InterruptedException e) {
+            throw new DaoException(e);
+        }
+    }
+
+    public void updatePasswordByLogin(UserLogoPasDto userLogoPasDto) { //UPDATE_PAS_USER
         try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_PAS_USER)) {
 
-            preparedStatement.setString(1, newPassword);
-            preparedStatement.setLong(2, idUser);
+            preparedStatement.setString(1, userLogoPasDto.password());
+            preparedStatement.setString(2, userLogoPasDto.login());
 
-            return preparedStatement.executeUpdate() > 0;
+            preparedStatement.executeUpdate();
         } catch (SQLException | InterruptedException e) {
             throw new DaoException(e);
         }
     }
 
     private User mapResultSetToUser(ResultSet rs) throws SQLException {
+        String password = rs.getString("password");
+        User user = mapResultSetToUserWithoutPassword(rs);
+        user.setPassword(password);
+        return user;
+    }
+
+    private User mapResultSetToUserWithoutPassword(ResultSet rs) throws SQLException {
         long idUser = rs.getLong("idUser");
         String nickname = rs.getString("nickname");
         String firstName = rs.getString("firstName");
         String lastName = rs.getString("lastName");
         String patronymic = rs.getString("patronymic");
-        String password = rs.getString("password");
         String phoneNumber = rs.getString("phoneNumber");
         String email = rs.getString("email");
         LocalDate birthDate = rs.getDate("birthDate").toLocalDate();
         BigDecimal accountBalance = rs.getBigDecimal("accountBalance");
         String roleString = rs.getString("role");
         UserRole role = UserRole.valueOf(roleString);
-        return new User(idUser, nickname, firstName, lastName, patronymic,
-                password, phoneNumber, email, birthDate, accountBalance, role);
+
+        return User.builder()
+                .idUser(idUser)
+                .nickname(nickname)
+                .firstName(firstName)
+                .lastName(lastName)
+                .patronymic(patronymic)
+                .phoneNumber(phoneNumber)
+                .email(email)
+                .birthDate(birthDate)
+                .accountBalance(accountBalance)
+                .role(role)
+                .build();
     }
 }
