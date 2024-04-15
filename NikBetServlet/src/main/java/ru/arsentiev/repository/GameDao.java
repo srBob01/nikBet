@@ -21,36 +21,54 @@ public class GameDao implements BaseDao<Long, Game> {
 
     //language=PostgreSQL
     private static final String INSERT_GAME = "INSERT INTO games " +
-            "(idHomeTeam, idGuestTeam, goalHomeTeam, goalGuestTeam," +
-            " gameDate, status, coefficientOnHomeTeam, coefficientOnDraw, coefficientOnGuestTeam, result) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                                              "(idHomeTeam, idGuestTeam, goalHomeTeam, goalGuestTeam," +
+                                              " gameDate, status, coefficientOnHomeTeam, coefficientOnDraw," +
+                                              " coefficientOnGuestTeam, time, result) " +
+                                              "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
     //language=PostgreSQL
     private static final String SELECT_GAME_BY_ID = "SELECT idgame, idhometeam, idguestteam, goalhometeam," +
-            " goalguestteam, gamedate, status, coefficientonhometeam, coefficientOnDraw, coefficientonguestteam, result" +
-            " FROM games WHERE idGame = ?;";
+                                                    " goalguestteam, gamedate, status, coefficientonhometeam," +
+                                                    " coefficientOnDraw, coefficientonguestteam, time, result" +
+                                                    " FROM games WHERE idGame = ?;";
     //language=PostgreSQL
     private static final String SELECT_ALL_GAMES = "SELECT idgame, idhometeam, idguestteam, goalhometeam, goalguestteam," +
-            " gamedate, status, coefficientonhometeam, coefficientOnDraw, coefficientonguestteam, result" +
-            " FROM games;";
+                                                   " gamedate, status, coefficientonhometeam, coefficientOnDraw," +
+                                                   " coefficientonguestteam, time, result" +
+                                                   " FROM games;";
+    //language=PostgreSQL
+    private static final String SELECT_SCHEDULED_GAMES = "SELECT idgame, idhometeam, idguestteam, goalhometeam, goalguestteam," +
+                                                         " gamedate, status, coefficientonhometeam, coefficientOnDraw," +
+                                                         " coefficientonguestteam, time, result" +
+                                                         " FROM games WHERE status = 'Scheduled';";
+    //language=PostgreSQL
+    private static final String SELECT_IN_PROGRESS_GAMES = "SELECT idgame, idhometeam, idguestteam, goalhometeam, goalguestteam," +
+                                                           " gamedate, status, coefficientonhometeam, coefficientOnDraw," +
+                                                           " coefficientonguestteam, time, result" +
+                                                           " FROM games WHERE status = 'InProgress';";
+    //language=PostgreSQL
+    private static final String SELECT_COMPLETED_GAMES = "SELECT idgame, idhometeam, idguestteam, goalhometeam, goalguestteam," +
+                                                         " gamedate, status, coefficientonhometeam, coefficientOnDraw," +
+                                                         " coefficientonguestteam, time, result" +
+                                                         " FROM games WHERE status = 'Completed';";
     //language=PostgreSQL
     private static final String SELECT_GAMES_BY_TEAM_ID = "SELECT idgame, idhometeam, idguestteam, goalhometeam, goalguestteam," +
-            " gamedate, status, coefficientonhometeam, coefficientondraw, coefficientonguestteam, result" +
-            " FROM games WHERE idHomeTeam = ? OR idGuestTeam = ?;";
+                                                          " gamedate, status, coefficientonhometeam, coefficientondraw, coefficientonguestteam, time, result" +
+                                                          " FROM games WHERE idHomeTeam = ? OR idGuestTeam = ?;";
     //language=PostgreSQL
     private static final String DELETE_GAME = "DELETE FROM games WHERE idGame = ?;";
     //language=PostgreSQL
     private static final String UPDATE_GAME = "UPDATE games SET " +
-            "idHomeTeam = ?, idGuestTeam = ?, goalHomeTeam = ?, goalGuestTeam = ?, gameDate = ?, status = ?, " +
-            "coefficientOnHomeTeam = ?, coefficientOnDraw = ?, coefficientOnGuestTeam = ?, result = ? WHERE idGame = ?;";
+                                              "idHomeTeam = ?, idGuestTeam = ?, goalHomeTeam = ?, goalGuestTeam = ?, gameDate = ?, status = ?, " +
+                                              "coefficientOnHomeTeam = ?, coefficientOnDraw = ?, coefficientOnGuestTeam = ?, time = ?, result = ? WHERE idGame = ?;";
     //language=PostgreSQL
     private static final String UPDATE_COEFFICIENT_GAME = "UPDATE games SET " +
-            "coefficientOnHomeTeam = ?, coefficientOnDraw = ?, coefficientOnGuestTeam = ? WHERE idGame = ?;";
+                                                          "coefficientOnHomeTeam = ?, coefficientOnDraw = ?, coefficientOnGuestTeam = ? WHERE idGame = ?;";
     //language=PostgreSQL
     private static final String UPDATE_GOALS_GAME = "UPDATE games SET " +
-            "goalHomeTeam = ?, goalGuestTeam = ? WHERE idGame = ?;";
+                                                    "goalHomeTeam = ?, goalGuestTeam = ? WHERE idGame = ?;";
     //language=PostgreSQL
     private static final String UPDATE_RESULT_STATUS_GAME = "UPDATE games SET " +
-            "status = ?, result = ? WHERE idGame = ?;";
+                                                            "status = ?, result = ? WHERE idGame = ?;";
 
     @Override
     public Game insert(Game game) {
@@ -76,6 +94,51 @@ public class GameDao implements BaseDao<Long, Game> {
         List<Game> games = new ArrayList<>();
         try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_GAMES);
+             ResultSet resultSet = preparedStatement.executeQuery()) {
+
+            while (resultSet.next()) {
+                games.add(mapResultSetToGame(resultSet));
+            }
+        } catch (SQLException | InterruptedException e) {
+            throw new DaoException(e);
+        }
+        return games;
+    }
+
+    public List<Game> selectAllGameScheduled() {
+        List<Game> games = new ArrayList<>();
+        try (Connection connection = connectionManager.get();
+             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_SCHEDULED_GAMES);
+             ResultSet resultSet = preparedStatement.executeQuery()) {
+
+            while (resultSet.next()) {
+                games.add(mapResultSetToGame(resultSet));
+            }
+        } catch (SQLException | InterruptedException e) {
+            throw new DaoException(e);
+        }
+        return games;
+    }
+
+    public List<Game> selectAllGameInProgress() {
+        List<Game> games = new ArrayList<>();
+        try (Connection connection = connectionManager.get();
+             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_IN_PROGRESS_GAMES);
+             ResultSet resultSet = preparedStatement.executeQuery()) {
+
+            while (resultSet.next()) {
+                games.add(mapResultSetToGame(resultSet));
+            }
+        } catch (SQLException | InterruptedException e) {
+            throw new DaoException(e);
+        }
+        return games;
+    }
+
+    public List<Game> selectAllGameCompleted() {
+        List<Game> games = new ArrayList<>();
+        try (Connection connection = connectionManager.get();
+             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_COMPLETED_GAMES);
              ResultSet resultSet = preparedStatement.executeQuery()) {
 
             while (resultSet.next()) {
@@ -225,6 +288,20 @@ public class GameDao implements BaseDao<Long, Game> {
         Float coefficientOnDraw = resultSet.getFloat("coefficientOnDraw");
         Float coefficientOnGuestTeam = resultSet.getFloat("coefficientOnGuestTeam");
         GameResult result = GameResult.valueOf(resultSet.getString("result"));
-        return new Game(idGame, homeTeam, guestTeam, goalHomeTeam, goalGuestTeam, gameDate, status, coefficientOnHomeTeam, coefficientOnDraw, coefficientOnGuestTeam, result);
+        GameTime time = GameTime.valueOf(resultSet.getString("time"));
+        return Game.builder()
+                .idGame(idGame)
+                .homeTeam(homeTeam)
+                .guestTeam(guestTeam)
+                .goalHomeTeam(goalHomeTeam)
+                .goalGuestTeam(goalGuestTeam)
+                .gameDate(gameDate)
+                .status(status)
+                .coefficientOnHomeTeam(coefficientOnHomeTeam)
+                .coefficientOnDraw(coefficientOnDraw)
+                .coefficientOnGuestTeam(coefficientOnGuestTeam)
+                .time(time)
+                .result(result)
+                .build();
     }
 }
