@@ -7,10 +7,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class SimplePasswordHashed {
-    private static final SimplePasswordHashed INSTANCE = new SimplePasswordHashed();
+public class PasswordHasher {
+    private static final PasswordHasher INSTANCE = new PasswordHasher();
 
-    public static SimplePasswordHashed getInstance() {
+    public static PasswordHasher getInstance() {
         return INSTANCE;
     }
 

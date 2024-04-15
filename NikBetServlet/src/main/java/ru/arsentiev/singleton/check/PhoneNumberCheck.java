@@ -14,7 +14,7 @@ public class PhoneNumberCheck {
     }
     private final Pattern PHONE_PATTERN = Pattern.compile("^\\+7\\d{10}$");
 
-    public boolean check(String string) {
-        return PHONE_PATTERN.matcher(string).matches();
+    public boolean isIncorrect(String string) {
+        return !PHONE_PATTERN.matcher(string).matches();
     }
 }

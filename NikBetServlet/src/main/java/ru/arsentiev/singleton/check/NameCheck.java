@@ -16,8 +16,8 @@ public class NameCheck {
 
     private final Pattern NAME_PATTERN = Pattern.compile("[a-zA-Z]{1,40}");
 
-    public boolean check(String string) {
-        return NAME_PATTERN.matcher(string).matches();
+    public boolean isIncorrect(String string) {
+        return !NAME_PATTERN.matcher(string).matches();
     }
 
 }
