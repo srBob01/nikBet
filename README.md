@@ -3,10 +3,6 @@ Nikbet is the best bookmaker. You can place bets with the best odds.
 
 ![nikbet](https://github.com/srBob01/nikBet/assets/126959812/7d0a7289-5aae-4a45-bfbe-e99212d92464)
 
-# Название проекта
-
-Описание проекта
-
 ## Требования к проекту
 
 Данный проект представляет собой веб-приложение, написанное с использованием Java Servlet API.
