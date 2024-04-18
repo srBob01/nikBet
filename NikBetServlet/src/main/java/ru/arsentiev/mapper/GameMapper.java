@@ -4,7 +4,6 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import ru.arsentiev.dto.game.*;
 import ru.arsentiev.entity.*;
-import ru.arsentiev.utils.LocalDateFormatter;
 import ru.arsentiev.utils.TimeStampFormatter;
 
 import java.time.LocalDateTime;
@@ -45,7 +44,7 @@ public class GameMapper {
                 .guestTeam(game.getGuestTeam().getTitle())
                 .coefficientOnHomeTeam(String.valueOf(game.getCoefficientOnHomeTeam()))
                 .coefficientOnDraw(String.valueOf(game.getCoefficientOnDraw()))
-                .coefficientOnGuestOnTeam(String.valueOf(game.getCoefficientOnGuestTeam()))
+                .coefficientOnGuestTeam(String.valueOf(game.getCoefficientOnGuestTeam()))
                 .gameDate(game.getGameDate().format(TimeStampFormatter.FORMATTER))
                 .build();
     }
@@ -54,7 +53,8 @@ public class GameMapper {
         return GameControllerCompletedDto.builder()
                 .homeTeam(gameViewCompletedDto.homeTeam())
                 .guestTeam(gameViewCompletedDto.guestTeam())
-                .score(gameViewCompletedDto.score())
+                .goalHomeTeam(parseGoals(gameViewCompletedDto.score())[0])
+                .goalGuestTeam(parseGoals(gameViewCompletedDto.score())[1])
                 .gameDate(TimeStampFormatter.format(gameViewCompletedDto.gameDate()))
                 .result(GameResult.valueOf(gameViewCompletedDto.result()))
                 .build();
@@ -64,7 +64,8 @@ public class GameMapper {
         return GameControllerProgressDto.builder()
                 .homeTeam(gameViewInProgressDto.homeTeam())
                 .guestTeam(gameViewInProgressDto.guestTeam())
-                .score(gameViewInProgressDto.score())
+                .goalHomeTeam(parseGoals(gameViewInProgressDto.score())[0])
+                .goalGuestTeam(parseGoals(gameViewInProgressDto.score())[1])
                 .coefficientOnHomeTeam(Float.parseFloat(gameViewInProgressDto.coefficientOnHomeTeam()))
                 .coefficientOnDraw(Float.parseFloat(gameViewInProgressDto.coefficientOnDraw()))
                 .coefficientOnGuestTeam(Float.parseFloat(gameViewInProgressDto.coefficientOnGuestTeam()))
@@ -78,7 +79,7 @@ public class GameMapper {
                 .guestTeam(gameViewScheduledDto.guestTeam())
                 .coefficientOnHomeTeam(Float.parseFloat(gameViewScheduledDto.coefficientOnHomeTeam()))
                 .coefficientOnDraw(Float.parseFloat(gameViewScheduledDto.coefficientOnDraw()))
-                .coefficientOnGuestTeam(Float.parseFloat(gameViewScheduledDto.coefficientOnGuestOnTeam()))
+                .coefficientOnGuestTeam(Float.parseFloat(gameViewScheduledDto.coefficientOnGuestTeam()))
                 .gameDate(TimeStampFormatter.format(gameViewScheduledDto.gameDate()))
                 .build();
     }
@@ -92,8 +93,8 @@ public class GameMapper {
                 .guestTeam(Team.builder()
                         .title(gameControllerCompletedDto.guestTeam())
                         .build())
-                .goalHomeTeam(parseGoals(gameControllerCompletedDto.score())[0])
-                .goalGuestTeam(parseGoals(gameControllerCompletedDto.score())[1])
+                .goalHomeTeam(gameControllerCompletedDto.goalHomeTeam())
+                .goalGuestTeam(gameControllerCompletedDto.goalGuestTeam())
                 .gameDate(gameControllerCompletedDto.gameDate())
                 .status(GameStatus.Completed)
                 .result(gameControllerCompletedDto.result())
@@ -124,8 +125,8 @@ public class GameMapper {
                 .guestTeam(Team.builder()
                         .title(gameControllerProgressDto.guestTeam())
                         .build())
-                .goalHomeTeam(parseGoals(gameControllerProgressDto.score())[0])
-                .goalGuestTeam(parseGoals(gameControllerProgressDto.score())[1])
+                .goalHomeTeam(gameControllerProgressDto.goalHomeTeam())
+                .goalGuestTeam(gameControllerProgressDto.goalGuestTeam())
                 .gameDate(LocalDateTime.now())
                 .status(GameStatus.InProgress)
                 .coefficientOnHomeTeam(gameControllerProgressDto.coefficientOnHomeTeam())
