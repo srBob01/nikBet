@@ -5,7 +5,8 @@ import lombok.Builder;
 import java.time.LocalDateTime;
 
 @Builder
-public record GameControllerScheduledDto(String homeTeam,
+public record GameControllerScheduledDto(Long idGame,
+                                         String homeTeam,
                                          String guestTeam,
                                          Float coefficientOnHomeTeam,
                                          Float coefficientOnDraw,

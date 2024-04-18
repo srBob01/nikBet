@@ -3,7 +3,8 @@ package ru.arsentiev.dto.game;
 import lombok.Builder;
 
 @Builder
-public record GameViewInProgressDto(String homeTeam,
+public record GameViewInProgressDto(String idGame,
+                                    String homeTeam,
                                     String guestTeam,
                                     String score,
                                     String coefficientOnHomeTeam,

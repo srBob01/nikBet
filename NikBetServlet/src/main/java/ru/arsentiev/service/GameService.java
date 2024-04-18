@@ -10,9 +10,8 @@ import ru.arsentiev.mapper.GameMapper;
 import ru.arsentiev.repository.GameDao;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class GameService {
