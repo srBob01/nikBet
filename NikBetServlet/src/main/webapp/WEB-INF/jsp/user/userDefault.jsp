@@ -38,6 +38,12 @@
 <a href="<c:url value='/user/money/default'/>">
     <button type="button">Look balance</button>
 </a>
+<br/>
+
+<a href="<c:url value='/user/matches/default'/>">
+    <button type="button">Look matches</button>
+</a>
+
 
 </body>
 </html>

@@ -1,16 +1,12 @@
 package ru.arsentiev.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-
-import java.util.List;
+import lombok.*;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @EqualsAndHashCode
+@Builder
 public class Team {
     private Long idTeam;
     private String title;
