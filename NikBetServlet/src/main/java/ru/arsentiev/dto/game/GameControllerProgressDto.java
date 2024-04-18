@@ -6,7 +6,8 @@ import ru.arsentiev.entity.GameTime;
 @Builder
 public record GameControllerProgressDto(String homeTeam,
                                         String guestTeam,
-                                        String score,
+                                        Integer goalHomeTeam,
+                                        Integer goalGuestTeam,
                                         Float coefficientOnHomeTeam,
                                         Float coefficientOnDraw,
                                         Float coefficientOnGuestTeam,

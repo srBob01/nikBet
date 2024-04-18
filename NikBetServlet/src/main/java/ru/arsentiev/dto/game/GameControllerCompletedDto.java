@@ -8,7 +8,8 @@ import java.time.LocalDateTime;
 @Builder
 public record GameControllerCompletedDto(String homeTeam,
                                          String guestTeam,
-                                         String score,
+                                         Integer goalHomeTeam,
+                                         Integer goalGuestTeam,
                                          LocalDateTime gameDate,
                                          GameResult result) {
 }
