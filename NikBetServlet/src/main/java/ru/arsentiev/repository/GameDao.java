@@ -112,7 +112,7 @@ public class GameDao implements BaseDao<Long, Game> {
              ResultSet resultSet = preparedStatement.executeQuery()) {
 
             while (resultSet.next()) {
-                games.add(mapResultSetToGame(resultSet));
+                games.add(mapToGameControllerScheduledDto(resultSet));
             }
         } catch (SQLException | InterruptedException e) {
             throw new DaoException(e);
@@ -127,7 +127,7 @@ public class GameDao implements BaseDao<Long, Game> {
              ResultSet resultSet = preparedStatement.executeQuery()) {
 
             while (resultSet.next()) {
-                games.add(mapResultSetToGame(resultSet));
+                games.add(mapToGameControllerProgressDto(resultSet));
             }
         } catch (SQLException | InterruptedException e) {
             throw new DaoException(e);
@@ -142,7 +142,7 @@ public class GameDao implements BaseDao<Long, Game> {
              ResultSet resultSet = preparedStatement.executeQuery()) {
 
             while (resultSet.next()) {
-                games.add(mapResultSetToGame(resultSet));
+                games.add(mapToGameControllerCompletedDto(resultSet));
             }
         } catch (SQLException | InterruptedException e) {
             throw new DaoException(e);
@@ -302,6 +302,71 @@ public class GameDao implements BaseDao<Long, Game> {
                 .coefficientOnGuestTeam(coefficientOnGuestTeam)
                 .time(time)
                 .result(result)
+                .build();
+    }
+
+    private Game mapToGameControllerCompletedDto(ResultSet resultSet) throws SQLException {
+        Team homeTeam = teamDAO.selectById(resultSet.getLong("idHomeTeam")
+                , resultSet.getStatement().getConnection()).orElseThrow(() -> new SQLException("HomeTeam not found"));
+        Team guestTeam = teamDAO.selectById(resultSet.getLong("idGuestTeam")
+                , resultSet.getStatement().getConnection()).orElseThrow(() -> new SQLException("GuestTeam not found"));
+        Integer goalHomeTeam = resultSet.getInt("goalHomeTeam");
+        Integer goalGuestTeam = resultSet.getInt("goalGuestTeam");
+        LocalDateTime gameDate = resultSet.getTimestamp("gameDate").toLocalDateTime();
+        GameResult result = GameResult.valueOf(resultSet.getString("result"));
+
+        return Game.builder()
+                .homeTeam(homeTeam)
+                .guestTeam(guestTeam)
+                .goalHomeTeam(goalHomeTeam)
+                .goalGuestTeam(goalGuestTeam)
+                .gameDate(gameDate)
+                .result(result)
+                .build();
+    }
+
+    private Game mapToGameControllerProgressDto(ResultSet resultSet) throws SQLException {
+        Team homeTeam = teamDAO.selectById(resultSet.getLong("idHomeTeam")
+                , resultSet.getStatement().getConnection()).orElseThrow(() -> new SQLException("HomeTeam not found"));
+        Team guestTeam = teamDAO.selectById(resultSet.getLong("idGuestTeam")
+                , resultSet.getStatement().getConnection()).orElseThrow(() -> new SQLException("GuestTeam not found"));
+        Integer goalHomeTeam = resultSet.getInt("goalHomeTeam");
+        Integer goalGuestTeam = resultSet.getInt("goalGuestTeam");
+        LocalDateTime gameDate = resultSet.getTimestamp("gameDate").toLocalDateTime();
+        Float coefficientOnHomeTeam = resultSet.getFloat("coefficientOnHomeTeam");
+        Float coefficientOnDraw = resultSet.getFloat("coefficientOnDraw");
+        Float coefficientOnGuestTeam = resultSet.getFloat("coefficientOnGuestTeam");
+        GameTime time = GameTime.valueOf(resultSet.getString("time"));
+
+        return Game.builder()
+                .homeTeam(homeTeam)
+                .guestTeam(guestTeam)
+                .goalHomeTeam(goalHomeTeam)
+                .goalGuestTeam(goalGuestTeam)
+                .coefficientOnHomeTeam(coefficientOnHomeTeam)
+                .coefficientOnDraw(coefficientOnDraw)
+                .coefficientOnGuestTeam(coefficientOnGuestTeam)
+                .time(time)
+                .build();
+    }
+
+    private Game mapToGameControllerScheduledDto(ResultSet resultSet) throws SQLException {
+        Team homeTeam = teamDAO.selectById(resultSet.getLong("idHomeTeam")
+                , resultSet.getStatement().getConnection()).orElseThrow(() -> new SQLException("HomeTeam not found"));
+        Team guestTeam = teamDAO.selectById(resultSet.getLong("idGuestTeam")
+                , resultSet.getStatement().getConnection()).orElseThrow(() -> new SQLException("GuestTeam not found"));
+        Float coefficientOnHomeTeam = resultSet.getFloat("coefficientOnHomeTeam");
+        Float coefficientOnDraw = resultSet.getFloat("coefficientOnDraw");
+        Float coefficientOnGuestTeam = resultSet.getFloat("coefficientOnGuestTeam");
+        LocalDateTime gameDate = resultSet.getTimestamp("gameDate").toLocalDateTime();
+
+        return Game.builder()
+                .homeTeam(homeTeam)
+                .guestTeam(guestTeam)
+                .coefficientOnHomeTeam(coefficientOnHomeTeam)
+                .coefficientOnDraw(coefficientOnDraw)
+                .coefficientOnGuestTeam(coefficientOnGuestTeam)
+                .gameDate(gameDate)
                 .build();
     }
 }
