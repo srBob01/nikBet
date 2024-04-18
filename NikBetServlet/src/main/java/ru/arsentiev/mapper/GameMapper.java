@@ -18,6 +18,7 @@ public class GameMapper {
 
     public GameViewCompletedDto mapViewCompleted(Game game) {
         return GameViewCompletedDto.builder()
+                .idGame(game.getIdGame().toString())
                 .homeTeam(game.getHomeTeam().getTitle())
                 .guestTeam(game.getGuestTeam().getTitle())
                 .score(game.getGoalHomeTeam() + " - " + game.getGoalGuestTeam())
@@ -28,6 +29,7 @@ public class GameMapper {
 
     public GameViewInProgressDto mapViewInProgress(Game game) {
         return GameViewInProgressDto.builder()
+                .idGame(game.getIdGame().toString())
                 .homeTeam(game.getHomeTeam().getTitle())
                 .guestTeam(game.getGuestTeam().getTitle())
                 .score(game.getGoalHomeTeam() + " - " + game.getGoalGuestTeam())
@@ -40,6 +42,7 @@ public class GameMapper {
 
     public GameViewScheduledDto mapViewScheduled(Game game) {
         return GameViewScheduledDto.builder()
+                .idGame(game.getIdGame().toString())
                 .homeTeam(game.getHomeTeam().getTitle())
                 .guestTeam(game.getGuestTeam().getTitle())
                 .coefficientOnHomeTeam(String.valueOf(game.getCoefficientOnHomeTeam()))
@@ -51,6 +54,7 @@ public class GameMapper {
 
     public GameControllerCompletedDto map(GameViewCompletedDto gameViewCompletedDto) {
         return GameControllerCompletedDto.builder()
+                .idGame(Long.parseLong(gameViewCompletedDto.idGame()))
                 .homeTeam(gameViewCompletedDto.homeTeam())
                 .guestTeam(gameViewCompletedDto.guestTeam())
                 .goalHomeTeam(parseGoals(gameViewCompletedDto.score())[0])
@@ -62,6 +66,7 @@ public class GameMapper {
 
     public GameControllerProgressDto map(GameViewInProgressDto gameViewInProgressDto) {
         return GameControllerProgressDto.builder()
+                .idGame(Long.parseLong(gameViewInProgressDto.idGame()))
                 .homeTeam(gameViewInProgressDto.homeTeam())
                 .guestTeam(gameViewInProgressDto.guestTeam())
                 .goalHomeTeam(parseGoals(gameViewInProgressDto.score())[0])
@@ -75,6 +80,7 @@ public class GameMapper {
 
     public GameControllerScheduledDto map(GameViewScheduledDto gameViewScheduledDto) {
         return GameControllerScheduledDto.builder()
+                .idGame(Long.parseLong(gameViewScheduledDto.idGame()))
                 .homeTeam(gameViewScheduledDto.homeTeam())
                 .guestTeam(gameViewScheduledDto.guestTeam())
                 .coefficientOnHomeTeam(Float.parseFloat(gameViewScheduledDto.coefficientOnHomeTeam()))
@@ -87,6 +93,7 @@ public class GameMapper {
 
     public Game map(GameControllerCompletedDto gameControllerCompletedDto) {
         return Game.builder()
+                .idGame(gameControllerCompletedDto.idGame())
                 .homeTeam(Team.builder()
                         .title(gameControllerCompletedDto.homeTeam())
                         .build())
@@ -103,6 +110,7 @@ public class GameMapper {
 
     public Game map(GameControllerScheduledDto gameControllerScheduledDto) {
         return Game.builder()
+                .idGame(gameControllerScheduledDto.idGame())
                 .homeTeam(Team.builder()
                         .title(gameControllerScheduledDto.homeTeam())
                         .build())
@@ -119,6 +127,7 @@ public class GameMapper {
 
     public Game map(GameControllerProgressDto gameControllerProgressDto) {
         return Game.builder()
+                .idGame(gameControllerProgressDto.idGame())
                 .homeTeam(Team.builder()
                         .title(gameControllerProgressDto.homeTeam())
                         .build())

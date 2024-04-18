@@ -21,18 +21,19 @@ import ru.arsentiev.validator.entity.money.MoneyError;
 import ru.arsentiev.validator.entity.update.UpdatePasswordError;
 import ru.arsentiev.validator.entity.update.UpdatedUserFields;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserService {
     private static final UserService INSTANCE = new UserService();
-    private static final UserMapper userMapper = UserMapper.getInstance();
-    private static final PasswordHasher passwordHasher = PasswordHasher.getInstance();
-    private static final UserDao userDao = DaoManager.getUserDao();
-    private static final RegistrationUserValidator registrationUserValidator = ValidationManager.getRegistrationUserValidator();
-    private static final UpdateUserValidator updateUserValidator = ValidationManager.getUpdateUserValidator();
-    private static final MoneyValidator moneyValidator = ValidationManager.getMoneyValidator();
+    private final UserMapper userMapper = UserMapper.getInstance();
+    private final PasswordHasher passwordHasher = PasswordHasher.getInstance();
+    private final UserDao userDao = DaoManager.getUserDao();
+    private final RegistrationUserValidator registrationUserValidator = ValidationManager.getRegistrationUserValidator();
+    private final UpdateUserValidator updateUserValidator = ValidationManager.getUpdateUserValidator();
+    private final MoneyValidator moneyValidator = ValidationManager.getMoneyValidator();
 
     public static UserService getInstance() {
         return INSTANCE;
@@ -133,5 +134,14 @@ public class UserService {
         }
         userDao.withdrawMoneyById(userMoneyControllerDto);
         return Optional.empty();
+    }
+
+    public boolean checkSummaPrediction(UserPredictionSummaDto userPredictionSummaDto) {
+        var balance = userDao.selectBalanceById(userPredictionSummaDto.idUser());
+        if (balance.isEmpty()) {
+            throw new RuntimeException();
+        }
+        BigDecimal summa = BigDecimal.valueOf(Double.parseDouble(userPredictionSummaDto.summa()));
+        return balance.get().compareTo(summa) >= 0;
     }
 }

@@ -23,8 +23,8 @@ public class PredictionDao implements BaseDao<Long, Prediction> {
     }
 
     //language=PostgreSQL
-    private static final String INSERT_PREDICTION = "INSERT INTO predictions (idGame, idUser, predictionDate, summa," +
-                                                    " prediction) VALUES (?, ?, ?, ?, ?);";
+    private static final String INSERT_PREDICTION = "INSERT INTO predictions (idGame, idUser, summa," +
+                                                    " prediction) VALUES (?, ?, ?, ?);";
     //language=PostgreSQL
     private static final String SELECT_ALL_PREDICTIONS = "SELECT idprediction, idgame, iduser, predictiondate, summa," +
                                                          " prediction FROM predictions;";
@@ -151,9 +151,8 @@ public class PredictionDao implements BaseDao<Long, Prediction> {
     private void setStatement(Prediction prediction, PreparedStatement preparedStatement) throws SQLException {
         preparedStatement.setLong(1, prediction.getGame().getIdGame());
         preparedStatement.setLong(2, prediction.getUser().getIdUser());
-        preparedStatement.setTimestamp(3, Timestamp.valueOf(prediction.getPredictionDate()));
-        preparedStatement.setBigDecimal(4, prediction.getSumma());
-        preparedStatement.setString(5, prediction.getPrediction().name());
+        preparedStatement.setBigDecimal(3, prediction.getSumma());
+        preparedStatement.setString(4, prediction.getPrediction().name());
     }
 
     private Prediction extractPredictionFromResultSet(ResultSet resultSet) throws SQLException {

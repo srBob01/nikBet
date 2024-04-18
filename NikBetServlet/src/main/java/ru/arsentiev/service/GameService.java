@@ -16,8 +16,8 @@ import static java.util.stream.Collectors.toList;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class GameService {
     private static final GameService INSTANCE = new GameService();
-    private static final GameDao gameDao = DaoManager.getGameDao();
-    private static final GameMapper gameMapper = GameMapper.getInstance();
+    private final GameDao gameDao = DaoManager.getGameDao();
+    private final GameMapper gameMapper = GameMapper.getInstance();
 
     public static GameService getInstance() {
         return INSTANCE;
