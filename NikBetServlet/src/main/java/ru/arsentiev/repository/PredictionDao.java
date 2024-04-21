@@ -32,10 +32,6 @@ public class PredictionDao implements BaseDao<Long, Prediction> {
     private static final String SELECT_PREDICTION_BY_ID = "SELECT idprediction, idgame, iduser, predictiondate," +
                                                           " summa, predictionstatus, prediction, coefficient FROM predictions WHERE idPrediction = ?;";
     //language=PostgreSQL
-    private static final String SELECT_PREDICTION_BY_USER_ID = "SELECT idprediction, idgame, iduser, predictiondate," +
-                                                               " summa, predictionstatus, prediction, coefficient FROM predictions" +
-                                                               " WHERE iduser = ?;";
-    //language=PostgreSQL
     private static final String SELECT_BET_NOT_PLAYED_PREDICTION_BY_USER_ID_LIMIT = "SELECT idprediction, idgame, iduser, predictiondate," +
                                                                                     " summa, predictionstatus, prediction, coefficient FROM predictions" +
                                                                                     " WHERE iduser = ? AND predictionstatus = 'BetNotPlayed' LIMIT 3;";
