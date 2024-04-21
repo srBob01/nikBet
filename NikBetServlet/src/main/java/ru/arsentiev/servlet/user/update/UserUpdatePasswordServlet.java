@@ -1,12 +1,14 @@
-package ru.arsentiev.servlet.user;
+package ru.arsentiev.servlet.user.update;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import ru.arsentiev.dto.user.UserDto;
-import ru.arsentiev.dto.user.UserViewLogoPasDto;
+import ru.arsentiev.dto.user.controller.UserControllerDto;
+import ru.arsentiev.dto.user.controller.UserLogoPasControllerDto;
+import ru.arsentiev.dto.user.view.UserLogoPasViewDto;
+import ru.arsentiev.mapper.UserMapper;
 import ru.arsentiev.service.UserService;
 import ru.arsentiev.utils.JspPathCreator;
 import ru.arsentiev.validator.entity.update.UpdatePasswordError;
@@ -23,10 +25,12 @@ import static ru.arsentiev.utils.UrlPathGetter.*;
 @WebServlet(USER_UPDATE_PASSWORD_URL)
 public class UserUpdatePasswordServlet extends HttpServlet {
     private static UserService userService;
+    private UserMapper userMapper;
 
     @Override
     public void init() throws ServletException {
         userService = UserService.getInstance();
+        userMapper = UserMapper.getInstance();
     }
 
     @Override
@@ -36,13 +40,17 @@ public class UserUpdatePasswordServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        UserDto user = (UserDto) req.getSession().getAttribute(NAME_ATTRIBUTE_USER);
-        String login = user.email();
+        UserControllerDto user = (UserControllerDto) req.getSession().getAttribute(NAME_ATTRIBUTE_USER);
+        String email = user.email();
         String oldPassword = req.getParameter("oldPassword");
         String newPassword = req.getParameter("newPassword");
-        UserViewLogoPasDto userViewLogoPasDto = new UserViewLogoPasDto(login, oldPassword, newPassword);
-
-        Optional<UpdatePasswordError> error = userService.updatePassword(userViewLogoPasDto);
+        UserLogoPasViewDto userLogoPasViewDto = UserLogoPasViewDto.builder()
+                .email(email)
+                .oldPassword(oldPassword)
+                .newPassword(newPassword)
+                .build();
+        UserLogoPasControllerDto userLogoPasControllerDto = userMapper.map(userLogoPasViewDto);
+        Optional<UpdatePasswordError> error = userService.updatePassword(userLogoPasControllerDto);
         if (error.isEmpty()) {
             resp.sendRedirect(USER_DEFAULT_URL);
         } else {

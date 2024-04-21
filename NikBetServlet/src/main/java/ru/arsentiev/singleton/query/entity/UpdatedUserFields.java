@@ -1,4 +1,4 @@
-package ru.arsentiev.validator.entity.update;
+package ru.arsentiev.singleton.query.entity;
 
 import lombok.Builder;
 

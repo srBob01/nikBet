@@ -1,11 +1,11 @@
-package ru.arsentiev.dto.user;
+package ru.arsentiev.dto.user.view;
 
 import lombok.Builder;
 import lombok.Value;
 
 @Value
 @Builder
-public class UserRegistrationDto {
+public class UserRegistrationViewDto {
     String nickname;
     String firstName;
     String lastName;
