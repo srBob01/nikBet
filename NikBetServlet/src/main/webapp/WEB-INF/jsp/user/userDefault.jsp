@@ -23,7 +23,7 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
+            width: 30%;
             margin: 20px auto;
             text-align: left;
         }
@@ -56,21 +56,21 @@
 </head>
 <body>
 
-<c:if test="${not empty sessionScope.user}">
+<c:if test="${not empty requestScope.userDto}">
     <form method="post" action="<c:url value='/logout'/>">
         <button type="submit">Logout</button>
     </form>
     <h2>User Profile</h2>
     <div class="profile">
-        <p>ID: ${sessionScope.user.idUser()}</p>
-        <p>Nickname: ${sessionScope.user.nickname()}</p>
-        <p>First Name: ${sessionScope.user.firstName()}</p>
-        <p>Last Name: ${sessionScope.user.lastName()}</p>
-        <p>Patronymic: ${sessionScope.user.patronymic()}</p>
-        <p>Phone Number: ${sessionScope.user.phoneNumber()}</p>
-        <p>Email: ${sessionScope.user.email()}</p>
-        <p>Birth Date: ${sessionScope.user.birthDate()}</p>
-        <p>Role: ${sessionScope.user.role()}</p>
+        <p>ID: ${requestScope.userDto.idUser()}</p>
+        <p>Nickname: ${requestScope.userDto.nickname()}</p>
+        <p>First Name: ${requestScope.userDto.firstName()}</p>
+        <p>Last Name: ${requestScope.userDto.lastName()}</p>
+        <p>Patronymic: ${requestScope.userDto.patronymic()}</p>
+        <p>Phone Number: ${requestScope.userDto.phoneNumber()}</p>
+        <p>Email: ${requestScope.userDto.email()}</p>
+        <p>Birth Date: ${requestScope.userDto.birthDate()}</p>
+        <p>Role: ${requestScope.userDto.role()}</p>
     </div>
 </c:if>
 
@@ -85,6 +85,9 @@
 </a>
 <a href="<c:url value='/user/matches/default'/>">
     <button type="button">Look matches</button>
+</a>
+<a href="<c:url value='/user/prediction/default'/>">
+    <button type="button">Look predictions</button>
 </a>
 
 </body>

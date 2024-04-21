@@ -2,8 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Game Listings</title>
+    <title>Search Matches</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,43 +12,46 @@
             position: relative;
         }
 
-        .fixed-button-left, .fixed-button-right {
-            position: fixed;
-            top: 20px;
-            z-index: 1000;
-            width: 160px;
-            height: 50px;
-        }
-
-        .fixed-button-left {
-            left: 20px;
-        }
-
-        .fixed-button-right {
-            right: 20px;
-        }
-
-        .full-list-button {
-            background-color: #5C7AEA;
-            color: white;
-            padding: 10px 20px;
-            text-align: center;
-            display: block;
-            width: 300px;
-            margin: 20px auto;
-            border-radius: 5px;
-            font-size: 14px;
-            text-decoration: none;
-        }
-
-        .full-list-button:hover {
-            background-color: #3f5bcc;
-        }
-
         h2 {
             color: #333;
             text-align: center;
             margin-bottom: 20px;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 50%;
+            margin: 20px auto;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        select, button {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #5C7AEA;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: block;
+            text-align: center;
+        }
+
+        button:hover {
+            background-color: #3f5bcc;
         }
 
         .game-list {
@@ -69,8 +71,21 @@
             text-align: center;
         }
 
-        .betting-form {
-            margin-top: 20px;
+        .default-page-link {
+            background-color: #5C7AEA;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            margin: 20px auto;
+            width: 200px;
+            transition: background-color 0.3s;
+        }
+
+        .default-page-link:hover {
+            background-color: #3f5bcc;
         }
 
         .message-error, .message-success {
@@ -92,64 +107,81 @@
             background-color: #DFF2BF;
         }
 
-        button {
-            padding: 10px 20px;
-            background-color: #5C7AEA;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            font-size: 16px;
-            text-align: center;
-            line-height: 30px;
-        }
-
-        button:hover {
-            background-color: #3f5bcc;
-        }
-
-        input[type="number"], input[type="radio"] {
-            margin-right: 5px;
-        }
-
-        label {
-            margin-right: 15px;
-        }
     </style>
 </head>
 <body>
 
-
-<a href="<c:url value='/user/default'/>" class="fixed-button-left">
-    <button type="button">On default page</button>
-</a>
-
-<a href="<c:url value='/user/matches/find'/>" class="fixed-button-right">
-    <button type="button">Find game</button>
-</a>
-
 <c:if test="${not empty requestScope.error}">
-    <div class="message-error">
-        <span>${requestScope.error}</span>
-    </div>
+<div class="message-error">
+    <span>${requestScope.error}</span>
+</div>
 </c:if>
 
 <c:if test="${not empty requestScope.predictionResultViewDto}">
-    <div class="message-success">
-        <p>You bet on the match: ${requestScope.predictionResultViewDto.homeTeam()} vs
-                ${requestScope.predictionResultViewDto.guestTeam()}
-        </p>
-        <p>Expected result: ${requestScope.predictionResultViewDto.winner()}</p>
-        <p>Expected gain: ${requestScope.predictionResultViewDto.possibleWin()}</p>
-    </div>
+<div class="message-success">
+    <p>You bet on the match: ${requestScope.predictionResultViewDto.homeTeam()} vs
+            ${requestScope.predictionResultViewDto.guestTeam()}
+    </p>
+    <p>Expected result: ${requestScope.predictionResultViewDto.winner()}</p>
+    <p>Expected gain: ${requestScope.predictionResultViewDto.possibleWin()}</p>
+</div>
 </c:if>
 
-<h2>Games In Progress</h2>
+<a href="<c:url value='/user/matches/default'/>" class="default-page-link">On default matches page</a>
 
-<a href="<c:url value='/user/matches/all/in-progress'/>" class="full-list-button">
-    <button type="button">View All In-Progress Games</button>
-</a>
+<h2>Search for Matches</h2>
+<form action="<c:url value='/user/matches/find'/>" method="post">
+    <div>
+        <label for="homeTeam">Home Team:</label>
+        <select name="homeTeam" id="homeTeam">
+            <option value="none">None team</option>
+            <c:forEach items="${requestScope.teams}" var="team">
+                <option value="${team.idTeam()}">${team.title()}</option>
+            </c:forEach>
+        </select>
+    </div>
+
+    <div>
+        <label for="guestTeam">Guest Team:</label>
+        <select name="guestTeam" id="guestTeam">
+            <option value="none">None team</option>
+            <c:forEach items="${requestScope.teams}" var="team">
+                <option value="${team.idTeam()}">${team.title()}</option>
+            </c:forEach>
+        </select>
+    </div>
+
+    <div>
+        <label for="status">Match Status:</label>
+        <select name="status" id="status">
+            <option value="none">None Status</option>
+            <c:forEach var="status" items="${requestScope.gameStatuses}">
+                <option value="${status}">${status}</option>
+            </c:forEach>
+        </select>
+    </div>
+
+    <div>
+        <label for="result">Match Result:</label>
+        <select name="result" id="result">
+            <option value="none">None Result</option>
+            <c:forEach var="result" items="${requestScope.gameResults}">
+                <option value="${result}">${result}</option>
+            </c:forEach>
+        </select>
+    </div>
+
+    <button type="submit">Find Matches</button>
+</form>
+
+
+<c:if test="${empty requestScope.listGameInProgressDto && empty requestScope.listGameScheduledDto && empty requestScope.listGameCompletedDto}">
+    <h2>Games is empty</h2>
+</c:if>
+
+<c:if test="${not empty requestScope.listGameInProgressDto}">
+
+<h2>Games In Progress</h2>
 
 <div class="game-list">
     <c:forEach items="${requestScope.listGameInProgressDto}" var="game">
@@ -157,14 +189,9 @@
             <p>${game.homeTeam()} vs ${game.guestTeam()}</p>
             <p>Score: ${game.score()}</p>
             <p>Time: ${game.time()}</p>
-            <form class="betting-form" method="post" action="<c:url value='/user/matches/default'/>">
+            <form class="betting-form" method="post" action="<c:url value='/user/matches/find/bet'/>">
                 <input type="hidden" name="action" value="placeBetInProgress"/>
                 <input type="hidden" name="gameId" value="${game.idGame()}"/>
-                <input type="hidden" name="homeTeam" value="${game.homeTeam()}"/>
-                <input type="hidden" name="guestTeam" value="${game.guestTeam()}"/>
-                <input type="hidden" name="coefficientOnHomeTeam" value="${game.coefficientOnHomeTeam()}"/>
-                <input type="hidden" name="coefficientOnDraw" value="${game.coefficientOnDraw()}"/>
-                <input type="hidden" name="coefficientOnGuestTeam" value="${game.coefficientOnGuestTeam()}"/>
                 <p>
                     <label><input type="radio" name="betType" value="HomeWin" checked> ${game.homeTeam()}
                         - ${game.coefficientOnHomeTeam()}</label>
@@ -187,20 +214,22 @@
     </c:forEach>
 </div>
 
-<h2>Scheduled Games</h2>
+</c:if>
 
-<a href="<c:url value='/user/matches/all/scheduled'/>" class="full-list-button">
-    <button type="button">View All Scheduled Games</button>
-</a>
+
+<c:if test="${not empty requestScope.listGameScheduledDto}">
+
+
+<h2>Scheduled Games</h2>
 
 <div class="game-list">
     <c:forEach items="${requestScope.listGameScheduledDto}" var="game">
         <div class="game-item">
             <p>${game.homeTeam()} vs ${game.guestTeam()}</p>
             <p>Game Date: ${game.gameDate()}</p>
-            <form class="betting-form" method="post" action="<c:url value='/user/matches/default'/>">
+            <form class="betting-form" method="post" action="<c:url value='/user/matches/find/bet'/>">
                 <input type="hidden" name="action" value="placeBetInProgress"/>
-                <input type="hidden" name="gameId" value="${game.idGame()}"/>
+                <input type="hidden" name="gameId" value="${game.idGame()}"/>>
                 <p>
                     <label><input type="radio" name="betType" value="HomeWin" checked> ${game.homeTeam()}
                         - ${game.coefficientOnHomeTeam()}</label>
@@ -223,11 +252,12 @@
     </c:forEach>
 </div>
 
-<h2>Completed Games</h2>
+</c:if>
 
-<a href="<c:url value='/user/matches/all/completed'/>" class="full-list-button">
-    <button type="button">View All Completed Games</button>
-</a>
+<c:if test="${not empty requestScope.listGameCompletedDto}">
+
+
+<h2>Completed Games</h2>
 
 <div class="game-list">
     <c:forEach items="${requestScope.listGameCompletedDto}" var="game">
@@ -246,5 +276,6 @@
     </c:forEach>
 </div>
 
-</body>
+</c:if>
+
 </html>

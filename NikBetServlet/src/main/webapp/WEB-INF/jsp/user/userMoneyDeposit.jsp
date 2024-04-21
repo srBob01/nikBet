@@ -66,12 +66,6 @@
 </head>
 <body>
 
-<c:if test="${not empty requestScope.error}">
-    <div class="error-message">
-        <span>${requestScope.error.toString()}</span>
-    </div>
-</c:if>
-
 <form method="post" action="<c:url value='/user/money/deposit'/>">
     <div>
         <label for="amount">Input summa for deposit:</label>

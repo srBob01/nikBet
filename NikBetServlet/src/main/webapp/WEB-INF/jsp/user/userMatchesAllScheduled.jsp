@@ -29,23 +29,6 @@
             right: 20px;
         }
 
-        .full-list-button {
-            background-color: #5C7AEA;
-            color: white;
-            padding: 10px 20px;
-            text-align: center;
-            display: block;
-            width: 300px;
-            margin: 20px auto;
-            border-radius: 5px;
-            font-size: 14px;
-            text-decoration: none;
-        }
-
-        .full-list-button:hover {
-            background-color: #3f5bcc;
-        }
-
         h2 {
             color: #333;
             text-align: center;
@@ -121,8 +104,8 @@
 <body>
 
 
-<a href="<c:url value='/user/default'/>" class="fixed-button-left">
-    <button type="button">On default page</button>
+<a href="<c:url value='/user/matches/default'/>" class="fixed-button-left">
+    <button type="button">On default matches page</button>
 </a>
 
 <a href="<c:url value='/user/matches/find'/>" class="fixed-button-right">
@@ -145,60 +128,13 @@
     </div>
 </c:if>
 
-<h2>Games In Progress</h2>
-
-<a href="<c:url value='/user/matches/all/in-progress'/>" class="full-list-button">
-    <button type="button">View All In-Progress Games</button>
-</a>
-
-<div class="game-list">
-    <c:forEach items="${requestScope.listGameInProgressDto}" var="game">
-        <div class="game-item">
-            <p>${game.homeTeam()} vs ${game.guestTeam()}</p>
-            <p>Score: ${game.score()}</p>
-            <p>Time: ${game.time()}</p>
-            <form class="betting-form" method="post" action="<c:url value='/user/matches/default'/>">
-                <input type="hidden" name="action" value="placeBetInProgress"/>
-                <input type="hidden" name="gameId" value="${game.idGame()}"/>
-                <input type="hidden" name="homeTeam" value="${game.homeTeam()}"/>
-                <input type="hidden" name="guestTeam" value="${game.guestTeam()}"/>
-                <input type="hidden" name="coefficientOnHomeTeam" value="${game.coefficientOnHomeTeam()}"/>
-                <input type="hidden" name="coefficientOnDraw" value="${game.coefficientOnDraw()}"/>
-                <input type="hidden" name="coefficientOnGuestTeam" value="${game.coefficientOnGuestTeam()}"/>
-                <p>
-                    <label><input type="radio" name="betType" value="HomeWin" checked> ${game.homeTeam()}
-                        - ${game.coefficientOnHomeTeam()}</label>
-                </p>
-                <p>
-                    <label><input type="radio" name="betType" value="Draw"> Draw - ${game.coefficientOnDraw()}</label>
-                </p>
-                <p>
-                    <label><input type="radio" name="betType" value="AwayWin"> ${game.guestTeam()}
-                        - ${game.coefficientOnGuestTeam()}</label>
-                </p>
-                <p>
-                    <label>
-                        <input type="number" name="betAmount" placeholder="Enter bet amount" required min="1"/>
-                    </label>
-                </p>
-                <button type="submit" name="submit" value="betInProgress">Place Bet</button>
-            </form>
-        </div>
-    </c:forEach>
-</div>
-
 <h2>Scheduled Games</h2>
-
-<a href="<c:url value='/user/matches/all/scheduled'/>" class="full-list-button">
-    <button type="button">View All Scheduled Games</button>
-</a>
-
 <div class="game-list">
     <c:forEach items="${requestScope.listGameScheduledDto}" var="game">
         <div class="game-item">
             <p>${game.homeTeam()} vs ${game.guestTeam()}</p>
             <p>Game Date: ${game.gameDate()}</p>
-            <form class="betting-form" method="post" action="<c:url value='/user/matches/default'/>">
+            <form class="betting-form" method="post" action="<c:url value='/user/matches/all/scheduled'/>">
                 <input type="hidden" name="action" value="placeBetInProgress"/>
                 <input type="hidden" name="gameId" value="${game.idGame()}"/>
                 <p>
@@ -219,29 +155,6 @@
                 </p>
                 <button type="submit">Place Bet</button>
             </form>
-        </div>
-    </c:forEach>
-</div>
-
-<h2>Completed Games</h2>
-
-<a href="<c:url value='/user/matches/all/completed'/>" class="full-list-button">
-    <button type="button">View All Completed Games</button>
-</a>
-
-<div class="game-list">
-    <c:forEach items="${requestScope.listGameCompletedDto}" var="game">
-        <div class="game-item">
-            <p>${game.homeTeam()} vs ${game.guestTeam()}</p>
-            <p>Score: ${game.score()}</p>
-            <p>Game Date: ${game.gameDate()}</p>
-            <p>
-                <c:choose>
-                    <c:when test="${game.result() == 'HomeWin'}">Winner: ${game.homeTeam()}</c:when>
-                    <c:when test="${game.result() == 'AwayWin'}">Winner: ${game.guestTeam()}</c:when>
-                    <c:otherwise>Draw</c:otherwise>
-                </c:choose>
-            </p>
         </div>
     </c:forEach>
 </div>

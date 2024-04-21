@@ -67,7 +67,7 @@
 
 <c:if test="${not empty requestScope.error}">
     <div class="error-message">
-        <span>${requestScope.error.toString()}</span>
+        <span>${requestScope.error}</span>
     </div>
 </c:if>
 
