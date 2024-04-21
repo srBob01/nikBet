@@ -1,9 +1,9 @@
-package ru.arsentiev.dto.game;
+package ru.arsentiev.dto.game.view;
 
 import lombok.Builder;
 
 @Builder
-public record GameViewInProgressDto(String idGame,
+public record GameInProgressViewDto(String idGame,
                                     String homeTeam,
                                     String guestTeam,
                                     String score,

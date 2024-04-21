@@ -1,9 +1,9 @@
-package ru.arsentiev.dto.game;
+package ru.arsentiev.dto.game.view;
 
 import lombok.Builder;
 
 @Builder
-public record GameViewScheduledDto(String idGame,
+public record GameScheduledViewDto(String idGame,
                                    String homeTeam,
                                    String guestTeam,
                                    String coefficientOnHomeTeam,

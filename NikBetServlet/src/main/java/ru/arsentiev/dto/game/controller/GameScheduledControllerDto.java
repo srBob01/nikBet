@@ -1,11 +1,11 @@
-package ru.arsentiev.dto.game;
+package ru.arsentiev.dto.game.controller;
 
 import lombok.Builder;
 
 import java.time.LocalDateTime;
 
 @Builder
-public record GameControllerScheduledDto(Long idGame,
+public record GameScheduledControllerDto(Long idGame,
                                          String homeTeam,
                                          String guestTeam,
                                          Float coefficientOnHomeTeam,

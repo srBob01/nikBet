@@ -1,4 +1,4 @@
-package ru.arsentiev.dto.prediction;
+package ru.arsentiev.dto.prediction.view;
 
 import lombok.Builder;
 

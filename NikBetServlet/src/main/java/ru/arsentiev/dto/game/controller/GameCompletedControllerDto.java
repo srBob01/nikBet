@@ -1,4 +1,4 @@
-package ru.arsentiev.dto.game;
+package ru.arsentiev.dto.game.controller;
 
 import lombok.Builder;
 import ru.arsentiev.entity.GameResult;
@@ -6,7 +6,7 @@ import ru.arsentiev.entity.GameResult;
 import java.time.LocalDateTime;
 
 @Builder
-public record GameControllerCompletedDto(Long idGame,
+public record GameCompletedControllerDto(Long idGame,
                                          String homeTeam,
                                          String guestTeam,
                                          Integer goalHomeTeam,

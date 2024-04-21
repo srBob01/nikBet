@@ -1,4 +1,4 @@
-package ru.arsentiev.dto.prediction;
+package ru.arsentiev.dto.prediction.controller;
 
 import lombok.Builder;
 import ru.arsentiev.entity.GameResult;
