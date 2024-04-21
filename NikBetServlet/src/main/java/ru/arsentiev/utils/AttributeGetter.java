@@ -7,5 +7,7 @@ public class AttributeGetter {
     public static final String NAME_ATTRIBUTE_USER = "user";
     public static final String NAME_ATTRIBUTE_ERROR = "error";
     public static final String NAME_ATTRIBUTE_ERRORS = "errors";
+    public static final String NAME_ATTRIBUTE_USER_DTO = "userDto";
+
 
 }

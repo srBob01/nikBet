@@ -15,5 +15,13 @@ public class UrlPathGetter {
     public static final String USER_MATCHES_DEFAULT_URL = "/user/matches/default";
     public static final String USER_MONEY_DEFAULT_URL = "/user/money/default";
     public static final String ADMIN_DEFAULT_URL = "/admin/default";
+    public static final String USER_PREDICTION_DEFAULT_URL = "/user/prediction/default";
+    public static final String USER_MATCHES_ALL_IN_PROGRESS_URL = "/user/matches/all/in-progress";
+    public static final String USER_MATCHES_ALL_COMPLETED_URL = "/user/matches/all/completed";
+    public static final String USER_MATCHES_ALL_SCHEDULED_URL = "/user/matches/all/scheduled";
+    public static final String USER_MATCHES_FIND_URL = "/user/matches/find";
+    public static final String USER_MATCHES_FIND_BET_URL = "/user/matches/find/bet";
+    public static final String USER_PREDICTION_PLAYED_URL = "/user/predictions/played";
+    public static final String USER_PREDICTION_NOT_PLAYED_URL = "/user/predictions/notPlayed";
 
 }
