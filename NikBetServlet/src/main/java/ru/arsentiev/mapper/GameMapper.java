@@ -2,8 +2,13 @@ package ru.arsentiev.mapper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import ru.arsentiev.dto.game.*;
+import ru.arsentiev.dto.game.controller.*;
+import ru.arsentiev.dto.game.view.GameCompletedViewDto;
+import ru.arsentiev.dto.game.view.GameInProgressViewDto;
+import ru.arsentiev.dto.game.view.GameParametersViewDto;
+import ru.arsentiev.dto.game.view.GameScheduledViewDto;
 import ru.arsentiev.entity.*;
+import ru.arsentiev.utils.LocalDateFormatter;
 import ru.arsentiev.utils.TimeStampFormatter;
 
 import java.time.LocalDateTime;
@@ -16,135 +21,200 @@ public class GameMapper {
         return INSTANCE;
     }
 
-    public GameViewCompletedDto mapViewCompleted(Game game) {
-        return GameViewCompletedDto.builder()
-                .idGame(game.getIdGame().toString())
+    public GameCompletedControllerDto mapControllerCompletedGameToController(Game game) {
+        return GameCompletedControllerDto.builder()
+                .idGame(game.getIdGame())
                 .homeTeam(game.getHomeTeam().getTitle())
                 .guestTeam(game.getGuestTeam().getTitle())
-                .score(game.getGoalHomeTeam() + " - " + game.getGoalGuestTeam())
-                .gameDate(game.getGameDate().format(TimeStampFormatter.FORMATTER))
-                .result(game.getResult().name())
+                .goalHomeTeam(game.getGoalHomeTeam())
+                .goalGuestTeam(game.getGoalGuestTeam())
+                .gameDate(game.getGameDate())
+                .result(game.getResult())
                 .build();
     }
 
-    public GameViewInProgressDto mapViewInProgress(Game game) {
-        return GameViewInProgressDto.builder()
-                .idGame(game.getIdGame().toString())
+    public GameProgressControllerDto mapControllerInProgressGameToController(Game game) {
+        return GameProgressControllerDto.builder()
+                .idGame(game.getIdGame())
                 .homeTeam(game.getHomeTeam().getTitle())
                 .guestTeam(game.getGuestTeam().getTitle())
-                .score(game.getGoalHomeTeam() + " - " + game.getGoalGuestTeam())
-                .coefficientOnHomeTeam(String.valueOf(game.getCoefficientOnHomeTeam()))
-                .coefficientOnDraw(String.valueOf(game.getCoefficientOnDraw()))
-                .coefficientOnGuestTeam(String.valueOf(game.getCoefficientOnGuestTeam()))
-                .time(game.getTime().name())
+                .goalHomeTeam(game.getGoalHomeTeam())
+                .goalGuestTeam(game.getGoalGuestTeam())
+                .coefficientOnHomeTeam(game.getCoefficientOnHomeTeam())
+                .coefficientOnDraw(game.getCoefficientOnDraw())
+                .coefficientOnGuestTeam(game.getCoefficientOnGuestTeam())
+                .time(game.getTime())
                 .build();
     }
 
-    public GameViewScheduledDto mapViewScheduled(Game game) {
-        return GameViewScheduledDto.builder()
-                .idGame(game.getIdGame().toString())
+    public GameScheduledControllerDto mapControllerScheduledGameToController(Game game) {
+        return GameScheduledControllerDto.builder()
+                .idGame(game.getIdGame())
                 .homeTeam(game.getHomeTeam().getTitle())
                 .guestTeam(game.getGuestTeam().getTitle())
-                .coefficientOnHomeTeam(String.valueOf(game.getCoefficientOnHomeTeam()))
-                .coefficientOnDraw(String.valueOf(game.getCoefficientOnDraw()))
-                .coefficientOnGuestTeam(String.valueOf(game.getCoefficientOnGuestTeam()))
-                .gameDate(game.getGameDate().format(TimeStampFormatter.FORMATTER))
+                .coefficientOnHomeTeam(game.getCoefficientOnHomeTeam())
+                .coefficientOnDraw(game.getCoefficientOnDraw())
+                .coefficientOnGuestTeam(game.getCoefficientOnGuestTeam())
+                .gameDate(game.getGameDate())
                 .build();
     }
 
-    public GameControllerCompletedDto map(GameViewCompletedDto gameViewCompletedDto) {
-        return GameControllerCompletedDto.builder()
-                .idGame(Long.parseLong(gameViewCompletedDto.idGame()))
-                .homeTeam(gameViewCompletedDto.homeTeam())
-                .guestTeam(gameViewCompletedDto.guestTeam())
-                .goalHomeTeam(parseGoals(gameViewCompletedDto.score())[0])
-                .goalGuestTeam(parseGoals(gameViewCompletedDto.score())[1])
-                .gameDate(TimeStampFormatter.format(gameViewCompletedDto.gameDate()))
-                .result(GameResult.valueOf(gameViewCompletedDto.result()))
+    public GameCompletedViewDto mapCompletedControllerToView(GameCompletedControllerDto dto) {
+        String score = dto.goalHomeTeam() + " - " + dto.goalGuestTeam();
+        return GameCompletedViewDto.builder()
+                .idGame(String.valueOf(dto.idGame()))
+                .homeTeam(dto.homeTeam())
+                .guestTeam(dto.guestTeam())
+                .score(score)
+                .gameDate(dto.gameDate().format(LocalDateFormatter.FORMATTER))
+                .result(dto.result().name())
                 .build();
     }
 
-    public GameControllerProgressDto map(GameViewInProgressDto gameViewInProgressDto) {
-        return GameControllerProgressDto.builder()
-                .idGame(Long.parseLong(gameViewInProgressDto.idGame()))
-                .homeTeam(gameViewInProgressDto.homeTeam())
-                .guestTeam(gameViewInProgressDto.guestTeam())
-                .goalHomeTeam(parseGoals(gameViewInProgressDto.score())[0])
-                .goalGuestTeam(parseGoals(gameViewInProgressDto.score())[1])
-                .coefficientOnHomeTeam(Float.parseFloat(gameViewInProgressDto.coefficientOnHomeTeam()))
-                .coefficientOnDraw(Float.parseFloat(gameViewInProgressDto.coefficientOnDraw()))
-                .coefficientOnGuestTeam(Float.parseFloat(gameViewInProgressDto.coefficientOnGuestTeam()))
-                .time(GameTime.valueOf(gameViewInProgressDto.time()))
+    public GameInProgressViewDto mapProgressControllerToView(GameProgressControllerDto dto) {
+        String score = dto.goalHomeTeam() + " - " + dto.goalGuestTeam();
+        return GameInProgressViewDto.builder()
+                .idGame(String.valueOf(dto.idGame()))
+                .homeTeam(dto.homeTeam())
+                .guestTeam(dto.guestTeam())
+                .score(score)
+                .coefficientOnHomeTeam(String.format("%.2f", dto.coefficientOnHomeTeam()))
+                .coefficientOnDraw(String.format("%.2f", dto.coefficientOnDraw()))
+                .coefficientOnGuestTeam(String.format("%.2f", dto.coefficientOnGuestTeam()))
+                .time(dto.time().name())
                 .build();
     }
 
-    public GameControllerScheduledDto map(GameViewScheduledDto gameViewScheduledDto) {
-        return GameControllerScheduledDto.builder()
-                .idGame(Long.parseLong(gameViewScheduledDto.idGame()))
-                .homeTeam(gameViewScheduledDto.homeTeam())
-                .guestTeam(gameViewScheduledDto.guestTeam())
-                .coefficientOnHomeTeam(Float.parseFloat(gameViewScheduledDto.coefficientOnHomeTeam()))
-                .coefficientOnDraw(Float.parseFloat(gameViewScheduledDto.coefficientOnDraw()))
-                .coefficientOnGuestTeam(Float.parseFloat(gameViewScheduledDto.coefficientOnGuestTeam()))
-                .gameDate(TimeStampFormatter.format(gameViewScheduledDto.gameDate()))
+    public GameScheduledViewDto mapScheduledControllerToView(GameScheduledControllerDto dto) {
+        return GameScheduledViewDto.builder()
+                .idGame(String.valueOf(dto.idGame()))
+                .homeTeam(dto.homeTeam())
+                .guestTeam(dto.guestTeam())
+                .coefficientOnHomeTeam(String.format("%.2f", dto.coefficientOnHomeTeam()))
+                .coefficientOnDraw(String.format("%.2f", dto.coefficientOnDraw()))
+                .coefficientOnGuestTeam(String.format("%.2f", dto.coefficientOnGuestTeam()))
+                .gameDate(dto.gameDate().format(LocalDateFormatter.FORMATTER))
+                .build();
+    }
+
+    public GameCompletedControllerDto map(GameCompletedViewDto gameCompletedViewDto) {
+        return GameCompletedControllerDto.builder()
+                .idGame(Long.parseLong(gameCompletedViewDto.idGame()))
+                .homeTeam(gameCompletedViewDto.homeTeam())
+                .guestTeam(gameCompletedViewDto.guestTeam())
+                .goalHomeTeam(parseGoals(gameCompletedViewDto.score())[0])
+                .goalGuestTeam(parseGoals(gameCompletedViewDto.score())[1])
+                .gameDate(TimeStampFormatter.format(gameCompletedViewDto.gameDate()))
+                .result(GameResult.valueOf(gameCompletedViewDto.result()))
+                .build();
+    }
+
+    public GameProgressControllerDto map(GameInProgressViewDto gameInProgressViewDto) {
+        return GameProgressControllerDto.builder()
+                .idGame(Long.parseLong(gameInProgressViewDto.idGame()))
+                .homeTeam(gameInProgressViewDto.homeTeam())
+                .guestTeam(gameInProgressViewDto.guestTeam())
+                .goalHomeTeam(parseGoals(gameInProgressViewDto.score())[0])
+                .goalGuestTeam(parseGoals(gameInProgressViewDto.score())[1])
+                .coefficientOnHomeTeam(Float.parseFloat(gameInProgressViewDto.coefficientOnHomeTeam()))
+                .coefficientOnDraw(Float.parseFloat(gameInProgressViewDto.coefficientOnDraw()))
+                .coefficientOnGuestTeam(Float.parseFloat(gameInProgressViewDto.coefficientOnGuestTeam()))
+                .time(GameTime.valueOf(gameInProgressViewDto.time()))
+                .build();
+    }
+
+    public GameScheduledControllerDto map(GameScheduledViewDto gameScheduledViewDto) {
+        return GameScheduledControllerDto.builder()
+                .idGame(Long.parseLong(gameScheduledViewDto.idGame()))
+                .homeTeam(gameScheduledViewDto.homeTeam())
+                .guestTeam(gameScheduledViewDto.guestTeam())
+                .coefficientOnHomeTeam(Float.parseFloat(gameScheduledViewDto.coefficientOnHomeTeam()))
+                .coefficientOnDraw(Float.parseFloat(gameScheduledViewDto.coefficientOnDraw()))
+                .coefficientOnGuestTeam(Float.parseFloat(gameScheduledViewDto.coefficientOnGuestTeam()))
+                .gameDate(TimeStampFormatter.format(gameScheduledViewDto.gameDate()))
                 .build();
     }
 
 
-    public Game map(GameControllerCompletedDto gameControllerCompletedDto) {
+    public Game mapCompletedControllerToGame(GameCompletedControllerDto gameCompletedControllerDto) {
         return Game.builder()
-                .idGame(gameControllerCompletedDto.idGame())
+                .idGame(gameCompletedControllerDto.idGame())
                 .homeTeam(Team.builder()
-                        .title(gameControllerCompletedDto.homeTeam())
+                        .title(gameCompletedControllerDto.homeTeam())
                         .build())
                 .guestTeam(Team.builder()
-                        .title(gameControllerCompletedDto.guestTeam())
+                        .title(gameCompletedControllerDto.guestTeam())
                         .build())
-                .goalHomeTeam(gameControllerCompletedDto.goalHomeTeam())
-                .goalGuestTeam(gameControllerCompletedDto.goalGuestTeam())
-                .gameDate(gameControllerCompletedDto.gameDate())
+                .goalHomeTeam(gameCompletedControllerDto.goalHomeTeam())
+                .goalGuestTeam(gameCompletedControllerDto.goalGuestTeam())
+                .gameDate(gameCompletedControllerDto.gameDate())
                 .status(GameStatus.Completed)
-                .result(gameControllerCompletedDto.result())
+                .result(gameCompletedControllerDto.result())
                 .build();
     }
 
-    public Game map(GameControllerScheduledDto gameControllerScheduledDto) {
+    public Game mapScedudeludControllerToGame(GameScheduledControllerDto gameScheduledControllerDto) {
         return Game.builder()
-                .idGame(gameControllerScheduledDto.idGame())
+                .idGame(gameScheduledControllerDto.idGame())
                 .homeTeam(Team.builder()
-                        .title(gameControllerScheduledDto.homeTeam())
+                        .title(gameScheduledControllerDto.homeTeam())
                         .build())
                 .guestTeam(Team.builder()
-                        .title(gameControllerScheduledDto.guestTeam())
+                        .title(gameScheduledControllerDto.guestTeam())
                         .build())
-                .gameDate(gameControllerScheduledDto.gameDate())
+                .gameDate(gameScheduledControllerDto.gameDate())
                 .status(GameStatus.Scheduled)
-                .coefficientOnHomeTeam(gameControllerScheduledDto.coefficientOnHomeTeam())
-                .coefficientOnDraw(gameControllerScheduledDto.coefficientOnDraw())
-                .coefficientOnGuestTeam(gameControllerScheduledDto.coefficientOnGuestTeam())
+                .coefficientOnHomeTeam(gameScheduledControllerDto.coefficientOnHomeTeam())
+                .coefficientOnDraw(gameScheduledControllerDto.coefficientOnDraw())
+                .coefficientOnGuestTeam(gameScheduledControllerDto.coefficientOnGuestTeam())
                 .build();
     }
 
-    public Game map(GameControllerProgressDto gameControllerProgressDto) {
+    public Game mapProgressControllerToGame(GameProgressControllerDto gameProgressControllerDto) {
         return Game.builder()
-                .idGame(gameControllerProgressDto.idGame())
+                .idGame(gameProgressControllerDto.idGame())
                 .homeTeam(Team.builder()
-                        .title(gameControllerProgressDto.homeTeam())
+                        .title(gameProgressControllerDto.homeTeam())
                         .build())
                 .guestTeam(Team.builder()
-                        .title(gameControllerProgressDto.guestTeam())
+                        .title(gameProgressControllerDto.guestTeam())
                         .build())
-                .goalHomeTeam(gameControllerProgressDto.goalHomeTeam())
-                .goalGuestTeam(gameControllerProgressDto.goalGuestTeam())
+                .goalHomeTeam(gameProgressControllerDto.goalHomeTeam())
+                .goalGuestTeam(gameProgressControllerDto.goalGuestTeam())
                 .gameDate(LocalDateTime.now())
                 .status(GameStatus.InProgress)
-                .coefficientOnHomeTeam(gameControllerProgressDto.coefficientOnHomeTeam())
-                .coefficientOnDraw(gameControllerProgressDto.coefficientOnDraw())
-                .coefficientOnGuestTeam(gameControllerProgressDto.coefficientOnGuestTeam())
-                .time(gameControllerProgressDto.time())
+                .coefficientOnHomeTeam(gameProgressControllerDto.coefficientOnHomeTeam())
+                .coefficientOnDraw(gameProgressControllerDto.coefficientOnDraw())
+                .coefficientOnGuestTeam(gameProgressControllerDto.coefficientOnGuestTeam())
+                .time(gameProgressControllerDto.time())
                 .build();
     }
 
+    public Game map(GameParametersControllerDto gameParametersControllerDto) {
+        return Game.builder()
+                .homeTeam(Team.builder()
+                        .idTeam(gameParametersControllerDto.homeTeamId())
+                        .build())
+                .guestTeam(Team.builder()
+                        .idTeam(gameParametersControllerDto.guestTeamId())
+                        .build())
+                .status(gameParametersControllerDto.status())
+                .result(gameParametersControllerDto.result())
+                .build();
+    }
+
+    public GameParametersControllerDto map(GameParametersViewDto gameParametersViewDto) {
+        return GameParametersControllerDto.builder()
+                .guestTeamId(gameParametersViewDto.guestTeamId().equals("none") ? null
+                        : Long.parseLong(gameParametersViewDto.guestTeamId()))
+                .homeTeamId(gameParametersViewDto.homeTeamId().equals("none") ? null
+                        : Long.parseLong(gameParametersViewDto.homeTeamId()))
+                .result(gameParametersViewDto.result().equals("none") ? null :
+                        GameResult.valueOf(gameParametersViewDto.result()))
+                .status(gameParametersViewDto.status().equals("none") ? null :
+                        GameStatus.valueOf(gameParametersViewDto.status()))
+                .build();
+    }
 
     private int[] parseGoals(String score) {
         String[] parts = score.split(" - ");

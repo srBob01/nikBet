@@ -2,7 +2,8 @@ package ru.arsentiev.mapper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import ru.arsentiev.dto.user.*;
+import ru.arsentiev.dto.user.controller.*;
+import ru.arsentiev.dto.user.view.*;
 import ru.arsentiev.entity.User;
 import ru.arsentiev.utils.LocalDateFormatter;
 
@@ -18,8 +19,8 @@ public class UserMapper {
         return INSTANCE;
     }
 
-    public UserDto map(User obj) {
-        return UserDto.builder()
+    public UserControllerDto map(User obj) {
+        return UserControllerDto.builder()
                 .idUser(obj.getIdUser())
                 .nickname(obj.getNickname())
                 .firstName(obj.getFirstName())
@@ -32,11 +33,14 @@ public class UserMapper {
                 .build();
     }
 
-    public UserLogoPasDto map(UserViewLogoPasDto obj, Function<String, String> hashFunction) {
-        return new UserLogoPasDto(obj.email(), hashFunction.apply(obj.newPassword()));
+    public User map(UserLogoPasControllerDto obj, Function<String, String> hashFunction) {
+        return User.builder()
+                .email(obj.email())
+                .password(hashFunction.apply(obj.newPassword()))
+                .build();
     }
 
-    public User map(UserUpdateDescriptionDto obj) {
+    public User map(UserUpdateDescriptionControllerDto obj) {
         return User.builder()
                 .idUser(Long.valueOf(obj.getIdUser()))
                 .nickname(obj.getNickname())
@@ -45,11 +49,11 @@ public class UserMapper {
                 .patronymic(obj.getPatronymic())
                 .email(obj.getEmail())
                 .phoneNumber(obj.getPhoneNumber())
-                .birthDate(LocalDateFormatter.format(obj.getBirthDate()))
+                .birthDate(obj.getBirthDate())
                 .build();
     }
 
-    public User map(UserRegistrationDto obj, Function<String, String> hashFunction) {
+    public User map(UserRegistrationControllerDto obj, Function<String, String> hashFunction) {
         return User.builder()
                 .nickname(obj.getNickname())
                 .firstName(obj.getFirstName())
@@ -58,26 +62,83 @@ public class UserMapper {
                 .email(obj.getEmail())
                 .phoneNumber(obj.getPhoneNumber())
                 .password(hashFunction.apply(obj.getPassword()))
-                .birthDate(LocalDateFormatter.format(obj.getBirthDate()))
+                .birthDate(obj.getBirthDate())
                 .build();
     }
 
-    public UserDto map(UserConstFieldsDto userConstFieldsDto, UserUpdateDescriptionDto userUpdateDescriptionDto) {
-        return UserDto.builder()
-                .idUser(userConstFieldsDto.idUser())
-                .nickname(userUpdateDescriptionDto.getNickname())
-                .firstName(userUpdateDescriptionDto.getFirstName())
-                .lastName(userUpdateDescriptionDto.getLastName())
-                .patronymic(userUpdateDescriptionDto.getPatronymic())
-                .email(userUpdateDescriptionDto.getEmail())
-                .phoneNumber(userUpdateDescriptionDto.getPhoneNumber())
-                .role(userConstFieldsDto.role())
-                .birthDate(LocalDateFormatter.format(userUpdateDescriptionDto.getBirthDate()))
+    public UserControllerDto map(UserConstFieldsControllerDto userConstFieldsControllerDto, UserUpdateDescriptionControllerDto userUpdateDescriptionControllerDto) {
+        return UserControllerDto.builder()
+                .idUser(userConstFieldsControllerDto.idUser())
+                .nickname(userUpdateDescriptionControllerDto.getNickname())
+                .firstName(userUpdateDescriptionControllerDto.getFirstName())
+                .lastName(userUpdateDescriptionControllerDto.getLastName())
+                .patronymic(userUpdateDescriptionControllerDto.getPatronymic())
+                .email(userUpdateDescriptionControllerDto.getEmail())
+                .phoneNumber(userUpdateDescriptionControllerDto.getPhoneNumber())
+                .role(userConstFieldsControllerDto.role())
+                .birthDate(userUpdateDescriptionControllerDto.getBirthDate())
+                .build();
+    }
+
+    public UserLoginControllerDto map(UserLoginViewDto userLoginViewDto) {
+        return UserLoginControllerDto.builder()
+                .email(userLoginViewDto.email())
+                .password(userLoginViewDto.password())
+                .build();
+    }
+
+    public UserRegistrationControllerDto map(UserRegistrationViewDto userRegistrationViewDto) {
+        return UserRegistrationControllerDto.builder()
+                .email(userRegistrationViewDto.getEmail())
+                .password(userRegistrationViewDto.getPassword())
+                .phoneNumber(userRegistrationViewDto.getPhoneNumber())
+                .patronymic(userRegistrationViewDto.getPatronymic())
+                .firstName(userRegistrationViewDto.getFirstName())
+                .lastName(userRegistrationViewDto.getLastName())
+                .nickname(userRegistrationViewDto.getNickname())
+                .birthDate(LocalDateFormatter.format(userRegistrationViewDto.getBirthDate()))
                 .build();
     }
 
     public UserMoneyControllerDto map(UserMoneyViewDto userMoneyViewDto) {
-        return new UserMoneyControllerDto(userMoneyViewDto.idUser(), BigDecimal.valueOf(
-                Double.parseDouble(userMoneyViewDto.summa())));
+        return UserMoneyControllerDto.builder()
+                .idUser(userMoneyViewDto.idUser())
+                .summa(BigDecimal.valueOf(Double.parseDouble(userMoneyViewDto.summa())))
+                .build();
+    }
+
+    public UserUpdateDescriptionControllerDto map(UserUpdateDescriptionViewDto userUpdateDescriptionViewDto) {
+        return UserUpdateDescriptionControllerDto.builder()
+                .email(userUpdateDescriptionViewDto.getEmail())
+                .idUser(userUpdateDescriptionViewDto.getIdUser())
+                .phoneNumber(userUpdateDescriptionViewDto.getPhoneNumber())
+                .patronymic(userUpdateDescriptionViewDto.getPatronymic())
+                .firstName(userUpdateDescriptionViewDto.getFirstName())
+                .lastName(userUpdateDescriptionViewDto.getLastName())
+                .nickname(userUpdateDescriptionViewDto.getNickname())
+                .birthDate(LocalDateFormatter.format(userUpdateDescriptionViewDto.getBirthDate()))
+                .build();
+    }
+
+    public UserLogoPasControllerDto map(UserLogoPasViewDto userLogoPasViewDto) {
+        return UserLogoPasControllerDto.builder()
+                .email(userLogoPasViewDto.email())
+                .newPassword(userLogoPasViewDto.newPassword())
+                .oldPassword(userLogoPasViewDto.oldPassword())
+                .build();
+    }
+
+    public UserViewDto map(UserControllerDto userControllerDto) {
+        return UserViewDto.builder()
+                .email(userControllerDto.email())
+                .idUser(userControllerDto.idUser())
+                .phoneNumber(userControllerDto.phoneNumber())
+                .patronymic(userControllerDto.patronymic())
+                .firstName(userControllerDto.firstName())
+                .lastName(userControllerDto.lastName())
+                .nickname(userControllerDto.nickname())
+                .birthDate(userControllerDto.birthDate().format(LocalDateFormatter.FORMATTER))
+                .role(userControllerDto.role().name())
+                .build();
     }
 }
