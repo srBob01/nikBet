@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <html>
@@ -11,17 +11,6 @@
             margin: 0;
             padding: 20px;
             text-align: center;
-        }
-
-        .error-message {
-            color: #D8000C;
-            background-color: #FFD2D2;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 20px auto;
-            width: 50%;
-            font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         form {

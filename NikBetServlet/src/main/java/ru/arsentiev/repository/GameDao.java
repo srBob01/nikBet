@@ -76,10 +76,6 @@ public class GameDao implements BaseDao<Long, Game> {
                                                                " FROM games WHERE status = 'Completed'" +
                                                                " ORDER BY gamedate LIMIT 5;";
     //language=PostgreSQL
-    private static final String SELECT_GAMES_BY_TEAM_ID = "SELECT idgame, idhometeam, idguestteam, goalhometeam, goalguestteam," +
-                                                          " gamedate, status, coefficientonhometeam, coefficientondraw, coefficientonguestteam, time, result" +
-                                                          " FROM games WHERE idHomeTeam = ? OR idGuestTeam = ?;";
-    //language=PostgreSQL
     private static final String DELETE_GAME = "DELETE FROM games WHERE idGame = ?;";
     //language=PostgreSQL
     private static final String UPDATE_GAME = "UPDATE games SET " +
@@ -196,25 +192,6 @@ public class GameDao implements BaseDao<Long, Game> {
     public List<Game> selectByParameters(Game game, CompletedGameFields completedGameFields) {
         String sql = gameQueryCreator.createGameSelectQuery(game, completedGameFields);
         return getGames(sql);
-    }
-
-    public List<Game> selectByTeamId(Long teamId) {
-        List<Game> games = new ArrayList<>();
-        try (Connection connection = connectionManager.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_GAMES_BY_TEAM_ID)) {
-
-            preparedStatement.setLong(1, teamId);
-            preparedStatement.setLong(2, teamId);
-
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                while (resultSet.next()) {
-                    games.add(mapResultSetToGame(resultSet));
-                }
-            }
-        } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
-        }
-        return games;
     }
 
     @Override

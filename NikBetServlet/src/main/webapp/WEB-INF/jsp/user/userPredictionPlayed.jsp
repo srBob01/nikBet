@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
 <head>
@@ -80,12 +80,6 @@
             display: flex;
             justify-content: center;
             flex-direction: column;
-        }
-
-        .alert {
-            text-align: center;
-            width: 50%;
-            margin: 20px auto;
         }
     </style>
 </head>

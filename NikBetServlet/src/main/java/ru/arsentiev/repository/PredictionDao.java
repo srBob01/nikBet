@@ -112,10 +112,6 @@ public class PredictionDao implements BaseDao<Long, Prediction> {
         return Optional.empty();
     }
 
-    public List<Prediction> selectByUserId(Long userId) {
-        return selectByOtherId(userId, SELECT_PREDICTION_BY_USER_ID);
-    }
-
     public List<Prediction> selectByUserIdLimitBetNotPlayed(Long userId) {
         return selectByOtherId(userId, SELECT_BET_NOT_PLAYED_PREDICTION_BY_USER_ID_LIMIT);
     }

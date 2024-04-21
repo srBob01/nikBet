@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
 <head>
@@ -23,7 +23,7 @@
             padding: 0 20px;
         }
 
-        .full-list-button, .delete-button, .details-button {
+        .full-list-button, .delete-button{
             background-color: #5C7AEA;
             color: white;
             padding: 10px 20px;
@@ -35,7 +35,7 @@
             width: 300px;
         }
 
-        .full-list-button:hover, .delete-button:hover, .details-button:hover {
+        .full-list-button:hover, .delete-button:hover {
             background-color: #3f5bcc;
         }
 
