@@ -24,23 +24,40 @@ public class PredictionDao implements BaseDao<Long, Prediction> {
 
     //language=PostgreSQL
     private static final String INSERT_PREDICTION = "INSERT INTO predictions (idGame, idUser, summa," +
-                                                    " prediction) VALUES (?, ?, ?, ?);";
+                                                    " prediction, coefficient) VALUES (?, ?, ?, ?, ?);";
     //language=PostgreSQL
     private static final String SELECT_ALL_PREDICTIONS = "SELECT idprediction, idgame, iduser, predictiondate, summa," +
-                                                         " prediction FROM predictions;";
+                                                         " predictionstatus, prediction, coefficient FROM predictions;";
     //language=PostgreSQL
     private static final String SELECT_PREDICTION_BY_ID = "SELECT idprediction, idgame, iduser, predictiondate," +
-                                                          " summa, prediction FROM predictions WHERE idPrediction = ?;";
+                                                          " summa, predictionstatus, prediction, coefficient FROM predictions WHERE idPrediction = ?;";
     //language=PostgreSQL
     private static final String SELECT_PREDICTION_BY_USER_ID = "SELECT idprediction, idgame, iduser, predictiondate," +
-                                                               " summa, prediction FROM predictions WHERE iduser = ?;";
+                                                               " summa, predictionstatus, prediction, coefficient FROM predictions" +
+                                                               " WHERE iduser = ?;";
+    //language=PostgreSQL
+    private static final String SELECT_BET_NOT_PLAYED_PREDICTION_BY_USER_ID_LIMIT = "SELECT idprediction, idgame, iduser, predictiondate," +
+                                                                                    " summa, predictionstatus, prediction, coefficient FROM predictions" +
+                                                                                    " WHERE iduser = ? AND predictionstatus = 'BetNotPlayed' LIMIT 3;";
+    //language=PostgreSQL
+    private static final String SELECT_BET_PLAYED_PREDICTION_BY_USER_ID_LIMIT = "SELECT idprediction, idgame, iduser, predictiondate," +
+                                                                                " summa, predictionstatus, prediction, coefficient FROM predictions" +
+                                                                                " WHERE iduser = ? AND predictionstatus = 'BetPlayed' LIMIT 3;";
+    //language=PostgreSQL
+    private static final String SELECT_BET_NOT_PLAYED_PREDICTION_BY_USER_ID = "SELECT idprediction, idgame, iduser, predictiondate," +
+                                                                              " summa, predictionstatus, prediction, coefficient FROM predictions" +
+                                                                              " WHERE iduser = ? AND predictionstatus = 'BetNotPlayed';";
+    //language=PostgreSQL
+    private static final String SELECT_BET_PLAYED_PREDICTION_BY_USER_ID = "SELECT idprediction, idgame, iduser, predictiondate," +
+                                                                          " summa, predictionstatus, prediction, coefficient FROM predictions" +
+                                                                          " WHERE iduser = ? AND predictionstatus = 'BetPlayed';";
     //language=PostgreSQL
     private static final String SELECT_PREDICTIONS_BY_GAME_ID = "SELECT idprediction, idgame, iduser, predictiondate," +
-                                                                " summa, prediction FROM predictions WHERE idgame = ?;";
+                                                                " summa, predictionstatus, prediction, coefficient FROM predictions WHERE idgame = ?;";
     //language=PostgreSQL
     private static final String DELETE_PREDICTION = "DELETE FROM predictions WHERE idPrediction = ?;";
     //language=PostgreSQL
-    private static final String UPDATE_PREDICTION = "UPDATE predictions SET idGame = ?, idUser = ?, predictionDate = ?, summa = ?, prediction = ? WHERE idPrediction = ?;";
+    private static final String UPDATE_PREDICTION = "UPDATE predictions SET idGame = ?, idUser = ?, predictionDate = ?, summa = ?, prediction = ?, predictionstatus = ?, coefficient = ? WHERE idPrediction = ?;";
 
     @Override
     public Prediction insert(Prediction prediction) {
@@ -99,6 +116,22 @@ public class PredictionDao implements BaseDao<Long, Prediction> {
         return selectByOtherId(userId, SELECT_PREDICTION_BY_USER_ID);
     }
 
+    public List<Prediction> selectByUserIdLimitBetNotPlayed(Long userId) {
+        return selectByOtherId(userId, SELECT_BET_NOT_PLAYED_PREDICTION_BY_USER_ID_LIMIT);
+    }
+
+    public List<Prediction> selectByUserIdLimitBetPlayed(Long userId) {
+        return selectByOtherId(userId, SELECT_BET_PLAYED_PREDICTION_BY_USER_ID_LIMIT);
+    }
+
+    public List<Prediction> selectByUserIdBetNotPlayed(Long userId) {
+        return selectByOtherId(userId, SELECT_BET_NOT_PLAYED_PREDICTION_BY_USER_ID);
+    }
+
+    public List<Prediction> selectByUserIdBetPlayed(Long userId) {
+        return selectByOtherId(userId, SELECT_BET_PLAYED_PREDICTION_BY_USER_ID);
+    }
+
     public List<Prediction> selectByGameId(Long gameId) {
         return selectByOtherId(gameId, SELECT_PREDICTIONS_BY_GAME_ID);
     }
@@ -153,6 +186,7 @@ public class PredictionDao implements BaseDao<Long, Prediction> {
         preparedStatement.setLong(2, prediction.getUser().getIdUser());
         preparedStatement.setBigDecimal(3, prediction.getSumma());
         preparedStatement.setString(4, prediction.getPrediction().name());
+        preparedStatement.setFloat(5, prediction.getCoefficient());
     }
 
     private Prediction extractPredictionFromResultSet(ResultSet resultSet) throws SQLException {
@@ -166,6 +200,8 @@ public class PredictionDao implements BaseDao<Long, Prediction> {
         User user = userDAO.selectById(resultSet.getLong("idUser"),
                 resultSet.getStatement().getConnection()).orElseThrow(() -> new SQLException("User not found"));
 
+        Float coefficient = resultSet.getBigDecimal("coefficient").floatValue();
+
         String predictionStatus = resultSet.getString("predictionStatus");
         return Prediction.builder()
                 .idPrediction(idPrediction)
@@ -175,6 +211,7 @@ public class PredictionDao implements BaseDao<Long, Prediction> {
                 .summa(summa)
                 .prediction(GameResult.valueOf(prediction))
                 .predictionStatus(PredictionStatus.valueOf(predictionStatus))
+                .coefficient(coefficient)
                 .build();
     }
 }

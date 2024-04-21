@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.experimental.UtilityClass;
 import ru.arsentiev.singleton.connection.ConnectionManager;
 import ru.arsentiev.repository.*;
+import ru.arsentiev.singleton.query.GameQueryCreator;
 import ru.arsentiev.singleton.query.UserQueryCreator;
 
 @UtilityClass
@@ -23,7 +24,7 @@ public class DaoManager {
         userDao = new UserDao(ConnectionManager.getInstance(), UserQueryCreator.getInstance());
         userExistsDao = new UserExistsDao(ConnectionManager.getInstance());
         teamDao = new TeamDao(ConnectionManager.getInstance());
-        gameDao = new GameDao(ConnectionManager.getInstance(), teamDao);
+        gameDao = new GameDao(ConnectionManager.getInstance(), teamDao, GameQueryCreator.getInstance());
         predictionDao = new PredictionDao(ConnectionManager.getInstance(), gameDao, userDao);
     }
 }

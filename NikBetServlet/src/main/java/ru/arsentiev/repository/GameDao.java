@@ -3,6 +3,8 @@ package ru.arsentiev.repository;
 import ru.arsentiev.entity.*;
 import ru.arsentiev.exception.DaoException;
 import ru.arsentiev.singleton.connection.ConnectionManager;
+import ru.arsentiev.singleton.query.GameQueryCreator;
+import ru.arsentiev.singleton.query.entity.CompletedGameFields;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -13,10 +15,12 @@ import java.util.Optional;
 public class GameDao implements BaseDao<Long, Game> {
     private final TeamDao teamDAO;
     private final ConnectionManager connectionManager;
+    private final GameQueryCreator gameQueryCreator;
 
-    public GameDao(ConnectionManager connectionManager, TeamDao teamDAO) {
+    public GameDao(ConnectionManager connectionManager, TeamDao teamDAO, GameQueryCreator gameQueryCreator) {
         this.connectionManager = connectionManager;
         this.teamDAO = teamDAO;
+        this.gameQueryCreator = gameQueryCreator;
     }
 
     //language=PostgreSQL
@@ -39,17 +43,38 @@ public class GameDao implements BaseDao<Long, Game> {
     private static final String SELECT_SCHEDULED_GAMES = "SELECT idgame, idhometeam, idguestteam, goalhometeam, goalguestteam," +
                                                          " gamedate, status, coefficientonhometeam, coefficientOnDraw," +
                                                          " coefficientonguestteam, time, result" +
-                                                         " FROM games WHERE status = 'Scheduled';";
+                                                         " FROM games WHERE status = 'Scheduled'" +
+                                                         " ORDER BY gamedate;";
     //language=PostgreSQL
     private static final String SELECT_IN_PROGRESS_GAMES = "SELECT idgame, idhometeam, idguestteam, goalhometeam, goalguestteam," +
                                                            " gamedate, status, coefficientonhometeam, coefficientOnDraw," +
                                                            " coefficientonguestteam, time, result" +
-                                                           " FROM games WHERE status = 'InProgress';";
+                                                           " FROM games WHERE status = 'InProgress'" +
+                                                           " ORDER BY gamedate;";
     //language=PostgreSQL
     private static final String SELECT_COMPLETED_GAMES = "SELECT idgame, idhometeam, idguestteam, goalhometeam, goalguestteam," +
                                                          " gamedate, status, coefficientonhometeam, coefficientOnDraw," +
                                                          " coefficientonguestteam, time, result" +
-                                                         " FROM games WHERE status = 'Completed';";
+                                                         " FROM games WHERE status = 'Completed'" +
+                                                         " ORDER BY gamedate;";
+    //language=PostgreSQL
+    private static final String SELECT_SCHEDULED_GAMES_LIMIT = "SELECT idgame, idhometeam, idguestteam, goalhometeam, goalguestteam," +
+                                                               " gamedate, status, coefficientonhometeam, coefficientOnDraw," +
+                                                               " coefficientonguestteam, time, result" +
+                                                               " FROM games WHERE status = 'Scheduled'" +
+                                                               " ORDER BY gamedate LIMIT 5;";
+    //language=PostgreSQL
+    private static final String SELECT_IN_PROGRESS_GAMES_LIMIT = "SELECT idgame, idhometeam, idguestteam, goalhometeam, goalguestteam," +
+                                                                 " gamedate, status, coefficientonhometeam, coefficientOnDraw," +
+                                                                 " coefficientonguestteam, time, result" +
+                                                                 " FROM games WHERE status = 'InProgress'" +
+                                                                 " ORDER BY gamedate LIMIT 5;";
+    //language=PostgreSQL
+    private static final String SELECT_COMPLETED_GAMES_LIMIT = "SELECT idgame, idhometeam, idguestteam, goalhometeam, goalguestteam," +
+                                                               " gamedate, status, coefficientonhometeam, coefficientOnDraw," +
+                                                               " coefficientonguestteam, time, result" +
+                                                               " FROM games WHERE status = 'Completed'" +
+                                                               " ORDER BY gamedate LIMIT 5;";
     //language=PostgreSQL
     private static final String SELECT_GAMES_BY_TEAM_ID = "SELECT idgame, idhometeam, idguestteam, goalhometeam, goalguestteam," +
                                                           " gamedate, status, coefficientonhometeam, coefficientondraw, coefficientonguestteam, time, result" +
@@ -91,58 +116,53 @@ public class GameDao implements BaseDao<Long, Game> {
 
     @Override
     public List<Game> selectAll() {
+        return getGames(SELECT_ALL_GAMES);
+    }
+
+    public List<Game> selectLimitGameScheduled() {
+        return getGamesScheduled(SELECT_SCHEDULED_GAMES_LIMIT);
+    }
+
+    public List<Game> selectLimitGameInProgress() {
+        return getGamesInProgress(SELECT_IN_PROGRESS_GAMES_LIMIT);
+    }
+
+    public List<Game> selectLimitGameCompleted() {
+        return getGamesCompleted(SELECT_COMPLETED_GAMES_LIMIT);
+    }
+
+    public List<Game> selectAllGameScheduled() {
+        return getGamesScheduled(SELECT_SCHEDULED_GAMES);
+    }
+
+    public List<Game> selectAllGameInProgress() {
+        return getGamesInProgress(SELECT_IN_PROGRESS_GAMES);
+    }
+
+    public List<Game> selectAllGameCompleted() {
+        return getGamesCompleted(SELECT_COMPLETED_GAMES);
+    }
+
+    private List<Game> getGamesCompleted(String select) {
+        return getGames(select);
+    }
+
+    private List<Game> getGamesInProgress(String select) {
+        return getGames(select);
+    }
+
+    private List<Game> getGamesScheduled(String select) {
+        return getGames(select);
+    }
+
+    private List<Game> getGames(String select) {
         List<Game> games = new ArrayList<>();
         try (Connection connection = connectionManager.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_GAMES);
+             PreparedStatement preparedStatement = connection.prepareStatement(select);
              ResultSet resultSet = preparedStatement.executeQuery()) {
 
             while (resultSet.next()) {
                 games.add(mapResultSetToGame(resultSet));
-            }
-        } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
-        }
-        return games;
-    }
-
-    public List<Game> selectAllGameScheduled() {
-        List<Game> games = new ArrayList<>();
-        try (Connection connection = connectionManager.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_SCHEDULED_GAMES);
-             ResultSet resultSet = preparedStatement.executeQuery()) {
-
-            while (resultSet.next()) {
-                games.add(mapToGameControllerScheduledDto(resultSet));
-            }
-        } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
-        }
-        return games;
-    }
-
-    public List<Game> selectAllGameInProgress() {
-        List<Game> games = new ArrayList<>();
-        try (Connection connection = connectionManager.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_IN_PROGRESS_GAMES);
-             ResultSet resultSet = preparedStatement.executeQuery()) {
-
-            while (resultSet.next()) {
-                games.add(mapToGameControllerProgressDto(resultSet));
-            }
-        } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
-        }
-        return games;
-    }
-
-    public List<Game> selectAllGameCompleted() {
-        List<Game> games = new ArrayList<>();
-        try (Connection connection = connectionManager.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_COMPLETED_GAMES);
-             ResultSet resultSet = preparedStatement.executeQuery()) {
-
-            while (resultSet.next()) {
-                games.add(mapToGameControllerCompletedDto(resultSet));
             }
         } catch (SQLException | InterruptedException e) {
             throw new DaoException(e);
@@ -171,6 +191,11 @@ public class GameDao implements BaseDao<Long, Game> {
         } catch (SQLException e) {
             throw new DaoException(e);
         }
+    }
+
+    public List<Game> selectByParameters(Game game, CompletedGameFields completedGameFields) {
+        String sql = gameQueryCreator.createGameSelectQuery(game, completedGameFields);
+        return getGames(sql);
     }
 
     public List<Game> selectByTeamId(Long teamId) {
@@ -280,15 +305,17 @@ public class GameDao implements BaseDao<Long, Game> {
                 , resultSet.getStatement().getConnection()).orElseThrow(() -> new SQLException("HomeTeam not found"));
         Team guestTeam = teamDAO.selectById(resultSet.getLong("idGuestTeam")
                 , resultSet.getStatement().getConnection()).orElseThrow(() -> new SQLException("GuestTeam not found"));
-        Integer goalHomeTeam = resultSet.getInt("goalHomeTeam");
-        Integer goalGuestTeam = resultSet.getInt("goalGuestTeam");
+        Integer goalHomeTeam = resultSet.getObject("goalHomeTeam", Integer.class);
+        Integer goalGuestTeam = resultSet.getObject("goalGuestTeam", Integer.class);
         LocalDateTime gameDate = resultSet.getTimestamp("gameDate").toLocalDateTime();
         GameStatus status = GameStatus.valueOf(resultSet.getString("status"));
-        Float coefficientOnHomeTeam = resultSet.getFloat("coefficientOnHomeTeam");
-        Float coefficientOnDraw = resultSet.getFloat("coefficientOnDraw");
-        Float coefficientOnGuestTeam = resultSet.getFloat("coefficientOnGuestTeam");
-        GameResult result = GameResult.valueOf(resultSet.getString("result"));
-        GameTime time = GameTime.valueOf(resultSet.getString("time"));
+        Float coefficientOnHomeTeam = resultSet.getBigDecimal("coefficientOnHomeTeam") != null ? resultSet.getBigDecimal("coefficientOnHomeTeam").floatValue() : null;
+        Float coefficientOnDraw = resultSet.getBigDecimal("coefficientOnDraw") != null ? resultSet.getBigDecimal("coefficientOnDraw").floatValue() : null;
+        Float coefficientOnGuestTeam = resultSet.getBigDecimal("coefficientOnGuestTeam") != null ? resultSet.getBigDecimal("coefficientOnGuestTeam").floatValue() : null;
+        String timeValue = resultSet.getString("time");
+        GameTime time = timeValue != null ? GameTime.valueOf(timeValue) : null;
+        String resultValue = resultSet.getString("result");
+        GameResult result = resultValue != null ? GameResult.valueOf(resultValue) : null;
         return Game.builder()
                 .idGame(idGame)
                 .homeTeam(homeTeam)
@@ -302,78 +329,6 @@ public class GameDao implements BaseDao<Long, Game> {
                 .coefficientOnGuestTeam(coefficientOnGuestTeam)
                 .time(time)
                 .result(result)
-                .build();
-    }
-
-    private Game mapToGameControllerCompletedDto(ResultSet resultSet) throws SQLException {
-        Long idGame = resultSet.getLong("idGame");
-        Team homeTeam = teamDAO.selectById(resultSet.getLong("idHomeTeam")
-                , resultSet.getStatement().getConnection()).orElseThrow(() -> new SQLException("HomeTeam not found"));
-        Team guestTeam = teamDAO.selectById(resultSet.getLong("idGuestTeam")
-                , resultSet.getStatement().getConnection()).orElseThrow(() -> new SQLException("GuestTeam not found"));
-        Integer goalHomeTeam = resultSet.getInt("goalHomeTeam");
-        Integer goalGuestTeam = resultSet.getInt("goalGuestTeam");
-        LocalDateTime gameDate = resultSet.getTimestamp("gameDate").toLocalDateTime();
-        GameResult result = GameResult.valueOf(resultSet.getString("result"));
-
-        return Game.builder()
-                .idGame(idGame)
-                .homeTeam(homeTeam)
-                .guestTeam(guestTeam)
-                .goalHomeTeam(goalHomeTeam)
-                .goalGuestTeam(goalGuestTeam)
-                .gameDate(gameDate)
-                .result(result)
-                .build();
-    }
-
-    private Game mapToGameControllerProgressDto(ResultSet resultSet) throws SQLException {
-        Long idGame = resultSet.getLong("idGame");
-        Team homeTeam = teamDAO.selectById(resultSet.getLong("idHomeTeam")
-                , resultSet.getStatement().getConnection()).orElseThrow(() -> new SQLException("HomeTeam not found"));
-        Team guestTeam = teamDAO.selectById(resultSet.getLong("idGuestTeam")
-                , resultSet.getStatement().getConnection()).orElseThrow(() -> new SQLException("GuestTeam not found"));
-        Integer goalHomeTeam = resultSet.getInt("goalHomeTeam");
-        Integer goalGuestTeam = resultSet.getInt("goalGuestTeam");
-        LocalDateTime gameDate = resultSet.getTimestamp("gameDate").toLocalDateTime();
-        Float coefficientOnHomeTeam = resultSet.getFloat("coefficientOnHomeTeam");
-        Float coefficientOnDraw = resultSet.getFloat("coefficientOnDraw");
-        Float coefficientOnGuestTeam = resultSet.getFloat("coefficientOnGuestTeam");
-        GameTime time = GameTime.valueOf(resultSet.getString("time"));
-
-        return Game.builder()
-                .idGame(idGame)
-                .homeTeam(homeTeam)
-                .guestTeam(guestTeam)
-                .goalHomeTeam(goalHomeTeam)
-                .goalGuestTeam(goalGuestTeam)
-                .coefficientOnHomeTeam(coefficientOnHomeTeam)
-                .coefficientOnDraw(coefficientOnDraw)
-                .coefficientOnGuestTeam(coefficientOnGuestTeam)
-                .gameDate(gameDate)
-                .time(time)
-                .build();
-    }
-
-    private Game mapToGameControllerScheduledDto(ResultSet resultSet) throws SQLException {
-        Long idGame = resultSet.getLong("idGame");
-        Team homeTeam = teamDAO.selectById(resultSet.getLong("idHomeTeam")
-                , resultSet.getStatement().getConnection()).orElseThrow(() -> new SQLException("HomeTeam not found"));
-        Team guestTeam = teamDAO.selectById(resultSet.getLong("idGuestTeam")
-                , resultSet.getStatement().getConnection()).orElseThrow(() -> new SQLException("GuestTeam not found"));
-        Float coefficientOnHomeTeam = resultSet.getFloat("coefficientOnHomeTeam");
-        Float coefficientOnDraw = resultSet.getFloat("coefficientOnDraw");
-        Float coefficientOnGuestTeam = resultSet.getFloat("coefficientOnGuestTeam");
-        LocalDateTime gameDate = resultSet.getTimestamp("gameDate").toLocalDateTime();
-
-        return Game.builder()
-                .idGame(idGame)
-                .homeTeam(homeTeam)
-                .guestTeam(guestTeam)
-                .coefficientOnHomeTeam(coefficientOnHomeTeam)
-                .coefficientOnDraw(coefficientOnDraw)
-                .coefficientOnGuestTeam(coefficientOnGuestTeam)
-                .gameDate(gameDate)
                 .build();
     }
 }

@@ -1,13 +1,12 @@
 package ru.arsentiev.repository;
 
-import ru.arsentiev.dto.user.UserLogoPasDto;
-import ru.arsentiev.dto.user.UserMoneyControllerDto;
+import ru.arsentiev.dto.user.controller.UserMoneyControllerDto;
 import ru.arsentiev.entity.User;
 import ru.arsentiev.entity.UserRole;
 import ru.arsentiev.exception.DaoException;
 import ru.arsentiev.singleton.connection.ConnectionManager;
 import ru.arsentiev.singleton.query.UserQueryCreator;
-import ru.arsentiev.validator.entity.update.UpdatedUserFields;
+import ru.arsentiev.singleton.query.entity.UpdatedUserFields;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -45,8 +44,8 @@ public class UserDao implements BaseDao<Long, User> {
                                                        "WHERE idUser = ?;";
     //language=PostgreSQL
     private static final String WITHDRAW_BALANCE_USER = "UPDATE users SET " +
-                                                       "accountBalance = accountBalance - ? " +
-                                                       "WHERE idUser = ?;";
+                                                        "accountBalance = accountBalance - ? " +
+                                                        "WHERE idUser = ?;";
     //language=PostgreSQL
     private static final String UPDATE_PAS_USER = "UPDATE users SET password = ? WHERE email = ?;";
     //language=PostgreSQL
@@ -229,21 +228,16 @@ public class UserDao implements BaseDao<Long, User> {
     }
 
     public void depositMoneyById(UserMoneyControllerDto userMoneyControllerDto) { //UPDATE_BALANCE_USER
-        try (Connection connection = connectionManager.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(DEPOSIT_BALANCE_USER)) {
-
-            preparedStatement.setBigDecimal(1, userMoneyControllerDto.summa());
-            preparedStatement.setLong(2, userMoneyControllerDto.idUser());
-
-            preparedStatement.executeUpdate();
-        } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
-        }
+        actionMoneyById(userMoneyControllerDto, DEPOSIT_BALANCE_USER);
     }
 
     public void withdrawMoneyById(UserMoneyControllerDto userMoneyControllerDto) { //UPDATE_BALANCE_USER
+        actionMoneyById(userMoneyControllerDto, WITHDRAW_BALANCE_USER);
+    }
+
+    private void actionMoneyById(UserMoneyControllerDto userMoneyControllerDto, String action) {
         try (Connection connection = connectionManager.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(WITHDRAW_BALANCE_USER)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(action)) {
 
             preparedStatement.setBigDecimal(1, userMoneyControllerDto.summa());
             preparedStatement.setLong(2, userMoneyControllerDto.idUser());
@@ -254,12 +248,12 @@ public class UserDao implements BaseDao<Long, User> {
         }
     }
 
-    public void updatePasswordByLogin(UserLogoPasDto userLogoPasDto) { //UPDATE_PAS_USER
+    public void updatePasswordByLogin(User user) { //UPDATE_PAS_USER
         try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_PAS_USER)) {
 
-            preparedStatement.setString(1, userLogoPasDto.password());
-            preparedStatement.setString(2, userLogoPasDto.login());
+            preparedStatement.setString(1, user.getPassword());
+            preparedStatement.setString(2, user.getEmail());
 
             preparedStatement.executeUpdate();
         } catch (SQLException | InterruptedException e) {
