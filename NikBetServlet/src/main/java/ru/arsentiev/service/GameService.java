@@ -6,7 +6,6 @@ import ru.arsentiev.dto.game.controller.GameCompletedControllerDto;
 import ru.arsentiev.dto.game.controller.GameParametersControllerDto;
 import ru.arsentiev.dto.game.controller.GameProgressControllerDto;
 import ru.arsentiev.dto.game.controller.GameScheduledControllerDto;
-import ru.arsentiev.dto.game.view.GameParametersViewDto;
 import ru.arsentiev.entity.Game;
 import ru.arsentiev.entity.GameStatus;
 import ru.arsentiev.manager.DaoManager;
@@ -66,8 +65,7 @@ public class GameService {
     }
 
     public TripleListOfGameControllerDto selectGameByParameters(CompletedGameFields completedGameFields,
-                                                                GameParametersViewDto gameParametersViewDto) {
-        GameParametersControllerDto gameParametersControllerDto = gameMapper.map(gameParametersViewDto);
+                                                                GameParametersControllerDto gameParametersControllerDto) {
         Game game = gameMapper.map(gameParametersControllerDto);
         List<Game> gameList = gameDao.selectByParameters(game, completedGameFields);
         List<GameProgressControllerDto> gameViewInProgressDtoList = gameList.stream()

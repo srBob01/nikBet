@@ -52,7 +52,7 @@ public class RegistrationServlet extends HttpServlet {
             userService.insertUser(userRegistrationControllerDto);
             resp.sendRedirect(LOGIN_URL);
         } else {
-            req.setAttribute(NAME_ATTRIBUTE_ERRORS, result);
+            req.setAttribute(NAME_ATTRIBUTE_ERRORS, result.getLoadErrors());
             doGet(req, resp);
         }
     }

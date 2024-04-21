@@ -5,6 +5,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import ru.arsentiev.dto.game.controller.GameParametersControllerDto;
 import ru.arsentiev.dto.game.view.GameParametersViewDto;
 import ru.arsentiev.dto.game.view.GameCompletedViewDto;
 import ru.arsentiev.dto.game.view.GameInProgressViewDto;
@@ -75,8 +76,9 @@ public class UserMatchesFindServlet extends HttpServlet {
                 .status(status)
                 .result(result)
                 .build();
+        GameParametersControllerDto gameParametersControllerDto = gameMapper.map(gameParametersViewDto);
         final TripleListOfGameControllerDto tripleListOfGameControllerDto = gameService.selectGameByParameters(completedGameFields,
-                gameParametersViewDto);
+                gameParametersControllerDto);
         List<GameInProgressViewDto> listGameInProgressDto =
                 tripleListOfGameControllerDto.gameViewInProgressDtoList()
                         .stream()

@@ -1,6 +1,7 @@
 package ru.arsentiev.repository;
 
 import ru.arsentiev.dto.user.controller.UserMoneyControllerDto;
+import ru.arsentiev.dto.user.controller.UserPasswordAndSaltControllerDto;
 import ru.arsentiev.entity.User;
 import ru.arsentiev.entity.UserRole;
 import ru.arsentiev.exception.DaoException;
@@ -26,8 +27,9 @@ public class UserDao implements BaseDao<Long, User> {
 
     //language=PostgreSQL
     private static final String INSERT_USER = "INSERT INTO users" +
-                                              "(nickname, firstName, lastName, patronymic, password, phoneNumber, email, birthDate)" +
-                                              "VALUES (?, ?, ?, ?, ?, ?, ?, TO_DATE(?, 'YYYY-MM-DD'));";
+                                              "(nickname, firstName, lastName, patronymic, password, phoneNumber," +
+                                              " email, birthDate, salt)" +
+                                              "VALUES (?, ?, ?, ?, ?, ?, ?, TO_DATE(?, 'YYYY-MM-DD'), ?);";
     //language=PostgreSQL
     private static final String UPDATE_USER = "UPDATE users SET " +
                                               "nickname = ?, " +
@@ -47,7 +49,7 @@ public class UserDao implements BaseDao<Long, User> {
                                                         "accountBalance = accountBalance - ? " +
                                                         "WHERE idUser = ?;";
     //language=PostgreSQL
-    private static final String UPDATE_PAS_USER = "UPDATE users SET password = ? WHERE email = ?;";
+    private static final String UPDATE_PAS_USER = "UPDATE users SET password = ?, salt = ? WHERE email = ?;";
     //language=PostgreSQL
     private static final String DELETE_USER = "DELETE FROM users WHERE idUser = ?;";
     //language=PostgreSQL
@@ -59,7 +61,7 @@ public class UserDao implements BaseDao<Long, User> {
                                                    " password, phonenumber, email, birthdate, accountbalance, role" +
                                                    " FROM users ORDER BY iduser;";
     //language=PostgreSQL
-    private static final String SELECT_PASSWORD_USER = "SELECT password FROM users WHERE email = ?";
+    private static final String SELECT_PASSWORD_SALT_USER = "SELECT password, salt FROM users WHERE email = ?";
     //language=PostgreSQL
     private static final String SELECT_BALANCE_USER = "SELECT accountBalance FROM users WHERE iduser = ?";
     //language=PostgreSQL
@@ -84,6 +86,7 @@ public class UserDao implements BaseDao<Long, User> {
             preparedStatement.setString(6, user.getPhoneNumber());
             preparedStatement.setString(7, user.getEmail());
             preparedStatement.setDate(8, Date.valueOf(user.getBirthDate()));
+            preparedStatement.setString(9, user.getSalt());
 
             preparedStatement.executeUpdate();
 
@@ -150,17 +153,22 @@ public class UserDao implements BaseDao<Long, User> {
         }
     }
 
-    public Optional<String> selectPasswordByLogin(String login) { //SELECT_PASSWORD_USER
+    public UserPasswordAndSaltControllerDto selectPasswordByLogin(String login) { //SELECT_PASSWORD_USER
         try (Connection connection = connectionManager.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_PASSWORD_USER)) {
-            String result = null;
+             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_PASSWORD_SALT_USER)) {
+            String password = null;
+            String salt = null;
             preparedStatement.setString(1, login);
             try (ResultSet rs = preparedStatement.executeQuery()) {
                 if (rs.next()) {
-                    result = rs.getString("password");
+                    password = rs.getString("password");
+                    salt = rs.getString("salt");
                 }
             }
-            return Optional.ofNullable(result);
+            return UserPasswordAndSaltControllerDto.builder()
+                    .salt(Optional.ofNullable(salt))
+                    .password(Optional.ofNullable(password))
+                    .build();
         } catch (SQLException | InterruptedException e) {
             throw new DaoException(e);
         }
@@ -252,7 +260,8 @@ public class UserDao implements BaseDao<Long, User> {
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_PAS_USER)) {
 
             preparedStatement.setString(1, user.getPassword());
-            preparedStatement.setString(2, user.getEmail());
+            preparedStatement.setString(2, user.getSalt());
+            preparedStatement.setString(3, user.getEmail());
 
             preparedStatement.executeUpdate();
         } catch (SQLException | InterruptedException e) {

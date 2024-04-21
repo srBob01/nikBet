@@ -8,7 +8,7 @@ import ru.arsentiev.entity.User;
 import ru.arsentiev.utils.LocalDateFormatter;
 
 import java.math.BigDecimal;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserMapper {
@@ -33,10 +33,11 @@ public class UserMapper {
                 .build();
     }
 
-    public User map(UserLogoPasControllerDto obj, Function<String, String> hashFunction) {
+    public User map(UserLogoPasControllerDto obj, String salt, BiFunction<String, String, String> function) {
         return User.builder()
                 .email(obj.email())
-                .password(hashFunction.apply(obj.newPassword()))
+                .salt(salt)
+                .password(function.apply(obj.newPassword(), salt))
                 .build();
     }
 
@@ -53,7 +54,7 @@ public class UserMapper {
                 .build();
     }
 
-    public User map(UserRegistrationControllerDto obj, Function<String, String> hashFunction) {
+    public User map(UserRegistrationControllerDto obj, String salt, BiFunction<String, String, String> function) {
         return User.builder()
                 .nickname(obj.getNickname())
                 .firstName(obj.getFirstName())
@@ -61,7 +62,8 @@ public class UserMapper {
                 .patronymic(obj.getPatronymic())
                 .email(obj.getEmail())
                 .phoneNumber(obj.getPhoneNumber())
-                .password(hashFunction.apply(obj.getPassword()))
+                .password(function.apply(obj.getPassword(), salt))
+                .salt(salt)
                 .birthDate(obj.getBirthDate())
                 .build();
     }

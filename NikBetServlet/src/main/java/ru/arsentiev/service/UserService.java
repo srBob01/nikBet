@@ -9,7 +9,7 @@ import ru.arsentiev.manager.ValidationManager;
 import ru.arsentiev.mapper.UserMapper;
 import ru.arsentiev.repository.UserDao;
 import ru.arsentiev.service.entity.user.ReturnValueInCheckLogin;
-import ru.arsentiev.singleton.password.PasswordHasher;
+import ru.arsentiev.singleton.password.PasswordHashed;
 import ru.arsentiev.singleton.query.entity.UpdatedUserFields;
 import ru.arsentiev.validator.UpdateUserValidator;
 import ru.arsentiev.validator.entity.login.LoginError;
@@ -22,7 +22,7 @@ import java.util.Optional;
 public class UserService {
     private static final UserService INSTANCE = new UserService();
     private final UserMapper userMapper = UserMapper.getInstance();
-    private final PasswordHasher passwordHasher = PasswordHasher.getInstance();
+    private final PasswordHashed passwordHashed = PasswordHashed.getInstance();
     private final UserDao userDao = DaoManager.getUserDao();
     private final UpdateUserValidator updateUserValidator = ValidationManager.getUpdateUserValidator();
 
@@ -31,7 +31,8 @@ public class UserService {
     }
 
     public void insertUser(UserRegistrationControllerDto userRegistrationControllerDto) {
-        User user = userMapper.map(userRegistrationControllerDto, passwordHasher::hashPassword);
+        String salt = passwordHashed.generateSalt();
+        User user = userMapper.map(userRegistrationControllerDto, salt, passwordHashed::hashPassword);
         userDao.insert(user);
     }
 
@@ -44,9 +45,12 @@ public class UserService {
     }
 
     public ReturnValueInCheckLogin checkLogin(UserLoginControllerDto userLoginControllerDto) {
-        Optional<String> userPassword = userDao.selectPasswordByLogin(userLoginControllerDto.email());
-        if (userPassword.isPresent()) {
-            if (userPassword.get().equals(passwordHasher.hashPassword(userLoginControllerDto.password()))) {
+        UserPasswordAndSaltControllerDto userPasswordAndSaltControllerDto =
+                userDao.selectPasswordByLogin(userLoginControllerDto.email());
+        if (userPasswordAndSaltControllerDto.password().isPresent() && userPasswordAndSaltControllerDto.salt().isPresent()) {
+            if (userPasswordAndSaltControllerDto.password().get()
+                    .equals(passwordHashed.hashPassword(userLoginControllerDto.password(),
+                            userPasswordAndSaltControllerDto.salt().get()))) {
                 User user = userDao.selectByLogin(userLoginControllerDto.email());
                 UserControllerDto userControllerDto = userMapper.map(user);
                 return new ReturnValueInCheckLogin(null, Optional.of(userControllerDto));
@@ -59,22 +63,26 @@ public class UserService {
     }
 
     public Optional<UpdatePasswordError> updatePassword(UserLogoPasControllerDto userLogoPasControllerDto) {
-        String login = userLogoPasControllerDto.email();
-        Optional<String> password = userDao.selectPasswordByLogin(login);
-        if (password.isEmpty()) {
-            throw new RuntimeException();
-        } else {
-            if (!passwordHasher.hashPassword(userLogoPasControllerDto.oldPassword()).equals(password.get())) {
+        UserPasswordAndSaltControllerDto userPasswordAndSaltControllerDto =
+                userDao.selectPasswordByLogin(userLogoPasControllerDto.email());
+        if (userPasswordAndSaltControllerDto.password().isPresent() && userPasswordAndSaltControllerDto.salt().isPresent()) {
+            if (userPasswordAndSaltControllerDto.password().get()
+                    .equals(passwordHashed.hashPassword(userLogoPasControllerDto.oldPassword(),
+                            userPasswordAndSaltControllerDto.salt().get()))) {
+                Optional<UpdatePasswordError> error = updateUserValidator.isValidPassword(userLogoPasControllerDto
+                        .newPassword());
+                if (error.isPresent()) {
+                    return error;
+                }
+                String salt = passwordHashed.generateSalt();
+                User user = userMapper.map(userLogoPasControllerDto, salt, passwordHashed::hashPassword);
+                userDao.updatePasswordByLogin(user);
+                return Optional.empty();
+            } else {
                 return Optional.of(UpdatePasswordError.PASSWORDS_DONT_MATCH);
             }
-            Optional<UpdatePasswordError> error = updateUserValidator.isValidPassword(userLogoPasControllerDto
-                    .newPassword());
-            if (error.isPresent()) {
-                return error;
-            }
-            User user = userMapper.map(userLogoPasControllerDto, passwordHasher::hashPassword);
-            userDao.updatePasswordByLogin(user);
-            return Optional.empty();
+        } else {
+            throw new RuntimeException();
         }
     }
 
