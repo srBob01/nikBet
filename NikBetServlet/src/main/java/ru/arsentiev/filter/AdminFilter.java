@@ -4,7 +4,7 @@ import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import ru.arsentiev.dto.user.UserDto;
+import ru.arsentiev.dto.user.controller.UserControllerDto;
 
 import java.io.IOException;
 
@@ -14,7 +14,7 @@ import static ru.arsentiev.utils.UrlPathGetter.USER_DEFAULT_URL;
 public class AdminFilter implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        UserDto user = (UserDto) ((HttpServletRequest) servletRequest).getSession().getAttribute(NAME_ATTRIBUTE_USER);
+        UserControllerDto user = (UserControllerDto) ((HttpServletRequest) servletRequest).getSession().getAttribute(NAME_ATTRIBUTE_USER);
         switch (user.role()) {
             case ADMIN -> filterChain.doFilter(servletRequest, servletResponse);
             case USER -> ((HttpServletResponse) servletResponse).sendRedirect(USER_DEFAULT_URL);
