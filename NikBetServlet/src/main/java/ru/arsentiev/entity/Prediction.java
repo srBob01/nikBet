@@ -18,4 +18,5 @@ public class Prediction {
     private BigDecimal summa;
     private GameResult prediction;
     private PredictionStatus predictionStatus;
+    private Float coefficient;
 }
