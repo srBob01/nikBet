@@ -5,7 +5,9 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import ru.arsentiev.dto.user.UserViewLoginDto;
+import ru.arsentiev.dto.user.controller.UserLoginControllerDto;
+import ru.arsentiev.dto.user.view.UserLoginViewDto;
+import ru.arsentiev.mapper.UserMapper;
 import ru.arsentiev.service.UserService;
 import ru.arsentiev.service.entity.user.ReturnValueInCheckLogin;
 import ru.arsentiev.utils.JspPathCreator;
@@ -20,10 +22,12 @@ import static ru.arsentiev.utils.UrlPathGetter.LOGIN_URL;
 @WebServlet(LOGIN_URL)
 public class LoginServlet extends HttpServlet {
     private static UserService userService;
+    private static UserMapper userMapper;
 
     @Override
     public void init() {
         userService = UserService.getInstance();
+        userMapper = UserMapper.getInstance();
     }
 
     @Override
@@ -33,9 +37,10 @@ public class LoginServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        UserViewLoginDto userViewLoginDto = new UserViewLoginDto
+        final UserLoginViewDto userLoginViewDto = new UserLoginViewDto
                 (req.getParameter("email"), req.getParameter("password"));
-        ReturnValueInCheckLogin value = userService.checkLogin(userViewLoginDto);
+        final UserLoginControllerDto userLoginControllerDto = userMapper.map(userLoginViewDto);
+        final ReturnValueInCheckLogin value = userService.checkLogin(userLoginControllerDto);
         if (value.userDto().isPresent()) {
             req.getSession().setAttribute(NAME_ATTRIBUTE_USER, value.userDto().get());
             resp.sendRedirect(UrlPathGetter.USER_DEFAULT_URL);

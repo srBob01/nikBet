@@ -1,17 +1,17 @@
 package ru.arsentiev.validator;
 
-import ru.arsentiev.dto.user.UserUpdateDescriptionDto;
+import ru.arsentiev.dto.user.view.UserUpdateDescriptionViewDto;
 import ru.arsentiev.repository.UserExistsDao;
 import ru.arsentiev.singleton.check.DateCheck;
 import ru.arsentiev.singleton.check.NameCheck;
 import ru.arsentiev.singleton.check.PasswordCheck;
 import ru.arsentiev.singleton.check.PhoneNumberCheck;
+import ru.arsentiev.singleton.query.entity.UpdatedUserFields;
 import ru.arsentiev.utils.LocalDateFormatter;
 import ru.arsentiev.validator.entity.load.LoadError;
 import ru.arsentiev.validator.entity.load.LoadValidationResult;
 import ru.arsentiev.validator.entity.load.TypeLoadError;
 import ru.arsentiev.validator.entity.update.UpdatePasswordError;
-import ru.arsentiev.validator.entity.update.UpdatedUserFields;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -32,7 +32,7 @@ public class UpdateUserValidator {
         this.passwordCheck = passwordCheck;
     }
 
-    public LoadValidationResult isValidDescription(UserUpdateDescriptionDto obj, UpdatedUserFields updatedUserFields) {
+    public LoadValidationResult isValidDescription(UserUpdateDescriptionViewDto obj, UpdatedUserFields updatedUserFields) {
         LoadValidationResult result = new LoadValidationResult();
 
         if (updatedUserFields.isNewNickName()) {

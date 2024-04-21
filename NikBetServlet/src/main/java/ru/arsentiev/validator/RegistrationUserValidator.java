@@ -1,15 +1,15 @@
 package ru.arsentiev.validator;
 
-import ru.arsentiev.singleton.check.NameCheck;
-import ru.arsentiev.dto.user.UserRegistrationDto;
+import ru.arsentiev.dto.user.view.UserRegistrationViewDto;
 import ru.arsentiev.repository.UserExistsDao;
-import ru.arsentiev.utils.LocalDateFormatter;
 import ru.arsentiev.singleton.check.DateCheck;
+import ru.arsentiev.singleton.check.NameCheck;
 import ru.arsentiev.singleton.check.PasswordCheck;
 import ru.arsentiev.singleton.check.PhoneNumberCheck;
+import ru.arsentiev.utils.LocalDateFormatter;
 import ru.arsentiev.validator.entity.load.LoadError;
-import ru.arsentiev.validator.entity.load.TypeLoadError;
 import ru.arsentiev.validator.entity.load.LoadValidationResult;
+import ru.arsentiev.validator.entity.load.TypeLoadError;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -30,7 +30,7 @@ public class RegistrationUserValidator {
         this.nameCheck = nameCheck;
     }
 
-    public LoadValidationResult isValid(UserRegistrationDto obj) {
+    public LoadValidationResult isValid(UserRegistrationViewDto obj) {
         LoadValidationResult result = new LoadValidationResult();
 
         if (obj.getNickname() == null || obj.getNickname().trim().isEmpty()) {

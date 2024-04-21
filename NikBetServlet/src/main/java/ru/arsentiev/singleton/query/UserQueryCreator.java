@@ -3,7 +3,7 @@ package ru.arsentiev.singleton.query;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import ru.arsentiev.entity.User;
-import ru.arsentiev.validator.entity.update.UpdatedUserFields;
+import ru.arsentiev.singleton.query.entity.UpdatedUserFields;
 
 import java.util.Optional;
 

@@ -6,16 +6,18 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import ru.arsentiev.dto.user.UserRegistrationDto;
+import ru.arsentiev.dto.user.controller.UserRegistrationControllerDto;
+import ru.arsentiev.dto.user.view.UserRegistrationViewDto;
+import ru.arsentiev.manager.ValidationManager;
+import ru.arsentiev.mapper.UserMapper;
 import ru.arsentiev.service.UserService;
-import ru.arsentiev.utils.AttributeGetter;
 import ru.arsentiev.utils.JspPathCreator;
-import ru.arsentiev.validator.entity.load.LoadError;
+import ru.arsentiev.validator.RegistrationUserValidator;
+import ru.arsentiev.validator.entity.load.LoadValidationResult;
 
 import java.io.IOException;
-import java.util.List;
 
-import static ru.arsentiev.utils.AttributeGetter.*;
+import static ru.arsentiev.utils.AttributeGetter.NAME_ATTRIBUTE_ERRORS;
 import static ru.arsentiev.utils.JspPathGetter.REGISTRATION_JSP;
 import static ru.arsentiev.utils.UrlPathGetter.LOGIN_URL;
 import static ru.arsentiev.utils.UrlPathGetter.REGISTRATION_URL;
@@ -24,10 +26,15 @@ import static ru.arsentiev.utils.UrlPathGetter.REGISTRATION_URL;
 public class RegistrationServlet extends HttpServlet {
 
     private static UserService userService;
+    private RegistrationUserValidator registrationUserValidator;
+    private static UserMapper userMapper;
+
 
     @Override
     public void init(ServletConfig config) {
         userService = UserService.getInstance();
+        registrationUserValidator = ValidationManager.getRegistrationUserValidator();
+        userMapper = UserMapper.getInstance();
     }
 
     @Override
@@ -37,10 +44,12 @@ public class RegistrationServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
-        final var userDto = getUserRegistrationDto(req);
+        final UserRegistrationViewDto userRegistrationViewDto = getUserRegistrationViewDto(req);
+        final LoadValidationResult result = registrationUserValidator.isValid(userRegistrationViewDto);
 
-        List<LoadError> result = userService.insertUser(userDto);
         if (result.isEmpty()) {
+            UserRegistrationControllerDto userRegistrationControllerDto = userMapper.map(userRegistrationViewDto);
+            userService.insertUser(userRegistrationControllerDto);
             resp.sendRedirect(LOGIN_URL);
         } else {
             req.setAttribute(NAME_ATTRIBUTE_ERRORS, result);
@@ -48,8 +57,8 @@ public class RegistrationServlet extends HttpServlet {
         }
     }
 
-    private static UserRegistrationDto getUserRegistrationDto(HttpServletRequest req) {
-        return UserRegistrationDto.builder()
+    private static UserRegistrationViewDto getUserRegistrationViewDto(HttpServletRequest req) {
+        return UserRegistrationViewDto.builder()
                 .nickname(req.getParameter("nickname"))
                 .firstName(req.getParameter("firstName"))
                 .lastName(req.getParameter("lastName"))
