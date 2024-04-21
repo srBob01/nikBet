@@ -92,7 +92,7 @@ public class GameDao implements BaseDao<Long, Game> {
                                                             "status = ?, result = ? WHERE idGame = ?;";
 
     @Override
-    public Game insert(Game game) {
+    public void insert(Game game) {
         try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_GAME, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -103,7 +103,6 @@ public class GameDao implements BaseDao<Long, Game> {
             if (generatedKeys.next()) {
                 game.setIdGame(generatedKeys.getLong(1));
             }
-            return game;
         } catch (SQLException | InterruptedException e) {
             throw new DaoException(e);
         }

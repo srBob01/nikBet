@@ -56,7 +56,7 @@ public class PredictionDao implements BaseDao<Long, Prediction> {
     private static final String UPDATE_PREDICTION = "UPDATE predictions SET idGame = ?, idUser = ?, predictionDate = ?, summa = ?, prediction = ?, predictionstatus = ?, coefficient = ? WHERE idPrediction = ?;";
 
     @Override
-    public Prediction insert(Prediction prediction) {
+    public void insert(Prediction prediction) {
         try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_PREDICTION, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -68,7 +68,6 @@ public class PredictionDao implements BaseDao<Long, Prediction> {
             if (generatedKeys.next()) {
                 prediction.setIdPrediction(generatedKeys.getLong("idPrediction"));
             }
-            return prediction;
         } catch (SQLException | InterruptedException e) {
             throw new DaoException(e);
         }

@@ -26,7 +26,7 @@ public class TeamDao implements BaseDao<Long, Team> {
     private static final String UPDATE_TEAM = "UPDATE teams SET title = ?, abbreviation = ? WHERE idTeam = ?;";
 
     @Override
-    public Team insert(Team team) {
+    public void insert(Team team) {
         try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_TEAM, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, team.getTitle());
@@ -36,7 +36,6 @@ public class TeamDao implements BaseDao<Long, Team> {
             if (generatedKeys.next()) {
                 team.setIdTeam(generatedKeys.getLong(1));
             }
-            return team;
         } catch (SQLException | InterruptedException e) {
             throw new DaoException(e);
         }

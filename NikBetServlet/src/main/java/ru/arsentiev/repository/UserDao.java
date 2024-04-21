@@ -68,7 +68,7 @@ public class UserDao implements BaseDao<Long, User> {
                                                        " FROM users WHERE email = ?;";
 
     @Override
-    public User insert(User user) { //INSERT_USER
+    public void insert(User user) { //INSERT_USER
         try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_USER, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -94,7 +94,6 @@ public class UserDao implements BaseDao<Long, User> {
         } catch (SQLException | InterruptedException e) {
             throw new DaoException(e);
         }
-        return user;
     }
 
     @Override
