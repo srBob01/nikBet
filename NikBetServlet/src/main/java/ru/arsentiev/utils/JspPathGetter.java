@@ -15,10 +15,15 @@ public class JspPathGetter {
     public static final String USER_MATCHES_DEFAULT_JSP = "userMatchesDefault";
     public static final String USER_MONEY_DEFAULT_JSP = "userMoneyDefault";
     public static final String USER_PREDICTION_DEFAULT_JSP = "userPredictionDefault";
-    public static final String USER_PREDICTION_PLAYED_JSP = "userPredictionNotPlayed";
+    public static final String USER_PREDICTION_PLAYED_JSP = "userPredictionPlayed";
     public static final String USER_PREDICTION_NOT_PLAYED_JSP = "userPredictionNotPlayed";
     public static final String USER_MATCHES_ALL_IN_PROGRESS_JSP = "userMatchesAllInProgress";
     public static final String USER_MATCHES_ALL_COMPLETED_JSP = "userMatchesAllCompleted";
     public static final String USER_MATCHES_ALL_SCHEDULED_JSP = "userMatchesAllScheduled";
     public static final String USER_MATCHES_FIND_JSP = "userMatchesFind";
+    public static final String ADMIN_USER_LIST_JSP = "adminUserList";
+    public static final String ADMIN_USER_FIND_JSP = "adminUserFind";
+    public static final String ADMIN_MATCH_ADD_JSP = "adminMatchAdd";
+    public static final String ADMIN_MATCH_START_JSP = "adminMatchStart";
+    public static final String ADMIN_MATCH_CHANGE_JSP = "adminMatchChange";
 }

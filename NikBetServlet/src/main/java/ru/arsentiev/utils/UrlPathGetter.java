@@ -23,5 +23,10 @@ public class UrlPathGetter {
     public static final String USER_MATCHES_FIND_BET_URL = "/user/matches/find/bet";
     public static final String USER_PREDICTION_PLAYED_URL = "/user/predictions/played";
     public static final String USER_PREDICTION_NOT_PLAYED_URL = "/user/predictions/notPlayed";
-
+    public static final String ADMIN_USER_LIST_URL = "/admin/user/list";
+    public static final String ADMIN_USER_FIND_URL = "/admin/user/find";
+    public static final String ADMIN_USER_DELETE_URL = "/admin/user/delete";
+    public static final String ADMIN_MATCH_ADD_URL = "/admin/match/add";
+    public static final String ADMIN_MATCH_START_URL = "/admin/match/start";
+    public static final String ADMIN_MATCH_CHANGE_URL = "/admin/match/change";
 }
