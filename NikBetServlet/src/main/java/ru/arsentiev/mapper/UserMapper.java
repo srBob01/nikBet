@@ -8,6 +8,7 @@ import ru.arsentiev.entity.User;
 import ru.arsentiev.utils.LocalDateFormatter;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.function.BiFunction;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -141,6 +142,34 @@ public class UserMapper {
                 .nickname(userControllerDto.nickname())
                 .birthDate(userControllerDto.birthDate().format(LocalDateFormatter.FORMATTER))
                 .role(userControllerDto.role().name())
+                .build();
+    }
+
+    public UserForAdminControllerDto mapUserToControllerForAdmin(User user) {
+        return UserForAdminControllerDto.builder()
+                .idUser(user.getIdUser())
+                .nickname(user.getNickname())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .phoneNumber(user.getPhoneNumber())
+                .accountBalance(user.getAccountBalance())
+                .birthDate(user.getBirthDate())
+                .email(user.getEmail())
+                .patronymic(user.getPatronymic())
+                .build();
+    }
+
+    public UserForAdminViewDto mapUserControllerToViewForAdmin(UserForAdminControllerDto user) {
+        return UserForAdminViewDto.builder()
+                .idUser(user.idUser().toString())
+                .nickname(user.nickname())
+                .firstName(user.firstName())
+                .lastName(user.lastName())
+                .phoneNumber(user.phoneNumber())
+                .accountBalance(user.accountBalance().setScale(2, RoundingMode.HALF_UP).toString())
+                .birthDate(user.birthDate().format(LocalDateFormatter.FORMATTER))
+                .email(user.email())
+                .patronymic(user.patronymic())
                 .build();
     }
 }
