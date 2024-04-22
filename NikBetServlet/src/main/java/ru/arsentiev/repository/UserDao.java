@@ -70,8 +70,8 @@ public class UserDao implements BaseDao<Long, User> {
                                                        " FROM users WHERE email = ?;";
     //language=PostgreSQL
     private static final String SELECT_USER_BY_NICKNAME = "SELECT idUser, nickname, firstName, lastName, patronymic," +
-                                                       " password, phoneNumber, email, birthDate, accountBalance, role" +
-                                                       " FROM users WHERE role = 'USER' AND nickname = ?;";
+                                                          " password, phoneNumber, email, birthDate, accountBalance, role" +
+                                                          " FROM users WHERE role = 'USER' AND nickname = ?;";
 
     @Override
     public void insert(User user) { //INSERT_USER
@@ -241,15 +241,14 @@ public class UserDao implements BaseDao<Long, User> {
 
     public void updateDescriptionWithDynamicCreation(User user, UpdatedUserFields fields) {
         Optional<String> sql = userQueryCreator.createUserUpdateQuery(user, fields);
-        if (sql.isEmpty()) {
-            return;
-        }
-        try (Connection connection = connectionManager.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(sql.get())) {
+        if (sql.isPresent()) {
+            try (Connection connection = connectionManager.get();
+                 PreparedStatement preparedStatement = connection.prepareStatement(sql.get())) {
 
-            preparedStatement.executeUpdate();
-        } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+                preparedStatement.executeUpdate();
+            } catch (SQLException | InterruptedException e) {
+                throw new DaoException(e);
+            }
         }
     }
 
