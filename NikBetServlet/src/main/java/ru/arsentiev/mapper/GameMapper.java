@@ -3,15 +3,9 @@ package ru.arsentiev.mapper;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import ru.arsentiev.dto.game.controller.*;
-import ru.arsentiev.dto.game.view.GameCompletedViewDto;
-import ru.arsentiev.dto.game.view.GameInProgressViewDto;
-import ru.arsentiev.dto.game.view.GameParametersViewDto;
-import ru.arsentiev.dto.game.view.GameScheduledViewDto;
+import ru.arsentiev.dto.game.view.*;
 import ru.arsentiev.entity.*;
-import ru.arsentiev.utils.LocalDateFormatter;
 import ru.arsentiev.utils.TimeStampFormatter;
-
-import java.time.LocalDateTime;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class GameMapper {
@@ -21,7 +15,7 @@ public class GameMapper {
         return INSTANCE;
     }
 
-    public GameCompletedControllerDto mapControllerCompletedGameToController(Game game) {
+    public GameCompletedControllerDto mapGameToControllerCompleted(Game game) {
         return GameCompletedControllerDto.builder()
                 .idGame(game.getIdGame())
                 .homeTeam(game.getHomeTeam().getTitle())
@@ -33,7 +27,7 @@ public class GameMapper {
                 .build();
     }
 
-    public GameProgressControllerDto mapControllerInProgressGameToController(Game game) {
+    public GameProgressControllerDto mapGameToControllerInProgress(Game game) {
         return GameProgressControllerDto.builder()
                 .idGame(game.getIdGame())
                 .homeTeam(game.getHomeTeam().getTitle())
@@ -47,7 +41,7 @@ public class GameMapper {
                 .build();
     }
 
-    public GameScheduledControllerDto mapControllerScheduledGameToController(Game game) {
+    public GameScheduledControllerDto mapGameToControllerScheduled(Game game) {
         return GameScheduledControllerDto.builder()
                 .idGame(game.getIdGame())
                 .homeTeam(game.getHomeTeam().getTitle())
@@ -66,7 +60,7 @@ public class GameMapper {
                 .homeTeam(dto.homeTeam())
                 .guestTeam(dto.guestTeam())
                 .score(score)
-                .gameDate(dto.gameDate().format(LocalDateFormatter.FORMATTER))
+                .gameDate(dto.gameDate().format(TimeStampFormatter.ISO_FORMATTER))
                 .result(dto.result().name())
                 .build();
     }
@@ -93,7 +87,7 @@ public class GameMapper {
                 .coefficientOnHomeTeam(String.format("%.2f", dto.coefficientOnHomeTeam()))
                 .coefficientOnDraw(String.format("%.2f", dto.coefficientOnDraw()))
                 .coefficientOnGuestTeam(String.format("%.2f", dto.coefficientOnGuestTeam()))
-                .gameDate(dto.gameDate().format(LocalDateFormatter.FORMATTER))
+                .gameDate(dto.gameDate().format(TimeStampFormatter.ISO_FORMATTER))
                 .build();
     }
 
@@ -135,61 +129,6 @@ public class GameMapper {
                 .build();
     }
 
-
-    public Game mapCompletedControllerToGame(GameCompletedControllerDto gameCompletedControllerDto) {
-        return Game.builder()
-                .idGame(gameCompletedControllerDto.idGame())
-                .homeTeam(Team.builder()
-                        .title(gameCompletedControllerDto.homeTeam())
-                        .build())
-                .guestTeam(Team.builder()
-                        .title(gameCompletedControllerDto.guestTeam())
-                        .build())
-                .goalHomeTeam(gameCompletedControllerDto.goalHomeTeam())
-                .goalGuestTeam(gameCompletedControllerDto.goalGuestTeam())
-                .gameDate(gameCompletedControllerDto.gameDate())
-                .status(GameStatus.Completed)
-                .result(gameCompletedControllerDto.result())
-                .build();
-    }
-
-    public Game mapScedudeludControllerToGame(GameScheduledControllerDto gameScheduledControllerDto) {
-        return Game.builder()
-                .idGame(gameScheduledControllerDto.idGame())
-                .homeTeam(Team.builder()
-                        .title(gameScheduledControllerDto.homeTeam())
-                        .build())
-                .guestTeam(Team.builder()
-                        .title(gameScheduledControllerDto.guestTeam())
-                        .build())
-                .gameDate(gameScheduledControllerDto.gameDate())
-                .status(GameStatus.Scheduled)
-                .coefficientOnHomeTeam(gameScheduledControllerDto.coefficientOnHomeTeam())
-                .coefficientOnDraw(gameScheduledControllerDto.coefficientOnDraw())
-                .coefficientOnGuestTeam(gameScheduledControllerDto.coefficientOnGuestTeam())
-                .build();
-    }
-
-    public Game mapProgressControllerToGame(GameProgressControllerDto gameProgressControllerDto) {
-        return Game.builder()
-                .idGame(gameProgressControllerDto.idGame())
-                .homeTeam(Team.builder()
-                        .title(gameProgressControllerDto.homeTeam())
-                        .build())
-                .guestTeam(Team.builder()
-                        .title(gameProgressControllerDto.guestTeam())
-                        .build())
-                .goalHomeTeam(gameProgressControllerDto.goalHomeTeam())
-                .goalGuestTeam(gameProgressControllerDto.goalGuestTeam())
-                .gameDate(LocalDateTime.now())
-                .status(GameStatus.InProgress)
-                .coefficientOnHomeTeam(gameProgressControllerDto.coefficientOnHomeTeam())
-                .coefficientOnDraw(gameProgressControllerDto.coefficientOnDraw())
-                .coefficientOnGuestTeam(gameProgressControllerDto.coefficientOnGuestTeam())
-                .time(gameProgressControllerDto.time())
-                .build();
-    }
-
     public Game map(GameParametersControllerDto gameParametersControllerDto) {
         return Game.builder()
                 .homeTeam(Team.builder()
@@ -219,5 +158,82 @@ public class GameMapper {
     private int[] parseGoals(String score) {
         String[] parts = score.split(" - ");
         return new int[]{Integer.parseInt(parts[0]), Integer.parseInt(parts[1])};
+    }
+
+    public GameAdminScheduledControllerDto mapAdminScheduledGameViewToController(GameAdminScheduledViewDto game) {
+        return GameAdminScheduledControllerDto.builder()
+                .idGuestTeam(Long.parseLong(game.idGuestTeam()))
+                .idHomeTeam(Long.parseLong(game.idHomeTeam()))
+                .coefficientOnHomeTeam(Float.parseFloat(game.coefficientOnHomeTeam()))
+                .coefficientOnDraw(Float.parseFloat(game.coefficientOnDraw()))
+                .coefficientOnGuestTeam(Float.parseFloat(game.coefficientOnGuestTeam()))
+                .gameDate(TimeStampFormatter.formatISO(game.gameDate()))
+                .build();
+    }
+
+    public Game mapAdminScheduledControllerToGame(GameAdminScheduledControllerDto game) {
+        return Game.builder()
+                .homeTeam(Team.builder()
+                        .idTeam(game.idHomeTeam())
+                        .build())
+                .guestTeam(Team.builder()
+                        .idTeam(game.idGuestTeam())
+                        .build())
+                .coefficientOnHomeTeam(game.coefficientOnHomeTeam())
+                .coefficientOnDraw(game.coefficientOnDraw())
+                .coefficientOnGuestTeam(game.coefficientOnGuestTeam())
+                .gameDate(game.gameDate())
+                .build();
+    }
+
+    public GameAdminProgressControllerDto mapAdminProgressControllerToViewGame(GameAdminProgressViewDto
+                                                                                       gameAdminProgressViewDto) {
+        return GameAdminProgressControllerDto.builder()
+                .goalGuestTeam(Integer.parseInt(gameAdminProgressViewDto.goalGuestTeam()))
+                .goalHomeTeam(Integer.parseInt(gameAdminProgressViewDto.goalHomeTeam()))
+                .coefficientOnHomeTeam(Float.parseFloat(gameAdminProgressViewDto.coefficientOnHomeTeam()))
+                .coefficientOnDraw(Float.parseFloat(gameAdminProgressViewDto.coefficientOnDraw()))
+                .coefficientOnGuestTeam(Float.parseFloat(gameAdminProgressViewDto.coefficientOnGuestTeam()))
+                .idGame(Long.parseLong(gameAdminProgressViewDto.idGame()))
+                .build();
+    }
+
+    public Game mapAdminProgressControllerToGame(GameAdminProgressControllerDto gameAdminProgressControllerDto) {
+        return Game.builder()
+                .goalHomeTeam(gameAdminProgressControllerDto.goalHomeTeam())
+                .goalGuestTeam(gameAdminProgressControllerDto.goalGuestTeam())
+                .coefficientOnHomeTeam(gameAdminProgressControllerDto.coefficientOnHomeTeam())
+                .coefficientOnDraw(gameAdminProgressControllerDto.coefficientOnDraw())
+                .coefficientOnGuestTeam(gameAdminProgressControllerDto.coefficientOnGuestTeam())
+                .idGame(gameAdminProgressControllerDto.idGame())
+                .build();
+    }
+
+    public GameAdminCompletedControllerDto mapAdminCompletedViewToControllerGame(GameAdminCompletedViewDto gameAdminCompletedViewDto) {
+        int goalHomeTeam = Integer.parseInt(gameAdminCompletedViewDto.goalHomeTeam());
+        int goalGuestTeam = Integer.parseInt(gameAdminCompletedViewDto.goalGuestTeam());
+        GameResult result = determineGameResult(goalHomeTeam, goalGuestTeam);
+
+        return GameAdminCompletedControllerDto.builder()
+                .idGame(Long.parseLong(gameAdminCompletedViewDto.idGame()))
+                .result(result)
+                .build();
+    }
+
+    private GameResult determineGameResult(int goalHomeTeam, int goalGuestTeam) {
+        if (goalHomeTeam > goalGuestTeam) {
+            return GameResult.HomeWin;
+        } else if (goalHomeTeam < goalGuestTeam) {
+            return GameResult.AwayWin;
+        } else {
+            return GameResult.Draw;
+        }
+    }
+
+    public Game mapAdminCompletedControllerToGame(GameAdminCompletedControllerDto gameAdminCompletedControllerDto) {
+        return Game.builder()
+                .idGame(gameAdminCompletedControllerDto.idGame())
+                .result(gameAdminCompletedControllerDto.result())
+                .build();
     }
 }
