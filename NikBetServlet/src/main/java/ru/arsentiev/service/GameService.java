@@ -59,7 +59,6 @@ public class GameService {
     }
 
     public List<GameScheduledControllerDto> selectGameScheduledAll() {
-        List<Game> list = gameDao.selectAllGameScheduled();
         return gameDao.selectAllGameScheduled().stream()
                 .map(gameMapper::mapGameToControllerScheduled)
                 .collect(toList());
