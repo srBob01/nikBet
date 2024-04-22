@@ -23,7 +23,7 @@
             padding: 0 20px;
         }
 
-        .full-list-button, .delete-button{
+        .full-list-button, .delete-button {
             background-color: #5C7AEA;
             color: white;
             padding: 10px 20px;
@@ -179,6 +179,16 @@
                     <p class="card-text">Coefficient: ${prediction.coefficient()}</p>
                     <p class="card-text">Status: ${prediction.predictionStatus()}</p>
                     <p class="card-text">Result: ${prediction.result()}</p>
+                    <p class="card-text">Outcome:
+                        <c:choose>
+                            <c:when test="${prediction.prediction() == prediction.result()}">
+                                Won
+                            </c:when>
+                            <c:otherwise>
+                                Lost
+                            </c:otherwise>
+                        </c:choose>
+                    </p>
                 </div>
             </div>
         </c:forEach>

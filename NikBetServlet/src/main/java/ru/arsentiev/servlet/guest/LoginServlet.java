@@ -43,7 +43,10 @@ public class LoginServlet extends HttpServlet {
         final ReturnValueInCheckLogin value = userService.checkLogin(userLoginControllerDto);
         if (value.userDto().isPresent()) {
             req.getSession().setAttribute(NAME_ATTRIBUTE_USER, value.userDto().get());
-            resp.sendRedirect(UrlPathGetter.USER_DEFAULT_URL);
+            switch (value.userDto().get().role()) {
+                case USER -> resp.sendRedirect(UrlPathGetter.USER_DEFAULT_URL);
+                case ADMIN -> resp.sendRedirect(UrlPathGetter.ADMIN_DEFAULT_URL);
+            }
         } else {
             req.setAttribute(NAME_ATTRIBUTE_ERROR, value.loginError());
             req.getRequestDispatcher(JspPathCreator.getDefaultPath(LOGIN_JSP)).forward(req, resp);
