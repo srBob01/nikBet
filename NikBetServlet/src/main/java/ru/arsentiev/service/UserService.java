@@ -16,6 +16,7 @@ import ru.arsentiev.validator.entity.login.LoginError;
 import ru.arsentiev.validator.entity.update.UpdatePasswordError;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -109,5 +110,19 @@ public class UserService {
         }
         userDao.withdrawMoneyById(userMoneyControllerDto);
         return true;
+    }
+
+    public List<UserForAdminControllerDto> selectAllUser() {
+        return userDao.selectAll().stream()
+                .map(userMapper::mapUserToControllerForAdmin)
+                .toList();
+    }
+
+    public boolean deleteUser(Long idUser) {
+        return userDao.delete(idUser);
+    }
+
+    public Optional<UserForAdminControllerDto> selectUserByNickname(String nickname) {
+        return userDao.selectByNickname(nickname).map(userMapper::mapUserToControllerForAdmin);
     }
 }
