@@ -59,7 +59,7 @@ public class UserDao implements BaseDao<Long, User> {
     //language=PostgreSQL
     private static final String SELECT_ALL_USERS = "SELECT iduser, nickname, firstname, lastname, patronymic," +
                                                    " password, phonenumber, email, birthdate, accountbalance, role" +
-                                                   " FROM users ORDER BY iduser;";
+                                                   " FROM users WHERE role = 'USER' ORDER BY iduser;";
     //language=PostgreSQL
     private static final String SELECT_PASSWORD_SALT_USER = "SELECT password, salt FROM users WHERE email = ?";
     //language=PostgreSQL
@@ -68,6 +68,10 @@ public class UserDao implements BaseDao<Long, User> {
     private static final String SELECT_USER_BY_LOGIN = "SELECT idUser, nickname, firstName, lastName, patronymic," +
                                                        " password, phoneNumber, email, birthDate, accountBalance, role" +
                                                        " FROM users WHERE email = ?;";
+    //language=PostgreSQL
+    private static final String SELECT_USER_BY_NICKNAME = "SELECT idUser, nickname, firstName, lastName, patronymic," +
+                                                       " password, phoneNumber, email, birthDate, accountBalance, role" +
+                                                       " FROM users WHERE role = 'USER' AND nickname = ?;";
 
     @Override
     public void insert(User user) { //INSERT_USER
@@ -148,6 +152,21 @@ public class UserDao implements BaseDao<Long, User> {
                 }
             }
             return null;
+        } catch (SQLException | InterruptedException e) {
+            throw new DaoException(e);
+        }
+    }
+
+    public Optional<User> selectByNickname(String nickname) { //SELECT_USER_BY_NICKNAME
+        try (Connection connection = connectionManager.get();
+             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_USER_BY_NICKNAME)) {
+            preparedStatement.setString(1, nickname);
+            try (ResultSet rs = preparedStatement.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapResultSetToUserWithoutPassword(rs));
+                }
+            }
+            return Optional.empty();
         } catch (SQLException | InterruptedException e) {
             throw new DaoException(e);
         }

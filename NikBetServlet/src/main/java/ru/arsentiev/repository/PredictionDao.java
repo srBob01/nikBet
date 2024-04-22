@@ -55,6 +55,10 @@ public class PredictionDao implements BaseDao<Long, Prediction> {
     //language=PostgreSQL
     private static final String UPDATE_PREDICTION = "UPDATE predictions SET idGame = ?, idUser = ?, predictionDate = ?, summa = ?, prediction = ?, predictionstatus = ?, coefficient = ? WHERE idPrediction = ?;";
 
+    //language=PostgreSQL
+    private static final String UPDATE_PREDICTION_STATUS = "UPDATE predictions SET predictionstatus = 'BetPlayed' WHERE idPrediction = ?;";
+
+
     @Override
     public void insert(Prediction prediction) {
         try (Connection connection = connectionManager.get();
@@ -167,6 +171,25 @@ public class PredictionDao implements BaseDao<Long, Prediction> {
 
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException | InterruptedException e) {
+            throw new DaoException(e);
+        }
+    }
+
+    public void updatePredictionStatusOfList(List<Long> listIdPrediction) {
+        try (Connection connection = connectionManager.get()) {
+            listIdPrediction.forEach(id -> updatePredictionStatus(id, connection));
+        } catch (SQLException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void updatePredictionStatus(Long idPrediction, Connection connection) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_PREDICTION_STATUS)) {
+
+            preparedStatement.setLong(1, idPrediction);
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
             throw new DaoException(e);
         }
     }

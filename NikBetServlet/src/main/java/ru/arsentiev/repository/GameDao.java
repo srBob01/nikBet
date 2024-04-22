@@ -25,10 +25,9 @@ public class GameDao implements BaseDao<Long, Game> {
 
     //language=PostgreSQL
     private static final String INSERT_GAME = "INSERT INTO games " +
-                                              "(idHomeTeam, idGuestTeam, goalHomeTeam, goalGuestTeam," +
-                                              " gameDate, status, coefficientOnHomeTeam, coefficientOnDraw," +
-                                              " coefficientOnGuestTeam, time, result) " +
-                                              "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                                              "(idHomeTeam, idGuestTeam, gameDate, coefficientOnHomeTeam," +
+                                              " coefficientOnDraw, coefficientOnGuestTeam) " +
+                                              "VALUES (?, ?, ?, ?, ?, ?);";
     //language=PostgreSQL
     private static final String SELECT_GAME_BY_ID = "SELECT idgame, idhometeam, idguestteam, goalhometeam," +
                                                     " goalguestteam, gamedate, status, coefficientonhometeam," +
@@ -75,6 +74,15 @@ public class GameDao implements BaseDao<Long, Game> {
                                                                " coefficientonguestteam, time, result" +
                                                                " FROM games WHERE status = 'Completed'" +
                                                                " ORDER BY gamedate LIMIT 5;";
+
+    //language=PostgreSQL
+    private static final String SELECT_HOT_GAMES_LIMIT = "SELECT idgame, idhometeam, idguestteam, goalhometeam, goalguestteam," +
+                                                         " gamedate, status, coefficientonhometeam, coefficientOnDraw," +
+                                                         " coefficientonguestteam, time, result" +
+                                                         " FROM games WHERE " +
+                                                         " status = 'Scheduled' AND" +
+                                                         " gamedate BETWEEN NOW() - INTERVAL '10 minutes' AND NOW() + INTERVAL '10 minutes'" +
+                                                         " ORDER BY gamedate;";
     //language=PostgreSQL
     private static final String DELETE_GAME = "DELETE FROM games WHERE idGame = ?;";
     //language=PostgreSQL
@@ -82,21 +90,34 @@ public class GameDao implements BaseDao<Long, Game> {
                                               "idHomeTeam = ?, idGuestTeam = ?, goalHomeTeam = ?, goalGuestTeam = ?, gameDate = ?, status = ?, " +
                                               "coefficientOnHomeTeam = ?, coefficientOnDraw = ?, coefficientOnGuestTeam = ?, time = ?, result = ? WHERE idGame = ?;";
     //language=PostgreSQL
-    private static final String UPDATE_COEFFICIENT_GAME = "UPDATE games SET " +
-                                                          "coefficientOnHomeTeam = ?, coefficientOnDraw = ?, coefficientOnGuestTeam = ? WHERE idGame = ?;";
+    private static final String UPDATE_DESCRIPTION_GAME = "UPDATE games SET" +
+                                                          " coefficientOnHomeTeam = ?, coefficientOnDraw = ?, coefficientOnGuestTeam = ?," +
+                                                          " goalHomeTeam = ?, goalGuestTeam = ? WHERE idGame = ?;";
     //language=PostgreSQL
-    private static final String UPDATE_GOALS_GAME = "UPDATE games SET " +
-                                                    "goalHomeTeam = ?, goalGuestTeam = ? WHERE idGame = ?;";
+    private static final String START_GAME = "UPDATE games SET " +
+                                             "status = 'InProgress', time = 'Time1'," +
+                                             " goalguestteam = 0, goalhometeam = 0" +
+                                             " WHERE idGame = ?;";
     //language=PostgreSQL
-    private static final String UPDATE_RESULT_STATUS_GAME = "UPDATE games SET " +
-                                                            "status = ?, result = ? WHERE idGame = ?;";
+    private static final String START_SECOND_HALF = "UPDATE games SET" +
+                                                    " time = 'Time2'" +
+                                                    " WHERE idGame = ?;";
+    //language=PostgreSQL
+    private static final String END_GAME = "UPDATE games SET status = 'Completed', result = ? " +
+                                           " WHERE idGame = ?;";
+
 
     @Override
     public void insert(Game game) {
         try (Connection connection = connectionManager.get();
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_GAME, Statement.RETURN_GENERATED_KEYS)) {
 
-            setStatement(game, preparedStatement);
+            preparedStatement.setLong(1, game.getHomeTeam().getIdTeam());
+            preparedStatement.setLong(2, game.getGuestTeam().getIdTeam());
+            preparedStatement.setTimestamp(3, Timestamp.valueOf(game.getGameDate()));
+            preparedStatement.setFloat(4, game.getCoefficientOnHomeTeam());
+            preparedStatement.setFloat(5, game.getCoefficientOnDraw());
+            preparedStatement.setFloat(6, game.getCoefficientOnGuestTeam());
 
             preparedStatement.executeUpdate();
             ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
@@ -124,6 +145,10 @@ public class GameDao implements BaseDao<Long, Game> {
 
     public List<Game> selectLimitGameCompleted() {
         return getGamesCompleted(SELECT_COMPLETED_GAMES_LIMIT);
+    }
+
+    public List<Game> selectHotGameScheduled() {
+        return getGamesCompleted(SELECT_HOT_GAMES_LIMIT);
     }
 
     public List<Game> selectAllGameScheduled() {
@@ -218,14 +243,16 @@ public class GameDao implements BaseDao<Long, Game> {
         }
     }
 
-    public boolean updateCoefficients(Long idGame, Float coefficientOnHomeTeam, Float coefficientOnDraw, Float coefficientOnGuestTeam) {
+    public boolean updateDescriptionGame(Game game) {
         try (Connection connection = connectionManager.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_COEFFICIENT_GAME)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_DESCRIPTION_GAME)) {
 
-            preparedStatement.setFloat(1, coefficientOnHomeTeam);
-            preparedStatement.setFloat(2, coefficientOnDraw);
-            preparedStatement.setFloat(3, coefficientOnGuestTeam);
-            preparedStatement.setLong(4, idGame);
+            preparedStatement.setFloat(1, game.getCoefficientOnHomeTeam());
+            preparedStatement.setFloat(2, game.getCoefficientOnDraw());
+            preparedStatement.setFloat(3, game.getCoefficientOnGuestTeam());
+            preparedStatement.setInt(4, game.getGoalHomeTeam());
+            preparedStatement.setInt(5, game.getGoalGuestTeam());
+            preparedStatement.setLong(6, game.getIdGame());
 
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException | InterruptedException e) {
@@ -233,13 +260,19 @@ public class GameDao implements BaseDao<Long, Game> {
         }
     }
 
-    public boolean updateGoals(Long idGame, Integer goalHomeTeam, Integer goalGuestTeam) {
-        try (Connection connection = connectionManager.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_GOALS_GAME)) {
+    public boolean startGame(Long idGame) {
+        return actionWithGame(idGame, START_GAME);
+    }
 
-            preparedStatement.setInt(1, goalHomeTeam);
-            preparedStatement.setInt(2, goalGuestTeam);
-            preparedStatement.setLong(3, idGame);
+    public boolean startSecondHalf(Long idGame) {
+        return actionWithGame(idGame, START_SECOND_HALF);
+    }
+
+    private boolean actionWithGame(Long idGame, String sql) {
+        try (Connection connection = connectionManager.get();
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
+            preparedStatement.setLong(1, idGame);
 
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException | InterruptedException e) {
@@ -247,13 +280,12 @@ public class GameDao implements BaseDao<Long, Game> {
         }
     }
 
-    public boolean updateResultAndStatus(Long idGame, GameStatus status, GameResult result) {
+    public boolean endGame(Game game) {
         try (Connection connection = connectionManager.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_RESULT_STATUS_GAME)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(END_GAME)) {
 
-            preparedStatement.setString(1, status.name());
-            preparedStatement.setString(2, result.name());
-            preparedStatement.setLong(3, idGame);
+            preparedStatement.setString(1, game.getResult().name());
+            preparedStatement.setLong(2, game.getIdGame());
 
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException | InterruptedException e) {
