@@ -6,6 +6,7 @@ CREATE TABLE users
     lastName       TEXT             NOT NULL,
     patronymic     VARCHAR,
     password       TEXT             NOT NULL,
+    salt           TEXT             NOT NULL,
     phoneNumber    CHAR(12) UNIQUE  NOT NULL,
     email          TEXT UNIQUE      NOT NULL,
     birthDate      DATE             NOT NULL,
@@ -37,12 +38,12 @@ CREATE TABLE games
     goalHomeTeam           INT,
     goalGuestTeam          INT,
     gameDate               TIMESTAMP NOT NULL,
-    status                 TEXT      NOT NULL, --enum
+    status                 TEXT      NOT NULL DEFAULT 'Scheduled', --enum
     coefficientOnHomeTeam  NUMERIC(4, 2),
     coefficientOnDraw      NUMERIC(4, 2),
     coefficientOnGuestTeam NUMERIC(4, 2),
     time                   TEXT,
-    result                 TEXT                --enum
+    result                 TEXT                                    --enum
 );
 
 CREATE INDEX games_status_date_idx ON games (gameDate);
