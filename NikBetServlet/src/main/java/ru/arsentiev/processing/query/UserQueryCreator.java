@@ -2,14 +2,14 @@ package ru.arsentiev.processing.query;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import ru.arsentiev.entity.User;
 import ru.arsentiev.processing.query.entity.UpdatedUserFields;
 
-import java.util.Optional;
-
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 public class UserQueryCreator {
-    public Optional<String> createUserUpdateQuery(User user, UpdatedUserFields fields) {
+    @NonNull
+    public String createUserUpdateQuery(User user, UpdatedUserFields fields) {
         String start = "UPDATE users SET ";
         StringBuilder sql = new StringBuilder(start);
 
@@ -38,11 +38,11 @@ public class UserQueryCreator {
         if (sql.toString().endsWith(", ")) {
             sql.setLength(sql.length() - 2);
         } else {
-            return Optional.empty();
+            return "empty";
         }
 
         sql.append("WHERE idUser =").append(user.getIdUser()).append(" ;");
 
-        return Optional.of(sql.toString());
+        return sql.toString();
     }
 }

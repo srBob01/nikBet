@@ -11,8 +11,6 @@ public class CheckManager {
     @Getter
     private static final DateCheck dateCheck;
     @Getter
-    private static final MoneyCheck moneyCheck;
-    @Getter
     private static final NameCheck nameCheck;
     @Getter
     private static final PasswordCheck passwordCheck;
@@ -22,7 +20,6 @@ public class CheckManager {
     static {
         localDateFormatter = DateFormatterManager.getLocalDateFormatter();
         dateCheck = new DateCheck(localDateFormatter);
-        moneyCheck = new MoneyCheck();
         nameCheck = new NameCheck();
         passwordCheck = new PasswordCheck();
         phoneNumberCheck = new PhoneNumberCheck();

@@ -37,7 +37,7 @@ public class PredictionService {
         if (game.isEmpty()) {
             throw new RuntimeException();
         }
-        Float coefficient = switch (predictionPlaceControllerDto.prediction()) {
+        float coefficient = switch (predictionPlaceControllerDto.prediction()) {
             case HomeWin -> game.get().getCoefficientOnHomeTeam();
             case Draw -> game.get().getCoefficientOnDraw();
             case AwayWin -> game.get().getCoefficientOnGuestTeam();

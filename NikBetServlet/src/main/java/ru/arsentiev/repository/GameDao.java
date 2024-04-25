@@ -308,18 +308,18 @@ public class GameDao implements BaseDao<Long, Game> {
     }
 
     private Game mapResultSetToGame(ResultSet resultSet) throws SQLException {
-        Long idGame = resultSet.getLong("idGame");
+        long idGame = resultSet.getLong("idGame");
         Team homeTeam = teamDAO.selectById(resultSet.getLong("idHomeTeam")
                 , resultSet.getStatement().getConnection()).orElseThrow(() -> new SQLException("HomeTeam not found"));
         Team guestTeam = teamDAO.selectById(resultSet.getLong("idGuestTeam")
                 , resultSet.getStatement().getConnection()).orElseThrow(() -> new SQLException("GuestTeam not found"));
-        Integer goalHomeTeam = resultSet.getObject("goalHomeTeam", Integer.class);
-        Integer goalGuestTeam = resultSet.getObject("goalGuestTeam", Integer.class);
+        int goalHomeTeam = resultSet.getObject("goalHomeTeam", Integer.class);
+        int goalGuestTeam = resultSet.getObject("goalGuestTeam", Integer.class);
         LocalDateTime gameDate = resultSet.getTimestamp("gameDate").toLocalDateTime();
         GameStatus status = GameStatus.valueOf(resultSet.getString("status"));
-        Float coefficientOnHomeTeam = resultSet.getBigDecimal("coefficientOnHomeTeam") != null ? resultSet.getBigDecimal("coefficientOnHomeTeam").floatValue() : null;
-        Float coefficientOnDraw = resultSet.getBigDecimal("coefficientOnDraw") != null ? resultSet.getBigDecimal("coefficientOnDraw").floatValue() : null;
-        Float coefficientOnGuestTeam = resultSet.getBigDecimal("coefficientOnGuestTeam") != null ? resultSet.getBigDecimal("coefficientOnGuestTeam").floatValue() : null;
+        float coefficientOnHomeTeam = resultSet.getBigDecimal("coefficientOnHomeTeam") != null ? resultSet.getBigDecimal("coefficientOnHomeTeam").floatValue() : 0;
+        float coefficientOnDraw = resultSet.getBigDecimal("coefficientOnDraw") != null ? resultSet.getBigDecimal("coefficientOnDraw").floatValue() : 0;
+        float coefficientOnGuestTeam = resultSet.getBigDecimal("coefficientOnGuestTeam") != null ? resultSet.getBigDecimal("coefficientOnGuestTeam").floatValue() : 0;
         String timeValue = resultSet.getString("time");
         GameTime time = timeValue != null ? GameTime.valueOf(timeValue) : null;
         String resultValue = resultSet.getString("result");

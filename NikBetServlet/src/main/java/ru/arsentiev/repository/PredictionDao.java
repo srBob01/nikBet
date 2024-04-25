@@ -204,7 +204,7 @@ public class PredictionDao implements BaseDao<Long, Prediction> {
     }
 
     private Prediction extractPredictionFromResultSet(ResultSet resultSet) throws SQLException {
-        Long idPrediction = resultSet.getLong("idPrediction");
+        long idPrediction = resultSet.getLong("idPrediction");
         LocalDateTime predictionDate = resultSet.getTimestamp("predictionDate").toLocalDateTime();
         BigDecimal summa = resultSet.getBigDecimal("summa");
         String prediction = resultSet.getString("prediction");
@@ -214,7 +214,7 @@ public class PredictionDao implements BaseDao<Long, Prediction> {
         User user = userDAO.selectById(resultSet.getLong("idUser"),
                 resultSet.getStatement().getConnection()).orElseThrow(() -> new SQLException("User not found"));
 
-        Float coefficient = resultSet.getBigDecimal("coefficient").floatValue();
+        float coefficient = resultSet.getBigDecimal("coefficient").floatValue();
 
         String predictionStatus = resultSet.getString("predictionStatus");
         return Prediction.builder()

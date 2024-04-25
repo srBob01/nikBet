@@ -240,10 +240,10 @@ public class UserDao implements BaseDao<Long, User> {
     }
 
     public void updateDescriptionWithDynamicCreation(User user, UpdatedUserFields fields) {
-        Optional<String> sql = userQueryCreator.createUserUpdateQuery(user, fields);
-        if (sql.isPresent()) {
+        String sql = userQueryCreator.createUserUpdateQuery(user, fields);
+        if (!sql.equals("empty")) {
             try (Connection connection = connectionGetter.get();
-                 PreparedStatement preparedStatement = connection.prepareStatement(sql.get())) {
+                 PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
                 preparedStatement.executeUpdate();
             } catch (SQLException | InterruptedException e) {

@@ -106,7 +106,7 @@ public class TeamDao implements BaseDao<Long, Team> {
     }
 
     private Team mapResultSetToTeam(ResultSet resultSet) throws SQLException {
-        Long id = resultSet.getLong("idTeam");
+        long id = resultSet.getLong("idTeam");
         String title = resultSet.getString("title");
         String abbreviation = resultSet.getString("abbreviation");
         return Team.builder()
