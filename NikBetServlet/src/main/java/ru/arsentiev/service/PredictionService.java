@@ -5,6 +5,7 @@ import ru.arsentiev.dto.user.controller.UserMoneyControllerDto;
 import ru.arsentiev.entity.Game;
 import ru.arsentiev.entity.GameStatus;
 import ru.arsentiev.entity.Prediction;
+import ru.arsentiev.exception.ServiceException;
 import ru.arsentiev.mapper.PredictionMapper;
 import ru.arsentiev.repository.GameDao;
 import ru.arsentiev.repository.PredictionDao;
@@ -35,7 +36,7 @@ public class PredictionService {
     public PredictionResultControllerDto insertPrediction(PredictionPlaceControllerDto predictionPlaceControllerDto) {
         Optional<Game> game = gameDao.selectById(predictionPlaceControllerDto.idGame());
         if (game.isEmpty()) {
-            throw new RuntimeException();
+            throw new ServiceException("The game does not exist");
         }
         float coefficient = switch (predictionPlaceControllerDto.prediction()) {
             case HomeWin -> game.get().getCoefficientOnHomeTeam();
@@ -81,7 +82,7 @@ public class PredictionService {
     public Optional<BigDecimal> deletePrediction(PredictionForDeleteControllerDto predictionForDeleteControllerDto) {
         Optional<Game> game = gameDao.selectById(predictionForDeleteControllerDto.idGame());
         if (game.isEmpty()) {
-            throw new RuntimeException();
+            throw new ServiceException("The game does not exist");
         }
 
         Float coefficientNow = switch (predictionForDeleteControllerDto.prediction()) {
@@ -99,7 +100,7 @@ public class PredictionService {
                 .divide(BigDecimal.valueOf(2L), 2, RoundingMode.HALF_UP);
 
         if (!predictionDao.delete(predictionForDeleteControllerDto.idPrediction())) {
-            throw new RuntimeException();
+            throw new ServiceException("The prediction does not delete");
         }
 
         UserMoneyControllerDto userMoneyControllerDto = UserMoneyControllerDto.builder()

@@ -179,7 +179,7 @@ public class PredictionDao implements BaseDao<Long, Prediction> {
         try (Connection connection = connectionGetter.get()) {
             listIdPrediction.forEach(id -> updatePredictionStatus(id, connection));
         } catch (SQLException | InterruptedException e) {
-            throw new RuntimeException(e);
+            throw new DaoException(e);
         }
     }
 

@@ -143,7 +143,5 @@ public class GameService {
                 .toList();
         predictionDao.updatePredictionStatusOfList(listIdPredictions);
         return true;
-
     }
-
 }

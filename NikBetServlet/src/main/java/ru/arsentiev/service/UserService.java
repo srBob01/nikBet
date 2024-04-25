@@ -2,6 +2,7 @@ package ru.arsentiev.service;
 
 import ru.arsentiev.dto.user.controller.*;
 import ru.arsentiev.entity.User;
+import ru.arsentiev.exception.ServiceException;
 import ru.arsentiev.mapper.UserMapper;
 import ru.arsentiev.processing.password.PasswordHashed;
 import ru.arsentiev.processing.query.entity.UpdatedUserFields;
@@ -39,8 +40,11 @@ public class UserService {
                                                    UpdatedUserFields updatedUserFields,
                                                    UserConstFieldsControllerDto userConstFieldsControllerDto) {
         User user = userMapper.map(userUpdateDescriptionControllerDto);
-        userDao.updateDescriptionWithDynamicCreation(user, updatedUserFields);
-        return userMapper.map(userConstFieldsControllerDto, userUpdateDescriptionControllerDto);
+        if (userDao.updateDescriptionWithDynamicCreation(user, updatedUserFields)){
+            return userMapper.map(userConstFieldsControllerDto, userUpdateDescriptionControllerDto);
+        } else {
+            throw new ServiceException("The user does not exist");
+        }
     }
 
     public ReturnValueInCheckLogin checkLogin(UserLoginControllerDto userLoginControllerDto) {
@@ -64,7 +68,8 @@ public class UserService {
     public Optional<UpdatePasswordError> updatePassword(UserLogoPasControllerDto userLogoPasControllerDto) {
         UserPasswordAndSaltControllerDto userPasswordAndSaltControllerDto =
                 userDao.selectPasswordByLogin(userLogoPasControllerDto.email());
-        if (userPasswordAndSaltControllerDto.password().isPresent() && userPasswordAndSaltControllerDto.salt().isPresent()) {
+        if (userPasswordAndSaltControllerDto.password().isPresent()
+            && userPasswordAndSaltControllerDto.salt().isPresent()) {
             if (userPasswordAndSaltControllerDto.password().get()
                     .equals(passwordHashed.hashPassword(userLogoPasControllerDto.oldPassword(),
                             userPasswordAndSaltControllerDto.salt().get()))) {
@@ -81,18 +86,18 @@ public class UserService {
                 return Optional.of(UpdatePasswordError.PASSWORDS_DONT_MATCH);
             }
         } else {
-            throw new RuntimeException();
+            throw new ServiceException("The user does not exist");
         }
     }
 
-    public void depositMoney(UserMoneyControllerDto userMoneyControllerDto) {
-        userDao.depositMoneyById(userMoneyControllerDto);
+    public boolean depositMoney(UserMoneyControllerDto userMoneyControllerDto) {
+        return userDao.depositMoneyById(userMoneyControllerDto);
     }
 
     public BigDecimal getAccountBalance(Long idUser) {
         var balance = userDao.selectBalanceById(idUser);
         if (balance.isEmpty()) {
-            throw new RuntimeException();
+            throw new ServiceException("The user does not exist");
         }
         return balance.get();
     }
@@ -100,14 +105,13 @@ public class UserService {
     public boolean withdrawMoney(UserMoneyControllerDto userMoneyControllerDto) {
         Optional<BigDecimal> balance = userDao.selectBalanceById(userMoneyControllerDto.idUser());
         if (balance.isEmpty()) {
-            throw new RuntimeException();
+            throw new ServiceException("The user does not exist");
         }
 
         if (balance.get().compareTo(userMoneyControllerDto.summa()) < 0) {
             return false;
         }
-        userDao.withdrawMoneyById(userMoneyControllerDto);
-        return true;
+        return userDao.withdrawMoneyById(userMoneyControllerDto);
     }
 
     public List<UserForAdminControllerDto> selectAllUser() {

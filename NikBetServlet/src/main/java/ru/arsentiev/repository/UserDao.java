@@ -218,7 +218,6 @@ public class UserDao implements BaseDao<Long, User> {
         } catch (SQLException | InterruptedException e) {
             throw new DaoException(e);
         }
-
     }
 
     @Override
@@ -239,41 +238,42 @@ public class UserDao implements BaseDao<Long, User> {
         }
     }
 
-    public void updateDescriptionWithDynamicCreation(User user, UpdatedUserFields fields) {
+    public boolean updateDescriptionWithDynamicCreation(User user, UpdatedUserFields fields) {
         String sql = userQueryCreator.createUserUpdateQuery(user, fields);
         if (!sql.equals("empty")) {
             try (Connection connection = connectionGetter.get();
                  PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
-                preparedStatement.executeUpdate();
+                return preparedStatement.executeUpdate() > 0;
             } catch (SQLException | InterruptedException e) {
                 throw new DaoException(e);
             }
         }
+        return true;
     }
 
-    public void depositMoneyById(UserMoneyControllerDto userMoneyControllerDto) { //UPDATE_BALANCE_USER
-        actionMoneyById(userMoneyControllerDto, DEPOSIT_BALANCE_USER);
+    public boolean depositMoneyById(UserMoneyControllerDto userMoneyControllerDto) { //UPDATE_BALANCE_USER
+        return actionMoneyById(userMoneyControllerDto, DEPOSIT_BALANCE_USER);
     }
 
-    public void withdrawMoneyById(UserMoneyControllerDto userMoneyControllerDto) { //UPDATE_BALANCE_USER
-        actionMoneyById(userMoneyControllerDto, WITHDRAW_BALANCE_USER);
+    public boolean withdrawMoneyById(UserMoneyControllerDto userMoneyControllerDto) { //UPDATE_BALANCE_USER
+        return actionMoneyById(userMoneyControllerDto, WITHDRAW_BALANCE_USER);
     }
 
-    private void actionMoneyById(UserMoneyControllerDto userMoneyControllerDto, String action) {
+    private boolean actionMoneyById(UserMoneyControllerDto userMoneyControllerDto, String action) {
         try (Connection connection = connectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(action)) {
 
             preparedStatement.setBigDecimal(1, userMoneyControllerDto.summa());
             preparedStatement.setLong(2, userMoneyControllerDto.idUser());
 
-            preparedStatement.executeUpdate();
+            return preparedStatement.executeUpdate() > 0;
         } catch (SQLException | InterruptedException e) {
             throw new DaoException(e);
         }
     }
 
-    public void updatePasswordByLogin(User user) { //UPDATE_PAS_USER
+    public boolean updatePasswordByLogin(User user) { //UPDATE_PAS_USER
         try (Connection connection = connectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_PAS_USER)) {
 
@@ -281,7 +281,7 @@ public class UserDao implements BaseDao<Long, User> {
             preparedStatement.setString(2, user.getSalt());
             preparedStatement.setString(3, user.getEmail());
 
-            preparedStatement.executeUpdate();
+            return preparedStatement.executeUpdate() > 0;
         } catch (SQLException | InterruptedException e) {
             throw new DaoException(e);
         }

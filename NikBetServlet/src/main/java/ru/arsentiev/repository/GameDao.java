@@ -127,7 +127,6 @@ public class GameDao implements BaseDao<Long, Game> {
         } catch (SQLException | InterruptedException e) {
             throw new DaoException(e);
         }
-
     }
 
     @Override
