@@ -7,16 +7,14 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@AllArgsConstructor
-@EqualsAndHashCode
 @Builder
 public class Prediction {
-    private Long idPrediction;
+    private long idPrediction;
     private Game game;
     private User user;
     private LocalDateTime predictionDate;
     private BigDecimal summa;
     private GameResult prediction;
     private PredictionStatus predictionStatus;
-    private Float coefficient;
+    private float coefficient;
 }

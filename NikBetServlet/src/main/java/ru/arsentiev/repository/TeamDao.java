@@ -11,9 +11,11 @@ import java.util.Optional;
 
 public class TeamDao implements BaseDao<Long, Team> {
     private final ConnectionManager connectionManager;
+
     public TeamDao(ConnectionManager connectionManager) {
         this.connectionManager = connectionManager;
     }
+
     //language=PostgreSQL
     private static final String INSERT_TEAM = "INSERT INTO teams (title, abbreviation) VALUES (?, ?);";
     //language=PostgreSQL
@@ -107,6 +109,10 @@ public class TeamDao implements BaseDao<Long, Team> {
         Long id = resultSet.getLong("idTeam");
         String title = resultSet.getString("title");
         String abbreviation = resultSet.getString("abbreviation");
-        return new Team(id, title, abbreviation);
+        return Team.builder()
+                .idTeam(id)
+                .title(title)
+                .abbreviation(abbreviation)
+                .build();
     }
 }
