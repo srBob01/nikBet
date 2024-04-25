@@ -44,42 +44,42 @@ public class UserMapper {
 
     public User map(UserUpdateDescriptionControllerDto obj) {
         return User.builder()
-                .idUser(Long.valueOf(obj.getIdUser()))
-                .nickname(obj.getNickname())
-                .firstName(obj.getFirstName())
-                .lastName(obj.getLastName())
-                .patronymic(obj.getPatronymic())
-                .email(obj.getEmail())
-                .phoneNumber(obj.getPhoneNumber())
-                .birthDate(obj.getBirthDate())
+                .idUser(obj.idUser())
+                .nickname(obj.nickname())
+                .firstName(obj.firstName())
+                .lastName(obj.lastName())
+                .patronymic(obj.patronymic())
+                .email(obj.email())
+                .phoneNumber(obj.phoneNumber())
+                .birthDate(obj.birthDate())
                 .build();
     }
 
     public User map(UserRegistrationControllerDto obj, String salt, BiFunction<String, String, String> function) {
         return User.builder()
-                .nickname(obj.getNickname())
-                .firstName(obj.getFirstName())
-                .lastName(obj.getLastName())
-                .patronymic(obj.getPatronymic())
-                .email(obj.getEmail())
-                .phoneNumber(obj.getPhoneNumber())
-                .password(function.apply(obj.getPassword(), salt))
+                .nickname(obj.nickname())
+                .firstName(obj.firstName())
+                .lastName(obj.lastName())
+                .patronymic(obj.patronymic())
+                .email(obj.email())
+                .phoneNumber(obj.phoneNumber())
+                .password(function.apply(obj.password(), salt))
                 .salt(salt)
-                .birthDate(obj.getBirthDate())
+                .birthDate(obj.birthDate())
                 .build();
     }
 
     public UserControllerDto map(UserConstFieldsControllerDto userConstFieldsControllerDto, UserUpdateDescriptionControllerDto userUpdateDescriptionControllerDto) {
         return UserControllerDto.builder()
                 .idUser(userConstFieldsControllerDto.idUser())
-                .nickname(userUpdateDescriptionControllerDto.getNickname())
-                .firstName(userUpdateDescriptionControllerDto.getFirstName())
-                .lastName(userUpdateDescriptionControllerDto.getLastName())
-                .patronymic(userUpdateDescriptionControllerDto.getPatronymic())
-                .email(userUpdateDescriptionControllerDto.getEmail())
-                .phoneNumber(userUpdateDescriptionControllerDto.getPhoneNumber())
+                .nickname(userUpdateDescriptionControllerDto.nickname())
+                .firstName(userUpdateDescriptionControllerDto.firstName())
+                .lastName(userUpdateDescriptionControllerDto.lastName())
+                .patronymic(userUpdateDescriptionControllerDto.patronymic())
+                .email(userUpdateDescriptionControllerDto.email())
+                .phoneNumber(userUpdateDescriptionControllerDto.phoneNumber())
                 .role(userConstFieldsControllerDto.role())
-                .birthDate(userUpdateDescriptionControllerDto.getBirthDate())
+                .birthDate(userUpdateDescriptionControllerDto.birthDate())
                 .build();
     }
 
@@ -113,7 +113,7 @@ public class UserMapper {
     public UserUpdateDescriptionControllerDto map(UserUpdateDescriptionViewDto userUpdateDescriptionViewDto) {
         return UserUpdateDescriptionControllerDto.builder()
                 .email(userUpdateDescriptionViewDto.getEmail())
-                .idUser(userUpdateDescriptionViewDto.getIdUser())
+                .idUser(Long.parseLong(userUpdateDescriptionViewDto.getIdUser()))
                 .phoneNumber(userUpdateDescriptionViewDto.getPhoneNumber())
                 .patronymic(userUpdateDescriptionViewDto.getPatronymic())
                 .firstName(userUpdateDescriptionViewDto.getFirstName())
@@ -161,7 +161,7 @@ public class UserMapper {
 
     public UserForAdminViewDto mapUserControllerToViewForAdmin(UserForAdminControllerDto user) {
         return UserForAdminViewDto.builder()
-                .idUser(user.idUser().toString())
+                .idUser(String.valueOf(user.idUser()))
                 .nickname(user.nickname())
                 .firstName(user.firstName())
                 .lastName(user.lastName())

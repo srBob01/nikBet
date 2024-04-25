@@ -5,5 +5,5 @@ import lombok.Builder;
 import java.math.BigDecimal;
 
 @Builder
-public record UserMoneyControllerDto(Long idUser, BigDecimal summa) {
+public record UserMoneyControllerDto(long idUser, BigDecimal summa) {
 }

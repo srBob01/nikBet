@@ -4,13 +4,13 @@ import lombok.Builder;
 import ru.arsentiev.entity.GameTime;
 
 @Builder
-public record GameProgressControllerDto(Long idGame,
+public record GameProgressControllerDto(long idGame,
                                         String homeTeam,
                                         String guestTeam,
-                                        Integer goalHomeTeam,
-                                        Integer goalGuestTeam,
-                                        Float coefficientOnHomeTeam,
-                                        Float coefficientOnDraw,
-                                        Float coefficientOnGuestTeam,
+                                        int goalHomeTeam,
+                                        int goalGuestTeam,
+                                        float coefficientOnHomeTeam,
+                                        float coefficientOnDraw,
+                                        float coefficientOnGuestTeam,
                                         GameTime time) {
 }

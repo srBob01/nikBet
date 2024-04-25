@@ -8,16 +8,16 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Builder
-public record PredictionPlayedControllerDto(Long idPrediction,
-                                            Long idGame,
+public record PredictionPlayedControllerDto(long idPrediction,
+                                            long idGame,
                                             String homeTeam,
                                             String guestTeam,
-                                            Integer goalHomeTeam,
-                                            Integer goalGuestTeam,
+                                            int goalHomeTeam,
+                                            int goalGuestTeam,
                                             LocalDateTime predictionDate,
                                             GameResult result,
                                             BigDecimal summa,
                                             GameResult prediction,
                                             PredictionStatus predictionStatus,
-                                            Float coefficient) {
+                                            float coefficient) {
 }

@@ -100,7 +100,7 @@ public class GameService {
     }
 
     public boolean addNewGame(GameAdminScheduledControllerDto gameAdminScheduledControllerDto) {
-        if (gameAdminScheduledControllerDto.idGuestTeam().equals(gameAdminScheduledControllerDto.idHomeTeam())
+        if (gameAdminScheduledControllerDto.idGuestTeam() == gameAdminScheduledControllerDto.idHomeTeam()
             || gameAdminScheduledControllerDto.gameDate().isBefore(LocalDateTime.now())) {
             return false;
         }

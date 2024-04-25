@@ -6,6 +6,6 @@ import ru.arsentiev.entity.GameResult;
 import java.math.BigDecimal;
 
 @Builder
-public record PredictionForDeleteControllerDto(Long idPrediction, Long idGame, GameResult prediction,
-                                               Float coefficient, BigDecimal summa, Long idUser) {
+public record PredictionForDeleteControllerDto(long idPrediction, long idGame, GameResult prediction,
+                                               float coefficient, BigDecimal summa, long idUser) {
 }

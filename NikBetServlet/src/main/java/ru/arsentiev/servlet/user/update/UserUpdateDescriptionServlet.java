@@ -59,7 +59,7 @@ public class UserUpdateDescriptionServlet extends HttpServlet {
                 patronymic, email, birthDate, firstName, lastName);
 
         final UserUpdateDescriptionViewDto userUpdateDescriptionViewDto = getUserUpdateDto(nickname,
-                firstName, lastName, patronymic, email, phoneNumber, birthDate, user.idUser().toString());
+                firstName, lastName, patronymic, email, phoneNumber, birthDate, String.valueOf(user.idUser()));
 
         final LoadValidationResult result = updateUserValidator.isValidDescription(userUpdateDescriptionViewDto,
                 updatedUserFields);

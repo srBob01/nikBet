@@ -6,7 +6,7 @@ import ru.arsentiev.entity.UserRole;
 import java.time.LocalDate;
 
 @Builder
-public record UserControllerDto(Long idUser, String nickname, String firstName, String lastName, String patronymic,
+public record UserControllerDto(long idUser, String nickname, String firstName, String lastName, String patronymic,
                                 String phoneNumber, String email, LocalDate birthDate,
                                 UserRole role) {
 }

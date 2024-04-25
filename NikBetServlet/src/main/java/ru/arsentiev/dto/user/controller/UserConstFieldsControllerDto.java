@@ -4,5 +4,5 @@ import lombok.Builder;
 import ru.arsentiev.entity.UserRole;
 
 @Builder
-public record UserConstFieldsControllerDto(Long idUser, UserRole role) {
+public record UserConstFieldsControllerDto(long idUser, UserRole role) {
 }

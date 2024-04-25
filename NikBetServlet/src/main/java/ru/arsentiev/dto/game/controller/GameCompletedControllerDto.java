@@ -6,11 +6,11 @@ import ru.arsentiev.entity.GameResult;
 import java.time.LocalDateTime;
 
 @Builder
-public record GameCompletedControllerDto(Long idGame,
+public record GameCompletedControllerDto(long idGame,
                                          String homeTeam,
                                          String guestTeam,
-                                         Integer goalHomeTeam,
-                                         Integer goalGuestTeam,
+                                         int goalHomeTeam,
+                                         int goalGuestTeam,
                                          LocalDateTime gameDate,
                                          GameResult result) {
 }

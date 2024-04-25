@@ -7,7 +7,6 @@ import ru.arsentiev.dto.team.view.TeamViewDto;
 import ru.arsentiev.entity.Team;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-
 public class TeamMapper {
     private static final TeamMapper INSTANCE = new TeamMapper();
 
@@ -17,7 +16,7 @@ public class TeamMapper {
 
     public TeamViewDto map(TeamControllerDto teamControllerDto) {
         return TeamViewDto.builder()
-                .idTeam(teamControllerDto.idTeam().toString())
+                .idTeam(String.valueOf(teamControllerDto.idTeam()))
                 .title(teamControllerDto.title())
                 .build();
     }

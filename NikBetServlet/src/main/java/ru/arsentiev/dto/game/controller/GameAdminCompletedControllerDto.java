@@ -4,5 +4,5 @@ import lombok.Builder;
 import ru.arsentiev.entity.GameResult;
 
 @Builder
-public record GameAdminCompletedControllerDto(Long idGame, GameResult result) {
+public record GameAdminCompletedControllerDto(long idGame, GameResult result) {
 }

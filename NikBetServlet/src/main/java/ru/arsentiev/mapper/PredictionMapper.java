@@ -22,7 +22,7 @@ public class PredictionMapper {
     }
 
     public PredictionPlaceControllerDto map(PredictionPlaceViewDto predictionPlaceViewDto) {
-        Long idGameAsLong = Long.parseLong(predictionPlaceViewDto.idGame());
+        long idGameAsLong = Long.parseLong(predictionPlaceViewDto.idGame());
         BigDecimal summaAsBigDecimal = new BigDecimal(predictionPlaceViewDto.summa());
         GameResult predictionAsEnum = GameResult.valueOf(predictionPlaceViewDto.prediction());
 
@@ -95,13 +95,13 @@ public class PredictionMapper {
                 .idGame(String.valueOf(dto.idGame()))
                 .homeTeam(dto.homeTeam())
                 .guestTeam(dto.guestTeam())
-                .goalHomeTeam(dto.goalHomeTeam() != null ? dto.goalHomeTeam().toString() : "")
-                .goalGuestTeam(dto.goalGuestTeam() != null ? dto.goalGuestTeam().toString() : "")
+                .goalHomeTeam(String.valueOf(dto.goalHomeTeam()))
+                .goalGuestTeam(String.valueOf(dto.goalGuestTeam()))
                 .predictionDate(dto.predictionDate() != null ? dto.predictionDate().format(TimeStampFormatter.FORMATTER) : "")
                 .summa(dto.summa() != null ? dto.summa().toString() : "")
                 .prediction(dto.prediction() != null ? dto.prediction().name() : "")
                 .predictionStatus(dto.predictionStatus() != null ? dto.predictionStatus().name() : "")
-                .coefficient(dto.coefficient() != null ? String.valueOf(dto.coefficient()) : "")
+                .coefficient(String.valueOf(dto.coefficient()))
                 .build();
     }
 
@@ -111,14 +111,14 @@ public class PredictionMapper {
                 .idGame(String.valueOf(dto.idGame()))
                 .homeTeam(dto.homeTeam())
                 .guestTeam(dto.guestTeam())
-                .goalHomeTeam(dto.goalHomeTeam() != null ? dto.goalHomeTeam().toString() : "")
-                .goalGuestTeam(dto.goalGuestTeam() != null ? dto.goalGuestTeam().toString() : "")
+                .goalHomeTeam(String.valueOf(dto.goalHomeTeam()))
+                .goalGuestTeam(String.valueOf(dto.goalGuestTeam()))
                 .predictionDate(dto.predictionDate() != null ? dto.predictionDate().format(TimeStampFormatter.FORMATTER) : "")
                 .summa(dto.summa() != null ? dto.summa().toString() : "")
                 .prediction(dto.prediction() != null ? dto.prediction().name() : "")
                 .result(dto.result().name())
                 .predictionStatus(dto.predictionStatus() != null ? dto.predictionStatus().name() : "")
-                .coefficient(dto.coefficient() != null ? String.valueOf(dto.coefficient()) : "")
+                .coefficient(String.valueOf(dto.coefficient()))
                 .build();
     }
 
@@ -127,9 +127,9 @@ public class PredictionMapper {
                 .idUser(predictionForDeleteViewDto.idUser())
                 .coefficient(Float.parseFloat(predictionForDeleteViewDto.coefficient().trim()))
                 .summa(BigDecimal.valueOf(Float.parseFloat(predictionForDeleteViewDto.summa().trim())))
-                .idGame(Long.valueOf(predictionForDeleteViewDto.idGame().trim()))
+                .idGame(Long.parseLong(predictionForDeleteViewDto.idGame().trim()))
                 .prediction(GameResult.valueOf(predictionForDeleteViewDto.prediction().trim()))
-                .idPrediction(Long.valueOf(predictionForDeleteViewDto.idPrediction().trim()))
+                .idPrediction(Long.parseLong(predictionForDeleteViewDto.idPrediction().trim()))
                 .build();
     }
 }
