@@ -7,6 +7,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import ru.arsentiev.dto.prediction.controller.PredictionForDeleteControllerDto;
 import ru.arsentiev.dto.prediction.view.PredictionForDeleteViewDto;
 import ru.arsentiev.dto.user.controller.UserControllerDto;
+import ru.arsentiev.manager.MapperManager;
+import ru.arsentiev.manager.ServiceManager;
 import ru.arsentiev.mapper.PredictionMapper;
 import ru.arsentiev.service.PredictionService;
 
@@ -23,8 +25,8 @@ public class UserPredictionBaseServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        predictionService = PredictionService.getInstance();
-        predictionMapper = PredictionMapper.getInstance();
+        predictionService = ServiceManager.getPredictionService();
+        predictionMapper = MapperManager.getPredictionMapper();
     }
 
     @Override

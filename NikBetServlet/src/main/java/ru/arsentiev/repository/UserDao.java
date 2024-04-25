@@ -5,9 +5,9 @@ import ru.arsentiev.dto.user.controller.UserPasswordAndSaltControllerDto;
 import ru.arsentiev.entity.User;
 import ru.arsentiev.entity.UserRole;
 import ru.arsentiev.exception.DaoException;
-import ru.arsentiev.singleton.connection.ConnectionManager;
-import ru.arsentiev.singleton.query.UserQueryCreator;
-import ru.arsentiev.singleton.query.entity.UpdatedUserFields;
+import ru.arsentiev.processing.connection.ConnectionGetter;
+import ru.arsentiev.processing.query.UserQueryCreator;
+import ru.arsentiev.processing.query.entity.UpdatedUserFields;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -17,11 +17,11 @@ import java.util.List;
 import java.util.Optional;
 
 public class UserDao implements BaseDao<Long, User> {
-    private final ConnectionManager connectionManager;
+    private final ConnectionGetter connectionGetter;
     private final UserQueryCreator userQueryCreator;
 
-    public UserDao(ConnectionManager connectionManager, UserQueryCreator userQueryCreator) {
-        this.connectionManager = connectionManager;
+    public UserDao(ConnectionGetter connectionGetter, UserQueryCreator userQueryCreator) {
+        this.connectionGetter = connectionGetter;
         this.userQueryCreator = userQueryCreator;
     }
 
@@ -75,7 +75,7 @@ public class UserDao implements BaseDao<Long, User> {
 
     @Override
     public void insert(User user) { //INSERT_USER
-        try (Connection connection = connectionManager.get();
+        try (Connection connection = connectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_USER, Statement.RETURN_GENERATED_KEYS)) {
 
             preparedStatement.setString(1, user.getNickname());
@@ -106,7 +106,7 @@ public class UserDao implements BaseDao<Long, User> {
     @Override
     public List<User> selectAll() { //SELECT_ALL_USERS
         List<User> users = new ArrayList<>();
-        try (Connection connection = connectionManager.get();
+        try (Connection connection = connectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_USERS);
              ResultSet rs = preparedStatement.executeQuery()) {
             while (rs.next()) {
@@ -120,7 +120,7 @@ public class UserDao implements BaseDao<Long, User> {
 
     @Override
     public Optional<User> selectById(Long id) { //SELECT_INFO_USER_BY_ID
-        try (Connection connection = connectionManager.get()) {
+        try (Connection connection = connectionGetter.get()) {
             return selectById(id, connection);
         } catch (SQLException | InterruptedException e) {
             throw new DaoException(e);
@@ -143,7 +143,7 @@ public class UserDao implements BaseDao<Long, User> {
     }
 
     public User selectByLogin(String login) { //SELECT_USER_BY_LOGIN
-        try (Connection connection = connectionManager.get();
+        try (Connection connection = connectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_USER_BY_LOGIN)) {
             preparedStatement.setString(1, login);
             try (ResultSet rs = preparedStatement.executeQuery()) {
@@ -158,7 +158,7 @@ public class UserDao implements BaseDao<Long, User> {
     }
 
     public Optional<User> selectByNickname(String nickname) { //SELECT_USER_BY_NICKNAME
-        try (Connection connection = connectionManager.get();
+        try (Connection connection = connectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_USER_BY_NICKNAME)) {
             preparedStatement.setString(1, nickname);
             try (ResultSet rs = preparedStatement.executeQuery()) {
@@ -173,7 +173,7 @@ public class UserDao implements BaseDao<Long, User> {
     }
 
     public UserPasswordAndSaltControllerDto selectPasswordByLogin(String login) { //SELECT_PASSWORD_USER
-        try (Connection connection = connectionManager.get();
+        try (Connection connection = connectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_PASSWORD_SALT_USER)) {
             String password = null;
             String salt = null;
@@ -194,7 +194,7 @@ public class UserDao implements BaseDao<Long, User> {
     }
 
     public Optional<BigDecimal> selectBalanceById(Long idUser) { //SELECT_BALANCE_USER
-        try (Connection connection = connectionManager.get();
+        try (Connection connection = connectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_BALANCE_USER)) {
             preparedStatement.setLong(1, idUser);
             try (ResultSet rs = preparedStatement.executeQuery()) {
@@ -210,7 +210,7 @@ public class UserDao implements BaseDao<Long, User> {
 
     @Override
     public boolean delete(Long id) { //DELETE_USER
-        try (Connection connection = connectionManager.get();
+        try (Connection connection = connectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(DELETE_USER)) {
 
             preparedStatement.setLong(1, id);
@@ -223,7 +223,7 @@ public class UserDao implements BaseDao<Long, User> {
 
     @Override
     public boolean update(User user) { //UPDATE_USER
-        try (Connection connection = connectionManager.get();
+        try (Connection connection = connectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_USER)) {
 
             preparedStatement.setString(1, user.getNickname());
@@ -242,7 +242,7 @@ public class UserDao implements BaseDao<Long, User> {
     public void updateDescriptionWithDynamicCreation(User user, UpdatedUserFields fields) {
         Optional<String> sql = userQueryCreator.createUserUpdateQuery(user, fields);
         if (sql.isPresent()) {
-            try (Connection connection = connectionManager.get();
+            try (Connection connection = connectionGetter.get();
                  PreparedStatement preparedStatement = connection.prepareStatement(sql.get())) {
 
                 preparedStatement.executeUpdate();
@@ -261,7 +261,7 @@ public class UserDao implements BaseDao<Long, User> {
     }
 
     private void actionMoneyById(UserMoneyControllerDto userMoneyControllerDto, String action) {
-        try (Connection connection = connectionManager.get();
+        try (Connection connection = connectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(action)) {
 
             preparedStatement.setBigDecimal(1, userMoneyControllerDto.summa());
@@ -274,7 +274,7 @@ public class UserDao implements BaseDao<Long, User> {
     }
 
     public void updatePasswordByLogin(User user) { //UPDATE_PAS_USER
-        try (Connection connection = connectionManager.get();
+        try (Connection connection = connectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_PAS_USER)) {
 
             preparedStatement.setString(1, user.getPassword());

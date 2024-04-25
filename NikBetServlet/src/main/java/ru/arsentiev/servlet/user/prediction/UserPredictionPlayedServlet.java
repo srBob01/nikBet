@@ -7,6 +7,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.arsentiev.dto.prediction.view.PredictionPlayedViewDto;
 import ru.arsentiev.dto.user.controller.UserControllerDto;
+import ru.arsentiev.manager.MapperManager;
+import ru.arsentiev.manager.ServiceManager;
 import ru.arsentiev.mapper.PredictionMapper;
 import ru.arsentiev.service.PredictionService;
 import ru.arsentiev.utils.JspPathCreator;
@@ -25,8 +27,8 @@ public class UserPredictionPlayedServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        predictionService = PredictionService.getInstance();
-        predictionMapper = PredictionMapper.getInstance();
+        predictionService = ServiceManager.getPredictionService();
+        predictionMapper = MapperManager.getPredictionMapper();
     }
 
     @Override

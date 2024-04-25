@@ -2,12 +2,8 @@ package ru.arsentiev.manager;
 
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
-import ru.arsentiev.singleton.check.DateCheck;
-import ru.arsentiev.singleton.check.NameCheck;
-import ru.arsentiev.singleton.check.PasswordCheck;
-import ru.arsentiev.singleton.check.PhoneNumberCheck;
-import ru.arsentiev.validator.RegistrationUserValidator;
-import ru.arsentiev.validator.UpdateUserValidator;
+import ru.arsentiev.processing.validator.RegistrationUserValidator;
+import ru.arsentiev.processing.validator.UpdateUserValidator;
 
 @UtilityClass
 public class ValidationManager {
@@ -18,10 +14,11 @@ public class ValidationManager {
 
     static {
         registrationUserValidator = new RegistrationUserValidator(DaoManager.getUserExistsDao(),
-                DateCheck.getInstance(), PasswordCheck.getInstance(), PhoneNumberCheck.getInstance(),
-                NameCheck.getInstance());
+                CheckManager.getDateCheck(), CheckManager.getPasswordCheck(), CheckManager.getPhoneNumberCheck(),
+                CheckManager.getNameCheck(), DateFormatterManager.getLocalDateFormatter());
+
         updateUserValidator = new UpdateUserValidator(DaoManager.getUserExistsDao(),
-                DateCheck.getInstance(), PhoneNumberCheck.getInstance(),
-                NameCheck.getInstance(), PasswordCheck.getInstance());
+                CheckManager.getDateCheck(), CheckManager.getPhoneNumberCheck(),
+                CheckManager.getNameCheck(), CheckManager.getPasswordCheck(), DateFormatterManager.getLocalDateFormatter());
     }
 }

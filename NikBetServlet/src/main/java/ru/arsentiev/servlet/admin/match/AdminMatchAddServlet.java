@@ -8,6 +8,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import ru.arsentiev.dto.game.controller.GameAdminScheduledControllerDto;
 import ru.arsentiev.dto.game.view.GameAdminScheduledViewDto;
 import ru.arsentiev.dto.team.view.TeamViewDto;
+import ru.arsentiev.manager.MapperManager;
+import ru.arsentiev.manager.ServiceManager;
 import ru.arsentiev.mapper.GameMapper;
 import ru.arsentiev.mapper.TeamMapper;
 import ru.arsentiev.service.GameService;
@@ -27,10 +29,10 @@ public class AdminMatchAddServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        gameMapper = GameMapper.getInstance();
-        gameService = GameService.getInstance();
-        final TeamMapper teamMapper = TeamMapper.getInstance();
-        final TeamService teamService = TeamService.getInstance();
+        gameMapper = MapperManager.getGameMapper();
+        gameService = ServiceManager.getGameService();
+        final TeamMapper teamMapper = MapperManager.getTeamMapper();
+        final TeamService teamService = ServiceManager.getTeamService();
         final List<TeamViewDto> teamViewDtoList = teamService.selectAllTeam()
                 .stream()
                 .map(teamMapper::map)

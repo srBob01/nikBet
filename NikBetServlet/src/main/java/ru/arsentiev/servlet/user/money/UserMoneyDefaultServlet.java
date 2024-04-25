@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.arsentiev.dto.user.controller.UserControllerDto;
+import ru.arsentiev.manager.ServiceManager;
 import ru.arsentiev.service.UserService;
 import ru.arsentiev.utils.JspPathCreator;
 
@@ -22,7 +23,7 @@ public class UserMoneyDefaultServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        userService = UserService.getInstance();
+        userService = ServiceManager.getUserService();
     }
 
     @Override

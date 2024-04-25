@@ -1,13 +1,10 @@
 package ru.arsentiev.service;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import ru.arsentiev.dto.prediction.controller.*;
 import ru.arsentiev.dto.user.controller.UserMoneyControllerDto;
 import ru.arsentiev.entity.Game;
 import ru.arsentiev.entity.GameStatus;
 import ru.arsentiev.entity.Prediction;
-import ru.arsentiev.manager.DaoManager;
 import ru.arsentiev.mapper.PredictionMapper;
 import ru.arsentiev.repository.GameDao;
 import ru.arsentiev.repository.PredictionDao;
@@ -19,17 +16,21 @@ import java.math.RoundingMode;
 import java.util.List;
 import java.util.Optional;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PredictionService {
-    private static final PredictionService INSTANCE = new PredictionService();
-    private final PredictionMapper predictionMapper = PredictionMapper.getInstance();
-    private final PredictionDao predictionDao = DaoManager.getPredictionDao();
-    private final GameDao gameDao = DaoManager.getGameDao();
-    private final UserDao userDao = DaoManager.getUserDao();
+    private final PredictionMapper predictionMapper;
 
-    public static PredictionService getInstance() {
-        return INSTANCE;
+    public PredictionService(PredictionMapper predictionMapper, PredictionDao predictionDao,
+                             GameDao gameDao, UserDao userDao) {
+        this.predictionMapper = predictionMapper;
+        this.predictionDao = predictionDao;
+        this.gameDao = gameDao;
+        this.userDao = userDao;
     }
+
+    private final PredictionDao predictionDao;
+    private final GameDao gameDao;
+    private final UserDao userDao;
+
 
     public PredictionResultControllerDto insertPrediction(PredictionPlaceControllerDto predictionPlaceControllerDto) {
         Optional<Game> game = gameDao.selectById(predictionPlaceControllerDto.idGame());

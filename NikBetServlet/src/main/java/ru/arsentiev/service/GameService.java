@@ -1,19 +1,16 @@
 package ru.arsentiev.service;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import ru.arsentiev.dto.game.controller.*;
 import ru.arsentiev.dto.user.controller.UserMoneyControllerDto;
 import ru.arsentiev.entity.Game;
 import ru.arsentiev.entity.GameStatus;
 import ru.arsentiev.entity.Prediction;
-import ru.arsentiev.manager.DaoManager;
 import ru.arsentiev.mapper.GameMapper;
+import ru.arsentiev.processing.query.entity.CompletedGameFields;
 import ru.arsentiev.repository.GameDao;
 import ru.arsentiev.repository.PredictionDao;
 import ru.arsentiev.repository.UserDao;
 import ru.arsentiev.service.entity.game.TripleListOfGameControllerDto;
-import ru.arsentiev.singleton.query.entity.CompletedGameFields;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -22,16 +19,17 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class GameService {
-    private static final GameService INSTANCE = new GameService();
-    private final GameDao gameDao = DaoManager.getGameDao();
-    private final PredictionDao predictionDao = DaoManager.getPredictionDao();
-    private final UserDao userDao = DaoManager.getUserDao();
-    private final GameMapper gameMapper = GameMapper.getInstance();
+    private final GameDao gameDao;
+    private final PredictionDao predictionDao;
+    private final UserDao userDao;
+    private final GameMapper gameMapper;
 
-    public static GameService getInstance() {
-        return INSTANCE;
+    public GameService(GameDao gameDao, PredictionDao predictionDao, UserDao userDao, GameMapper gameMapper) {
+        this.gameDao = gameDao;
+        this.predictionDao = predictionDao;
+        this.userDao = userDao;
+        this.gameMapper = gameMapper;
     }
 
     public List<GameProgressControllerDto> selectGameInProgressLimit() {

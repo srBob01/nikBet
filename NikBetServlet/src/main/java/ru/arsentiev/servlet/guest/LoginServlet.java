@@ -7,6 +7,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.arsentiev.dto.user.controller.UserLoginControllerDto;
 import ru.arsentiev.dto.user.view.UserLoginViewDto;
+import ru.arsentiev.manager.MapperManager;
+import ru.arsentiev.manager.ServiceManager;
 import ru.arsentiev.mapper.UserMapper;
 import ru.arsentiev.service.UserService;
 import ru.arsentiev.service.entity.user.ReturnValueInCheckLogin;
@@ -26,8 +28,8 @@ public class LoginServlet extends HttpServlet {
 
     @Override
     public void init() {
-        userService = UserService.getInstance();
-        userMapper = UserMapper.getInstance();
+        userService = ServiceManager.getUserService();
+        userMapper = MapperManager.getUserMapper();
     }
 
     @Override

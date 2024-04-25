@@ -11,6 +11,8 @@ import ru.arsentiev.dto.prediction.view.PredictionResultViewDto;
 import ru.arsentiev.dto.user.controller.UserControllerDto;
 import ru.arsentiev.dto.user.controller.UserMoneyControllerDto;
 import ru.arsentiev.dto.user.view.UserMoneyViewDto;
+import ru.arsentiev.manager.MapperManager;
+import ru.arsentiev.manager.ServiceManager;
 import ru.arsentiev.mapper.GameMapper;
 import ru.arsentiev.mapper.PredictionMapper;
 import ru.arsentiev.mapper.UserMapper;
@@ -33,12 +35,12 @@ public class UserMatchesBaseServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        predictionMapper = PredictionMapper.getInstance();
-        userMapper = UserMapper.getInstance();
-        userService = UserService.getInstance();
-        gameService = GameService.getInstance();
-        predictionService = PredictionService.getInstance();
-        gameMapper = GameMapper.getInstance();
+        predictionMapper = MapperManager.getPredictionMapper();
+        userMapper = MapperManager.getUserMapper();
+        userService = ServiceManager.getUserService();
+        gameService = ServiceManager.getGameService();
+        predictionService = ServiceManager.getPredictionService();
+        gameMapper = MapperManager.getGameMapper();
     }
 
     @Override

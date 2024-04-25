@@ -4,6 +4,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import ru.arsentiev.manager.MapperManager;
+import ru.arsentiev.manager.ServiceManager;
 import ru.arsentiev.mapper.UserMapper;
 import ru.arsentiev.service.UserService;
 
@@ -16,8 +18,8 @@ public class AdminBaseDeleteServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        userService = UserService.getInstance();
-        userMapper = UserMapper.getInstance();
+        userService = ServiceManager.getUserService();
+        userMapper = MapperManager.getUserMapper();
     }
 
     @Override

@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.arsentiev.dto.user.controller.UserControllerDto;
 import ru.arsentiev.dto.user.view.UserViewDto;
+import ru.arsentiev.manager.MapperManager;
 import ru.arsentiev.mapper.UserMapper;
 import ru.arsentiev.utils.JspPathCreator;
 
@@ -23,7 +24,7 @@ public class AdminDefaultServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        userMapper = UserMapper.getInstance();
+        userMapper = MapperManager.getUserMapper();
     }
 
     @Override

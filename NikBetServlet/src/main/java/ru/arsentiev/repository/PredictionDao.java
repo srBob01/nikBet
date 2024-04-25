@@ -2,7 +2,7 @@ package ru.arsentiev.repository;
 
 import ru.arsentiev.entity.*;
 import ru.arsentiev.exception.DaoException;
-import ru.arsentiev.singleton.connection.ConnectionManager;
+import ru.arsentiev.processing.connection.ConnectionGetter;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -12,12 +12,12 @@ import java.util.List;
 import java.util.Optional;
 
 public class PredictionDao implements BaseDao<Long, Prediction> {
-    private final ConnectionManager connectionManager;
+    private final ConnectionGetter connectionGetter;
     private final GameDao gameDAO;
     private final UserDao userDAO;
 
-    public PredictionDao(ConnectionManager connectionManager, GameDao gameDAO, UserDao userDAO) {
-        this.connectionManager = connectionManager;
+    public PredictionDao(ConnectionGetter connectionGetter, GameDao gameDAO, UserDao userDAO) {
+        this.connectionGetter = connectionGetter;
         this.gameDAO = gameDAO;
         this.userDAO = userDAO;
     }
@@ -61,7 +61,7 @@ public class PredictionDao implements BaseDao<Long, Prediction> {
 
     @Override
     public void insert(Prediction prediction) {
-        try (Connection connection = connectionManager.get();
+        try (Connection connection = connectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_PREDICTION, Statement.RETURN_GENERATED_KEYS)) {
 
             setStatement(prediction, preparedStatement);
@@ -80,7 +80,7 @@ public class PredictionDao implements BaseDao<Long, Prediction> {
     @Override
     public List<Prediction> selectAll() {
         List<Prediction> predictions = new ArrayList<>();
-        try (Connection connection = connectionManager.get();
+        try (Connection connection = connectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_PREDICTIONS);
              ResultSet resultSet = preparedStatement.executeQuery()) {
 
@@ -95,7 +95,7 @@ public class PredictionDao implements BaseDao<Long, Prediction> {
 
     @Override
     public Optional<Prediction> selectById(Long id) {
-        try (Connection connection = connectionManager.get();
+        try (Connection connection = connectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_PREDICTION_BY_ID)) {
 
             preparedStatement.setLong(1, id);
@@ -133,7 +133,7 @@ public class PredictionDao implements BaseDao<Long, Prediction> {
 
     private List<Prediction> selectByOtherId(Long Id, String selectPredictionsById) {
         List<Prediction> predictions = new ArrayList<>();
-        try (Connection connection = connectionManager.get();
+        try (Connection connection = connectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(selectPredictionsById)) {
 
             preparedStatement.setLong(1, Id);
@@ -151,7 +151,7 @@ public class PredictionDao implements BaseDao<Long, Prediction> {
 
     @Override
     public boolean delete(Long id) {
-        try (Connection connection = connectionManager.get();
+        try (Connection connection = connectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(DELETE_PREDICTION)) {
 
             preparedStatement.setLong(1, id);
@@ -163,7 +163,7 @@ public class PredictionDao implements BaseDao<Long, Prediction> {
 
     @Override
     public boolean update(Prediction prediction) {
-        try (Connection connection = connectionManager.get();
+        try (Connection connection = connectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_PREDICTION)) {
 
             setStatement(prediction, preparedStatement);
@@ -176,7 +176,7 @@ public class PredictionDao implements BaseDao<Long, Prediction> {
     }
 
     public void updatePredictionStatusOfList(List<Long> listIdPrediction) {
-        try (Connection connection = connectionManager.get()) {
+        try (Connection connection = connectionGetter.get()) {
             listIdPrediction.forEach(id -> updatePredictionStatus(id, connection));
         } catch (SQLException | InterruptedException e) {
             throw new RuntimeException(e);

@@ -2,7 +2,7 @@ package ru.arsentiev.repository;
 
 import ru.arsentiev.entity.Team;
 import ru.arsentiev.exception.DaoException;
-import ru.arsentiev.singleton.connection.ConnectionManager;
+import ru.arsentiev.processing.connection.ConnectionGetter;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.Optional;
 
 public class TeamDao implements BaseDao<Long, Team> {
-    private final ConnectionManager connectionManager;
+    private final ConnectionGetter connectionGetter;
 
-    public TeamDao(ConnectionManager connectionManager) {
-        this.connectionManager = connectionManager;
+    public TeamDao(ConnectionGetter connectionGetter) {
+        this.connectionGetter = connectionGetter;
     }
 
     //language=PostgreSQL
@@ -29,7 +29,7 @@ public class TeamDao implements BaseDao<Long, Team> {
 
     @Override
     public void insert(Team team) {
-        try (Connection connection = connectionManager.get();
+        try (Connection connection = connectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_TEAM, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, team.getTitle());
             preparedStatement.setString(2, team.getAbbreviation());
@@ -46,7 +46,7 @@ public class TeamDao implements BaseDao<Long, Team> {
     @Override
     public List<Team> selectAll() {
         List<Team> teams = new ArrayList<>();
-        try (Connection connection = connectionManager.get();
+        try (Connection connection = connectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_TEAMS);
              ResultSet resultSet = preparedStatement.executeQuery()) {
             while (resultSet.next()) {
@@ -60,7 +60,7 @@ public class TeamDao implements BaseDao<Long, Team> {
 
     @Override
     public Optional<Team> selectById(Long id) {
-        try (Connection connection = connectionManager.get()) {
+        try (Connection connection = connectionGetter.get()) {
             return selectById(id, connection);
         } catch (SQLException | InterruptedException e) {
             throw new DaoException(e);
@@ -83,7 +83,7 @@ public class TeamDao implements BaseDao<Long, Team> {
 
     @Override
     public boolean delete(Long id) {
-        try (Connection connection = connectionManager.get();
+        try (Connection connection = connectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(DELETE_TEAM)) {
             preparedStatement.setLong(1, id);
             return preparedStatement.executeUpdate() > 0;
@@ -94,7 +94,7 @@ public class TeamDao implements BaseDao<Long, Team> {
 
     @Override
     public boolean update(Team team) {
-        try (Connection connection = connectionManager.get();
+        try (Connection connection = connectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_TEAM)) {
             preparedStatement.setString(1, team.getTitle());
             preparedStatement.setString(2, team.getAbbreviation());

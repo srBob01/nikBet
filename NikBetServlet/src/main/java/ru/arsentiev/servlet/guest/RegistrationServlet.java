@@ -8,12 +8,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.arsentiev.dto.user.controller.UserRegistrationControllerDto;
 import ru.arsentiev.dto.user.view.UserRegistrationViewDto;
+import ru.arsentiev.manager.MapperManager;
+import ru.arsentiev.manager.ServiceManager;
 import ru.arsentiev.manager.ValidationManager;
 import ru.arsentiev.mapper.UserMapper;
 import ru.arsentiev.service.UserService;
 import ru.arsentiev.utils.JspPathCreator;
-import ru.arsentiev.validator.RegistrationUserValidator;
-import ru.arsentiev.validator.entity.load.LoadValidationResult;
+import ru.arsentiev.processing.validator.RegistrationUserValidator;
+import ru.arsentiev.processing.validator.entity.load.LoadValidationResult;
 
 import java.io.IOException;
 
@@ -32,9 +34,9 @@ public class RegistrationServlet extends HttpServlet {
 
     @Override
     public void init(ServletConfig config) {
-        userService = UserService.getInstance();
+        userService = ServiceManager.getUserService();
         registrationUserValidator = ValidationManager.getRegistrationUserValidator();
-        userMapper = UserMapper.getInstance();
+        userMapper = MapperManager.getUserMapper();
     }
 
     @Override

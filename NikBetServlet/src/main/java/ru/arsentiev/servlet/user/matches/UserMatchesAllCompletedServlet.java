@@ -6,6 +6,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.arsentiev.dto.game.view.GameCompletedViewDto;
+import ru.arsentiev.manager.MapperManager;
+import ru.arsentiev.manager.ServiceManager;
 import ru.arsentiev.mapper.GameMapper;
 import ru.arsentiev.service.GameService;
 import ru.arsentiev.utils.JspPathCreator;
@@ -23,8 +25,8 @@ public class UserMatchesAllCompletedServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        gameService = GameService.getInstance();
-        gameMapper = GameMapper.getInstance();
+        gameService = ServiceManager.getGameService();
+        gameMapper = MapperManager.getGameMapper();
     }
 
     @Override

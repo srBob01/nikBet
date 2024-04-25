@@ -6,6 +6,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.arsentiev.dto.game.view.GameScheduledViewDto;
+import ru.arsentiev.manager.MapperManager;
+import ru.arsentiev.manager.ServiceManager;
 import ru.arsentiev.mapper.GameMapper;
 import ru.arsentiev.service.GameService;
 import ru.arsentiev.utils.JspPathCreator;
@@ -23,8 +25,8 @@ public class AdminMatchStartServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        gameMapper = GameMapper.getInstance();
-        gameService = GameService.getInstance();
+        gameMapper = MapperManager.getGameMapper();
+        gameService = ServiceManager.getGameService();
     }
 
     @Override

@@ -9,13 +9,15 @@ import ru.arsentiev.dto.user.controller.UserConstFieldsControllerDto;
 import ru.arsentiev.dto.user.controller.UserControllerDto;
 import ru.arsentiev.dto.user.controller.UserUpdateDescriptionControllerDto;
 import ru.arsentiev.dto.user.view.UserUpdateDescriptionViewDto;
+import ru.arsentiev.manager.MapperManager;
+import ru.arsentiev.manager.ServiceManager;
 import ru.arsentiev.manager.ValidationManager;
 import ru.arsentiev.mapper.UserMapper;
 import ru.arsentiev.service.UserService;
-import ru.arsentiev.singleton.query.entity.UpdatedUserFields;
+import ru.arsentiev.processing.query.entity.UpdatedUserFields;
 import ru.arsentiev.utils.JspPathCreator;
-import ru.arsentiev.validator.UpdateUserValidator;
-import ru.arsentiev.validator.entity.load.LoadValidationResult;
+import ru.arsentiev.processing.validator.UpdateUserValidator;
+import ru.arsentiev.processing.validator.entity.load.LoadValidationResult;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -34,8 +36,8 @@ public class UserUpdateDescriptionServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        userService = UserService.getInstance();
-        userMapper = UserMapper.getInstance();
+        userService = ServiceManager.getUserService();
+        userMapper = MapperManager.getUserMapper();
         updateUserValidator = ValidationManager.getUpdateUserValidator();
     }
 

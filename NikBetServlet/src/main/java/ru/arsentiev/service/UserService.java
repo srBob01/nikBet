@@ -1,34 +1,32 @@
 package ru.arsentiev.service;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import ru.arsentiev.dto.user.controller.*;
 import ru.arsentiev.entity.User;
-import ru.arsentiev.manager.DaoManager;
-import ru.arsentiev.manager.ValidationManager;
 import ru.arsentiev.mapper.UserMapper;
+import ru.arsentiev.processing.password.PasswordHashed;
+import ru.arsentiev.processing.query.entity.UpdatedUserFields;
 import ru.arsentiev.repository.UserDao;
 import ru.arsentiev.service.entity.user.ReturnValueInCheckLogin;
-import ru.arsentiev.singleton.password.PasswordHashed;
-import ru.arsentiev.singleton.query.entity.UpdatedUserFields;
-import ru.arsentiev.validator.UpdateUserValidator;
-import ru.arsentiev.validator.entity.login.LoginError;
-import ru.arsentiev.validator.entity.update.UpdatePasswordError;
+import ru.arsentiev.processing.validator.UpdateUserValidator;
+import ru.arsentiev.processing.validator.entity.login.LoginError;
+import ru.arsentiev.processing.validator.entity.update.UpdatePasswordError;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserService {
-    private static final UserService INSTANCE = new UserService();
-    private final UserMapper userMapper = UserMapper.getInstance();
-    private final PasswordHashed passwordHashed = PasswordHashed.getInstance();
-    private final UserDao userDao = DaoManager.getUserDao();
-    private final UpdateUserValidator updateUserValidator = ValidationManager.getUpdateUserValidator();
+    private final UserMapper userMapper;
+    private final PasswordHashed passwordHashed;
+    private final UserDao userDao;
+    private final UpdateUserValidator updateUserValidator;
 
-    public static UserService getInstance() {
-        return INSTANCE;
+    public UserService(UserMapper userMapper, PasswordHashed passwordHashed, UserDao userDao,
+                       UpdateUserValidator updateUserValidator) {
+        this.userMapper = userMapper;
+        this.passwordHashed = passwordHashed;
+        this.userDao = userDao;
+        this.updateUserValidator = updateUserValidator;
     }
 
     public void insertUser(UserRegistrationControllerDto userRegistrationControllerDto) {

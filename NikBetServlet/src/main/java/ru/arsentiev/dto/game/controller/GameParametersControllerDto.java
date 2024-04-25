@@ -5,5 +5,5 @@ import ru.arsentiev.entity.GameResult;
 import ru.arsentiev.entity.GameStatus;
 
 @Builder
-public record GameParametersControllerDto(long homeTeamId, long guestTeamId, GameStatus status, GameResult result) {
+public record GameParametersControllerDto(Long homeTeamId, Long guestTeamId, GameStatus status, GameResult result) {
 }

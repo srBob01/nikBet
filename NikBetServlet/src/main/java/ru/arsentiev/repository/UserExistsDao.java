@@ -1,6 +1,6 @@
 package ru.arsentiev.repository;
 
-import ru.arsentiev.singleton.connection.ConnectionManager;
+import ru.arsentiev.processing.connection.ConnectionGetter;
 import ru.arsentiev.exception.DaoException;
 
 import java.sql.Connection;
@@ -9,10 +9,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class UserExistsDao {
-    private final ConnectionManager connectionManager;
+    private final ConnectionGetter connectionGetter;
 
-    public UserExistsDao(ConnectionManager connectionManager) {
-        this.connectionManager = connectionManager;
+    public UserExistsDao(ConnectionGetter connectionGetter) {
+        this.connectionGetter = connectionGetter;
     }
 
     //language=PostgreSQL
@@ -35,7 +35,7 @@ public class UserExistsDao {
     }
 
     private boolean executeMyQuery(String nickname, String select1ByNickname) {
-        try (Connection connection = connectionManager.get();
+        try (Connection connection = connectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(select1ByNickname)) {
             preparedStatement.setString(1, nickname);
             try (ResultSet rs = preparedStatement.executeQuery()) {

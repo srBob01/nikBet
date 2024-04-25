@@ -1,23 +1,19 @@
 package ru.arsentiev.mapper;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import ru.arsentiev.dto.user.controller.*;
 import ru.arsentiev.dto.user.view.*;
 import ru.arsentiev.entity.User;
-import ru.arsentiev.utils.LocalDateFormatter;
+import ru.arsentiev.processing.dateformatter.LocalDateFormatter;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.function.BiFunction;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserMapper {
+    private final LocalDateFormatter localDateFormatter;
 
-    private static final UserMapper INSTANCE = new UserMapper();
-
-    public static UserMapper getInstance() {
-        return INSTANCE;
+    public UserMapper(LocalDateFormatter localDateFormatter) {
+        this.localDateFormatter = localDateFormatter;
     }
 
     public UserControllerDto map(User obj) {
@@ -69,7 +65,8 @@ public class UserMapper {
                 .build();
     }
 
-    public UserControllerDto map(UserConstFieldsControllerDto userConstFieldsControllerDto, UserUpdateDescriptionControllerDto userUpdateDescriptionControllerDto) {
+    public UserControllerDto map(UserConstFieldsControllerDto userConstFieldsControllerDto,
+                                 UserUpdateDescriptionControllerDto userUpdateDescriptionControllerDto) {
         return UserControllerDto.builder()
                 .idUser(userConstFieldsControllerDto.idUser())
                 .nickname(userUpdateDescriptionControllerDto.nickname())
@@ -99,7 +96,7 @@ public class UserMapper {
                 .firstName(userRegistrationViewDto.getFirstName())
                 .lastName(userRegistrationViewDto.getLastName())
                 .nickname(userRegistrationViewDto.getNickname())
-                .birthDate(LocalDateFormatter.format(userRegistrationViewDto.getBirthDate()))
+                .birthDate(localDateFormatter.format(userRegistrationViewDto.getBirthDate()))
                 .build();
     }
 
@@ -119,7 +116,7 @@ public class UserMapper {
                 .firstName(userUpdateDescriptionViewDto.getFirstName())
                 .lastName(userUpdateDescriptionViewDto.getLastName())
                 .nickname(userUpdateDescriptionViewDto.getNickname())
-                .birthDate(LocalDateFormatter.format(userUpdateDescriptionViewDto.getBirthDate()))
+                .birthDate(localDateFormatter.format(userUpdateDescriptionViewDto.getBirthDate()))
                 .build();
     }
 
@@ -140,7 +137,7 @@ public class UserMapper {
                 .firstName(userControllerDto.firstName())
                 .lastName(userControllerDto.lastName())
                 .nickname(userControllerDto.nickname())
-                .birthDate(userControllerDto.birthDate().format(LocalDateFormatter.FORMATTER))
+                .birthDate(userControllerDto.birthDate().format(localDateFormatter.FORMATTER))
                 .role(userControllerDto.role().name())
                 .build();
     }
@@ -167,7 +164,7 @@ public class UserMapper {
                 .lastName(user.lastName())
                 .phoneNumber(user.phoneNumber())
                 .accountBalance(user.accountBalance().setScale(2, RoundingMode.HALF_UP).toString())
-                .birthDate(user.birthDate().format(LocalDateFormatter.FORMATTER))
+                .birthDate(user.birthDate().format(localDateFormatter.FORMATTER))
                 .email(user.email())
                 .patronymic(user.patronymic())
                 .build();

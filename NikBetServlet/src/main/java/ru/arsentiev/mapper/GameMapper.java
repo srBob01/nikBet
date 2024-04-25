@@ -1,18 +1,15 @@
 package ru.arsentiev.mapper;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import ru.arsentiev.dto.game.controller.*;
 import ru.arsentiev.dto.game.view.*;
 import ru.arsentiev.entity.*;
-import ru.arsentiev.utils.TimeStampFormatter;
+import ru.arsentiev.processing.dateformatter.TimeStampFormatter;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class GameMapper {
-    private static final GameMapper INSTANCE = new GameMapper();
+    private final TimeStampFormatter timeStampFormatter;
 
-    public static GameMapper getInstance() {
-        return INSTANCE;
+    public GameMapper(TimeStampFormatter timeStampFormatter) {
+        this.timeStampFormatter = timeStampFormatter;
     }
 
     public GameCompletedControllerDto mapGameToControllerCompleted(Game game) {
@@ -60,7 +57,7 @@ public class GameMapper {
                 .homeTeam(dto.homeTeam())
                 .guestTeam(dto.guestTeam())
                 .score(score)
-                .gameDate(dto.gameDate().format(TimeStampFormatter.ISO_FORMATTER))
+                .gameDate(dto.gameDate().format(timeStampFormatter.ISO_FORMATTER))
                 .result(dto.result().name())
                 .build();
     }
@@ -87,7 +84,7 @@ public class GameMapper {
                 .coefficientOnHomeTeam(String.format("%.2f", dto.coefficientOnHomeTeam()))
                 .coefficientOnDraw(String.format("%.2f", dto.coefficientOnDraw()))
                 .coefficientOnGuestTeam(String.format("%.2f", dto.coefficientOnGuestTeam()))
-                .gameDate(dto.gameDate().format(TimeStampFormatter.ISO_FORMATTER))
+                .gameDate(dto.gameDate().format(timeStampFormatter.ISO_FORMATTER))
                 .build();
     }
 
@@ -98,7 +95,7 @@ public class GameMapper {
                 .guestTeam(gameCompletedViewDto.guestTeam())
                 .goalHomeTeam(parseGoals(gameCompletedViewDto.score())[0])
                 .goalGuestTeam(parseGoals(gameCompletedViewDto.score())[1])
-                .gameDate(TimeStampFormatter.format(gameCompletedViewDto.gameDate()))
+                .gameDate(timeStampFormatter.format(gameCompletedViewDto.gameDate()))
                 .result(GameResult.valueOf(gameCompletedViewDto.result()))
                 .build();
     }
@@ -125,7 +122,7 @@ public class GameMapper {
                 .coefficientOnHomeTeam(Float.parseFloat(gameScheduledViewDto.coefficientOnHomeTeam()))
                 .coefficientOnDraw(Float.parseFloat(gameScheduledViewDto.coefficientOnDraw()))
                 .coefficientOnGuestTeam(Float.parseFloat(gameScheduledViewDto.coefficientOnGuestTeam()))
-                .gameDate(TimeStampFormatter.format(gameScheduledViewDto.gameDate()))
+                .gameDate(timeStampFormatter.format(gameScheduledViewDto.gameDate()))
                 .build();
     }
 
@@ -167,7 +164,7 @@ public class GameMapper {
                 .coefficientOnHomeTeam(Float.parseFloat(game.coefficientOnHomeTeam()))
                 .coefficientOnDraw(Float.parseFloat(game.coefficientOnDraw()))
                 .coefficientOnGuestTeam(Float.parseFloat(game.coefficientOnGuestTeam()))
-                .gameDate(TimeStampFormatter.formatISO(game.gameDate()))
+                .gameDate(timeStampFormatter.formatISO(game.gameDate()))
                 .build();
     }
 

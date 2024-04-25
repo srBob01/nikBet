@@ -7,6 +7,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.arsentiev.dto.user.controller.UserForAdminControllerDto;
 import ru.arsentiev.dto.user.view.UserForAdminViewDto;
+import ru.arsentiev.manager.MapperManager;
+import ru.arsentiev.manager.ServiceManager;
 import ru.arsentiev.mapper.UserMapper;
 import ru.arsentiev.service.UserService;
 import ru.arsentiev.utils.JspPathCreator;
@@ -24,8 +26,8 @@ public class AdminUserFindServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        userService = UserService.getInstance();
-        userMapper = UserMapper.getInstance();
+        userService = ServiceManager.getUserService();
+        userMapper = MapperManager.getUserMapper();
     }
 
     @Override

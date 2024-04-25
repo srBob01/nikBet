@@ -10,6 +10,8 @@ import ru.arsentiev.dto.game.controller.GameAdminProgressControllerDto;
 import ru.arsentiev.dto.game.view.GameAdminCompletedViewDto;
 import ru.arsentiev.dto.game.view.GameAdminProgressViewDto;
 import ru.arsentiev.dto.game.view.GameInProgressViewDto;
+import ru.arsentiev.manager.MapperManager;
+import ru.arsentiev.manager.ServiceManager;
 import ru.arsentiev.mapper.GameMapper;
 import ru.arsentiev.service.GameService;
 import ru.arsentiev.utils.JspPathCreator;
@@ -27,8 +29,8 @@ public class AdminMatchChangeServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        gameService = GameService.getInstance();
-        gameMapper = GameMapper.getInstance();
+        gameService = ServiceManager.getGameService();
+        gameMapper = MapperManager.getGameMapper();
     }
 
     @Override

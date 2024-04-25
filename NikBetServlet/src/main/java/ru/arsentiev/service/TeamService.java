@@ -1,23 +1,19 @@
 package ru.arsentiev.service;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import ru.arsentiev.dto.team.controller.TeamControllerDto;
-import ru.arsentiev.manager.DaoManager;
 import ru.arsentiev.mapper.TeamMapper;
 import ru.arsentiev.repository.TeamDao;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TeamService {
-    private static final TeamService INSTANCE = new TeamService();
-    private final TeamDao teamDao = DaoManager.getTeamDao();
-    private final TeamMapper teamMapper = TeamMapper.getInstance();
+    private final TeamDao teamDao;
+    private final TeamMapper teamMapper;
 
-    public static TeamService getInstance() {
-        return INSTANCE;
+    public TeamService(TeamDao teamDao, TeamMapper teamMapper) {
+        this.teamDao = teamDao;
+        this.teamMapper = teamMapper;
     }
 
     public List<TeamControllerDto> selectAllTeam() {

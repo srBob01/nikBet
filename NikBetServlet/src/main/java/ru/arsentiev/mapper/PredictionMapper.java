@@ -1,24 +1,21 @@
 package ru.arsentiev.mapper;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import ru.arsentiev.dto.prediction.controller.*;
 import ru.arsentiev.dto.prediction.view.*;
 import ru.arsentiev.entity.Game;
 import ru.arsentiev.entity.GameResult;
 import ru.arsentiev.entity.Prediction;
 import ru.arsentiev.entity.User;
-import ru.arsentiev.utils.TimeStampFormatter;
+import ru.arsentiev.processing.dateformatter.TimeStampFormatter;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PredictionMapper {
-    private static final PredictionMapper INSTANCE = new PredictionMapper();
+    private final TimeStampFormatter timeStampFormatter;
 
-    public static PredictionMapper getInstance() {
-        return INSTANCE;
+    public PredictionMapper(TimeStampFormatter timeStampFormatter) {
+        this.timeStampFormatter = timeStampFormatter;
     }
 
     public PredictionPlaceControllerDto map(PredictionPlaceViewDto predictionPlaceViewDto) {
@@ -49,7 +46,8 @@ public class PredictionMapper {
 
     public PredictionResultViewDto map(PredictionResultControllerDto predictionResultControllerDto) {
         return PredictionResultViewDto.builder()
-                .possibleWin(predictionResultControllerDto.possibleWin().setScale(2, RoundingMode.HALF_UP).toString())
+                .possibleWin(predictionResultControllerDto.possibleWin().setScale(2,
+                        RoundingMode.HALF_UP).toString())
                 .winner(predictionResultControllerDto.winner())
                 .guestTeam(predictionResultControllerDto.guestTeam())
                 .homeTeam(predictionResultControllerDto.homeTeam())
@@ -97,7 +95,8 @@ public class PredictionMapper {
                 .guestTeam(dto.guestTeam())
                 .goalHomeTeam(String.valueOf(dto.goalHomeTeam()))
                 .goalGuestTeam(String.valueOf(dto.goalGuestTeam()))
-                .predictionDate(dto.predictionDate() != null ? dto.predictionDate().format(TimeStampFormatter.FORMATTER) : "")
+                .predictionDate(dto.predictionDate() != null ?
+                        dto.predictionDate().format(timeStampFormatter.FORMATTER) : "")
                 .summa(dto.summa() != null ? dto.summa().toString() : "")
                 .prediction(dto.prediction() != null ? dto.prediction().name() : "")
                 .predictionStatus(dto.predictionStatus() != null ? dto.predictionStatus().name() : "")
@@ -113,7 +112,8 @@ public class PredictionMapper {
                 .guestTeam(dto.guestTeam())
                 .goalHomeTeam(String.valueOf(dto.goalHomeTeam()))
                 .goalGuestTeam(String.valueOf(dto.goalGuestTeam()))
-                .predictionDate(dto.predictionDate() != null ? dto.predictionDate().format(TimeStampFormatter.FORMATTER) : "")
+                .predictionDate(dto.predictionDate() != null ?
+                        dto.predictionDate().format(timeStampFormatter.FORMATTER) : "")
                 .summa(dto.summa() != null ? dto.summa().toString() : "")
                 .prediction(dto.prediction() != null ? dto.prediction().name() : "")
                 .result(dto.result().name())

@@ -8,10 +8,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import ru.arsentiev.dto.user.controller.UserControllerDto;
 import ru.arsentiev.dto.user.controller.UserLogoPasControllerDto;
 import ru.arsentiev.dto.user.view.UserLogoPasViewDto;
+import ru.arsentiev.manager.MapperManager;
+import ru.arsentiev.manager.ServiceManager;
 import ru.arsentiev.mapper.UserMapper;
 import ru.arsentiev.service.UserService;
 import ru.arsentiev.utils.JspPathCreator;
-import ru.arsentiev.validator.entity.update.UpdatePasswordError;
+import ru.arsentiev.processing.validator.entity.update.UpdatePasswordError;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -29,8 +31,8 @@ public class UserUpdatePasswordServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        userService = UserService.getInstance();
-        userMapper = UserMapper.getInstance();
+        userService = ServiceManager.getUserService();
+        userMapper = MapperManager.getUserMapper();
     }
 
     @Override
