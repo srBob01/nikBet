@@ -11,12 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class PredictionDao implements BaseDao<Long, Prediction> {
+public class PredictionRepository implements BaseRepository<Long, Prediction> {
     private final ConnectionGetter connectionGetter;
-    private final GameDao gameDAO;
-    private final UserDao userDAO;
+    private final GameRepository gameDAO;
+    private final UserRepository userDAO;
 
-    public PredictionDao(ConnectionGetter connectionGetter, GameDao gameDAO, UserDao userDAO) {
+    public PredictionRepository(ConnectionGetter connectionGetter, GameRepository gameDAO, UserRepository userDAO) {
         this.connectionGetter = connectionGetter;
         this.gameDAO = gameDAO;
         this.userDAO = userDAO;

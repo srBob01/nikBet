@@ -13,11 +13,11 @@ public class ValidationManager {
     private static final UpdateUserValidator updateUserValidator;
 
     static {
-        registrationUserValidator = new RegistrationUserValidator(DaoManager.getUserExistsDao(),
+        registrationUserValidator = new RegistrationUserValidator(RepositoryManager.getUserExistRepository(),
                 CheckManager.getDateCheck(), CheckManager.getPasswordCheck(), CheckManager.getPhoneNumberCheck(),
                 CheckManager.getNameCheck(), DateFormatterManager.getLocalDateFormatter());
 
-        updateUserValidator = new UpdateUserValidator(DaoManager.getUserExistsDao(),
+        updateUserValidator = new UpdateUserValidator(RepositoryManager.getUserExistRepository(),
                 CheckManager.getDateCheck(), CheckManager.getPhoneNumberCheck(),
                 CheckManager.getNameCheck(), CheckManager.getPasswordCheck(), DateFormatterManager.getLocalDateFormatter());
     }

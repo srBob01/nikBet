@@ -9,10 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class TeamDao implements BaseDao<Long, Team> {
+public class TeamRepository implements BaseRepository<Long, Team> {
     private final ConnectionGetter connectionGetter;
 
-    public TeamDao(ConnectionGetter connectionGetter) {
+    public TeamRepository(ConnectionGetter connectionGetter) {
         this.connectionGetter = connectionGetter;
     }
 

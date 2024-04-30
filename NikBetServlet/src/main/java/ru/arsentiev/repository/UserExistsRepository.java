@@ -8,10 +8,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class UserExistsDao {
+public class UserExistsRepository {
     private final ConnectionGetter connectionGetter;
 
-    public UserExistsDao(ConnectionGetter connectionGetter) {
+    public UserExistsRepository(ConnectionGetter connectionGetter) {
         this.connectionGetter = connectionGetter;
     }
 

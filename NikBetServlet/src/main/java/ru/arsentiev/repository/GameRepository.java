@@ -12,12 +12,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class GameDao implements BaseDao<Long, Game> {
-    private final TeamDao teamDAO;
+public class GameRepository implements BaseRepository<Long, Game> {
+    private final TeamRepository teamDAO;
     private final ConnectionGetter connectionGetter;
     private final GameQueryCreator gameQueryCreator;
 
-    public GameDao(ConnectionGetter connectionGetter, TeamDao teamDAO, GameQueryCreator gameQueryCreator) {
+    public GameRepository(ConnectionGetter connectionGetter, TeamRepository teamDAO, GameQueryCreator gameQueryCreator) {
         this.connectionGetter = connectionGetter;
         this.teamDAO = teamDAO;
         this.gameQueryCreator = gameQueryCreator;

@@ -6,7 +6,7 @@ import ru.arsentiev.exception.ServiceException;
 import ru.arsentiev.mapper.UserMapper;
 import ru.arsentiev.processing.password.PasswordHashed;
 import ru.arsentiev.processing.query.entity.UpdatedUserFields;
-import ru.arsentiev.repository.UserDao;
+import ru.arsentiev.repository.UserRepository;
 import ru.arsentiev.service.entity.user.ReturnValueInCheckLogin;
 import ru.arsentiev.processing.validator.UpdateUserValidator;
 import ru.arsentiev.processing.validator.entity.login.LoginError;
@@ -19,28 +19,28 @@ import java.util.Optional;
 public class UserService {
     private final UserMapper userMapper;
     private final PasswordHashed passwordHashed;
-    private final UserDao userDao;
+    private final UserRepository userRepository;
     private final UpdateUserValidator updateUserValidator;
 
-    public UserService(UserMapper userMapper, PasswordHashed passwordHashed, UserDao userDao,
+    public UserService(UserMapper userMapper, PasswordHashed passwordHashed, UserRepository userRepository,
                        UpdateUserValidator updateUserValidator) {
         this.userMapper = userMapper;
         this.passwordHashed = passwordHashed;
-        this.userDao = userDao;
+        this.userRepository = userRepository;
         this.updateUserValidator = updateUserValidator;
     }
 
     public void insertUser(UserRegistrationControllerDto userRegistrationControllerDto) {
         String salt = passwordHashed.generateSalt();
         User user = userMapper.map(userRegistrationControllerDto, salt, passwordHashed::hashPassword);
-        userDao.insert(user);
+        userRepository.insert(user);
     }
 
     public UserControllerDto updateDescriptionUser(UserUpdateDescriptionControllerDto userUpdateDescriptionControllerDto,
                                                    UpdatedUserFields updatedUserFields,
                                                    UserConstFieldsControllerDto userConstFieldsControllerDto) {
         User user = userMapper.map(userUpdateDescriptionControllerDto);
-        if (userDao.updateDescriptionWithDynamicCreation(user, updatedUserFields)) {
+        if (userRepository.updateDescriptionWithDynamicCreation(user, updatedUserFields)) {
             return userMapper.map(userConstFieldsControllerDto, userUpdateDescriptionControllerDto);
         } else {
             throw new ServiceException("The user does not exist");
@@ -49,12 +49,12 @@ public class UserService {
 
     public ReturnValueInCheckLogin checkLogin(UserLoginControllerDto userLoginControllerDto) {
         UserPasswordAndSaltControllerDto userPasswordAndSaltControllerDto =
-                userDao.selectPasswordByLogin(userLoginControllerDto.email());
+                userRepository.selectPasswordByLogin(userLoginControllerDto.email());
         if (userPasswordAndSaltControllerDto.password().isPresent() && userPasswordAndSaltControllerDto.salt().isPresent()) {
             if (userPasswordAndSaltControllerDto.password().get()
                     .equals(passwordHashed.hashPassword(userLoginControllerDto.password(),
                             userPasswordAndSaltControllerDto.salt().get()))) {
-                User user = userDao.selectByLogin(userLoginControllerDto.email());
+                User user = userRepository.selectByLogin(userLoginControllerDto.email());
                 UserControllerDto userControllerDto = userMapper.map(user);
                 return new ReturnValueInCheckLogin(null, Optional.of(userControllerDto));
             } else {
@@ -67,7 +67,7 @@ public class UserService {
 
     public Optional<UpdatePasswordError> updatePassword(UserLogoPasControllerDto userLogoPasControllerDto) {
         UserPasswordAndSaltControllerDto userPasswordAndSaltControllerDto =
-                userDao.selectPasswordByLogin(userLogoPasControllerDto.email());
+                userRepository.selectPasswordByLogin(userLogoPasControllerDto.email());
         if (userPasswordAndSaltControllerDto.password().isPresent()
             && userPasswordAndSaltControllerDto.salt().isPresent()) {
             if (userPasswordAndSaltControllerDto.password().get()
@@ -80,7 +80,7 @@ public class UserService {
                 }
                 String salt = passwordHashed.generateSalt();
                 User user = userMapper.map(userLogoPasControllerDto, salt, passwordHashed::hashPassword);
-                if (userDao.updatePasswordByLogin(user)) {
+                if (userRepository.updatePasswordByLogin(user)) {
                     return Optional.empty();
                 } else {
                     throw new ServiceException("The user has not been updated");
@@ -94,11 +94,11 @@ public class UserService {
     }
 
     public boolean depositMoney(UserMoneyControllerDto userMoneyControllerDto) {
-        return userDao.depositMoneyById(userMoneyControllerDto);
+        return userRepository.depositMoneyById(userMoneyControllerDto);
     }
 
     public BigDecimal getAccountBalance(Long idUser) {
-        var balance = userDao.selectBalanceById(idUser);
+        var balance = userRepository.selectBalanceById(idUser);
         if (balance.isEmpty()) {
             throw new ServiceException("The user does not exist");
         }
@@ -106,7 +106,7 @@ public class UserService {
     }
 
     public boolean withdrawMoney(UserMoneyControllerDto userMoneyControllerDto) {
-        Optional<BigDecimal> balance = userDao.selectBalanceById(userMoneyControllerDto.idUser());
+        Optional<BigDecimal> balance = userRepository.selectBalanceById(userMoneyControllerDto.idUser());
         if (balance.isEmpty()) {
             throw new ServiceException("The user does not exist");
         }
@@ -114,20 +114,20 @@ public class UserService {
         if (balance.get().compareTo(userMoneyControllerDto.summa()) < 0) {
             return false;
         }
-        return userDao.withdrawMoneyById(userMoneyControllerDto);
+        return userRepository.withdrawMoneyById(userMoneyControllerDto);
     }
 
     public List<UserForAdminControllerDto> selectAllUser() {
-        return userDao.selectAll().stream()
+        return userRepository.selectAll().stream()
                 .map(userMapper::mapUserToControllerForAdmin)
                 .toList();
     }
 
     public boolean deleteUser(Long idUser) {
-        return userDao.delete(idUser);
+        return userRepository.delete(idUser);
     }
 
     public Optional<UserForAdminControllerDto> selectUserByNickname(String nickname) {
-        return userDao.selectByNickname(nickname).map(userMapper::mapUserToControllerForAdmin);
+        return userRepository.selectByNickname(nickname).map(userMapper::mapUserToControllerForAdmin);
     }
 }

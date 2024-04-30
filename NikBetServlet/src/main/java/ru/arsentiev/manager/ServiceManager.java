@@ -21,12 +21,12 @@ public class ServiceManager {
 
     static {
         userService = new UserService(MapperManager.getUserMapper(), new PasswordHashed(),
-                DaoManager.getUserDao(), ValidationManager.getUpdateUserValidator());
-        gameService = new GameService(DaoManager.getGameDao(), DaoManager.getPredictionDao(),
-                DaoManager.getUserDao(), MapperManager.getGameMapper());
-        teamService = new TeamService(DaoManager.getTeamDao(), MapperManager.getTeamMapper());
-        predictionService = new PredictionService(MapperManager.getPredictionMapper(), DaoManager.getPredictionDao(),
-                DaoManager.getGameDao(), DaoManager.getUserDao());
+                RepositoryManager.getUserRepository(), ValidationManager.getUpdateUserValidator());
+        gameService = new GameService(RepositoryManager.getGameRepository(), RepositoryManager.getPredictionRepository(),
+                RepositoryManager.getUserRepository(), MapperManager.getGameMapper());
+        teamService = new TeamService(RepositoryManager.getTeamRepository(), MapperManager.getTeamMapper());
+        predictionService = new PredictionService(MapperManager.getPredictionMapper(), RepositoryManager.getPredictionRepository(),
+                RepositoryManager.getGameRepository(), RepositoryManager.getUserRepository());
     }
 
 }

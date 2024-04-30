@@ -16,11 +16,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class UserDao implements BaseDao<Long, User> {
+public class UserRepository implements BaseRepository<Long, User> {
     private final ConnectionGetter connectionGetter;
     private final UserQueryCreator userQueryCreator;
 
-    public UserDao(ConnectionGetter connectionGetter, UserQueryCreator userQueryCreator) {
+    public UserRepository(ConnectionGetter connectionGetter, UserQueryCreator userQueryCreator) {
         this.connectionGetter = connectionGetter;
         this.userQueryCreator = userQueryCreator;
     }

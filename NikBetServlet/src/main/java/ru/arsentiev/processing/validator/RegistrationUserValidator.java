@@ -1,7 +1,7 @@
 package ru.arsentiev.processing.validator;
 
 import ru.arsentiev.dto.user.view.UserRegistrationViewDto;
-import ru.arsentiev.repository.UserExistsDao;
+import ru.arsentiev.repository.UserExistsRepository;
 import ru.arsentiev.processing.check.DateCheck;
 import ru.arsentiev.processing.check.NameCheck;
 import ru.arsentiev.processing.check.PasswordCheck;
@@ -15,16 +15,16 @@ import java.time.LocalDate;
 import java.time.Period;
 
 public class RegistrationUserValidator {
-    private final UserExistsDao userExistsDao;
+    private final UserExistsRepository userExistsRepository;
     private final DateCheck dateCheck;
     private final PasswordCheck passwordCheck;
     private final PhoneNumberCheck phoneNumberCheck;
     private final NameCheck nameCheck;
     private final LocalDateFormatter localDateFormatter;
 
-    public RegistrationUserValidator(UserExistsDao userExistsDao, DateCheck dateCheck, PasswordCheck passwordCheck,
+    public RegistrationUserValidator(UserExistsRepository userExistsRepository, DateCheck dateCheck, PasswordCheck passwordCheck,
                                      PhoneNumberCheck phoneNumberCheck, NameCheck nameCheck, LocalDateFormatter localDateFormatter) {
-        this.userExistsDao = userExistsDao;
+        this.userExistsRepository = userExistsRepository;
         this.dateCheck = dateCheck;
         this.passwordCheck = passwordCheck;
         this.phoneNumberCheck = phoneNumberCheck;
@@ -37,7 +37,7 @@ public class RegistrationUserValidator {
 
         if (obj.getNickname() == null || obj.getNickname().trim().isEmpty()) {
             result.add(LoadError.of("nickname", TypeLoadError.EMPTY));
-        } else if (userExistsDao.existsByNickname(obj.getNickname())) {
+        } else if (userExistsRepository.existsByNickname(obj.getNickname())) {
             result.add(LoadError.of("nickname", TypeLoadError.NON_UNIQUE));
         }
 
@@ -66,14 +66,14 @@ public class RegistrationUserValidator {
             result.add(LoadError.of("phoneNumber", TypeLoadError.EMPTY));
         } else if (phoneNumberCheck.isIncorrect(obj.getPhoneNumber())) {
             result.add(LoadError.of("phoneNumber", TypeLoadError.INCORRECT));
-        } else if (userExistsDao.existsByPhoneNumber(obj.getPhoneNumber())) {
+        } else if (userExistsRepository.existsByPhoneNumber(obj.getPhoneNumber())) {
             result.add(LoadError.of("phoneNumber", TypeLoadError.NON_UNIQUE));
         }
 
 
         if (obj.getEmail() == null || obj.getEmail().trim().isEmpty()) {
             result.add(LoadError.of("email", TypeLoadError.EMPTY));
-        } else if (userExistsDao.existsByEmail(obj.getEmail())) {
+        } else if (userExistsRepository.existsByEmail(obj.getEmail())) {
             result.add(LoadError.of("email", TypeLoadError.NON_UNIQUE));
         }
 

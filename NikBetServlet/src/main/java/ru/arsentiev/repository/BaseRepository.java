@@ -3,7 +3,7 @@ package ru.arsentiev.repository;
 import java.util.List;
 import java.util.Optional;
 
-public interface BaseDao<K, E> {
+public interface BaseRepository<K, E> {
     void insert(E e);
 
     List<E> selectAll();

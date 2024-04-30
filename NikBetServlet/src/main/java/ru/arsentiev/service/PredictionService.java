@@ -7,9 +7,9 @@ import ru.arsentiev.entity.GameStatus;
 import ru.arsentiev.entity.Prediction;
 import ru.arsentiev.exception.ServiceException;
 import ru.arsentiev.mapper.PredictionMapper;
-import ru.arsentiev.repository.GameDao;
-import ru.arsentiev.repository.PredictionDao;
-import ru.arsentiev.repository.UserDao;
+import ru.arsentiev.repository.GameRepository;
+import ru.arsentiev.repository.PredictionRepository;
+import ru.arsentiev.repository.UserRepository;
 import ru.arsentiev.service.entity.prediction.DoubleListPredictionControllerDto;
 
 import java.math.BigDecimal;
@@ -19,22 +19,20 @@ import java.util.Optional;
 
 public class PredictionService {
     private final PredictionMapper predictionMapper;
+    private final PredictionRepository predictionRepository;
+    private final GameRepository gameRepository;
+    private final UserRepository userRepository;
 
-    public PredictionService(PredictionMapper predictionMapper, PredictionDao predictionDao,
-                             GameDao gameDao, UserDao userDao) {
+    public PredictionService(PredictionMapper predictionMapper, PredictionRepository predictionRepository,
+                             GameRepository gameRepository, UserRepository userRepository) {
         this.predictionMapper = predictionMapper;
-        this.predictionDao = predictionDao;
-        this.gameDao = gameDao;
-        this.userDao = userDao;
+        this.predictionRepository = predictionRepository;
+        this.gameRepository = gameRepository;
+        this.userRepository = userRepository;
     }
 
-    private final PredictionDao predictionDao;
-    private final GameDao gameDao;
-    private final UserDao userDao;
-
-
     public PredictionResultControllerDto insertPrediction(PredictionPlaceControllerDto predictionPlaceControllerDto) {
-        Optional<Game> game = gameDao.selectById(predictionPlaceControllerDto.idGame());
+        Optional<Game> game = gameRepository.selectById(predictionPlaceControllerDto.idGame());
         if (game.isEmpty()) {
             throw new ServiceException("The game does not exist");
         }
@@ -45,7 +43,7 @@ public class PredictionService {
         };
         Prediction prediction = predictionMapper.map(predictionPlaceControllerDto);
         prediction.setCoefficient(coefficient);
-        predictionDao.insert(prediction);
+        predictionRepository.insert(prediction);
         String homeTeam = game.get().getHomeTeam().getTitle();
         String guestTeam = game.get().getGuestTeam().getTitle();
         String winner = switch (predictionPlaceControllerDto.prediction()) {
@@ -63,12 +61,12 @@ public class PredictionService {
     }
 
     public DoubleListPredictionControllerDto selectDoublePredictionsList(Long idUser) {
-        List<PredictionPlayedControllerDto> predictionBetPlayedControllerDtoList = predictionDao
+        List<PredictionPlayedControllerDto> predictionBetPlayedControllerDtoList = predictionRepository
                 .selectByUserIdLimitBetPlayed(idUser)
                 .stream()
                 .map(predictionMapper::mapPredictionPlayed)
                 .toList();
-        List<PredictionNotPlayedControllerDto> predictionBetNotPlayedControllerDtoList = predictionDao
+        List<PredictionNotPlayedControllerDto> predictionBetNotPlayedControllerDtoList = predictionRepository
                 .selectByUserIdLimitBetNotPlayed(idUser)
                 .stream()
                 .map(predictionMapper::mapPredictionNotPlayed)
@@ -80,7 +78,7 @@ public class PredictionService {
     }
 
     public Optional<BigDecimal> deletePrediction(PredictionForDeleteControllerDto predictionForDeleteControllerDto) {
-        Optional<Game> game = gameDao.selectById(predictionForDeleteControllerDto.idGame());
+        Optional<Game> game = gameRepository.selectById(predictionForDeleteControllerDto.idGame());
         if (game.isEmpty()) {
             throw new ServiceException("The game does not exist");
         }
@@ -99,7 +97,7 @@ public class PredictionService {
         BigDecimal refund = predictionForDeleteControllerDto.summa()
                 .divide(BigDecimal.valueOf(2L), 2, RoundingMode.HALF_UP);
 
-        if (!predictionDao.delete(predictionForDeleteControllerDto.idPrediction())) {
+        if (!predictionRepository.delete(predictionForDeleteControllerDto.idPrediction())) {
             throw new ServiceException("The prediction does not delete");
         }
 
@@ -107,20 +105,20 @@ public class PredictionService {
                 .idUser(predictionForDeleteControllerDto.idUser())
                 .summa(refund)
                 .build();
-        userDao.depositMoneyById(userMoneyControllerDto);
+        userRepository.depositMoneyById(userMoneyControllerDto);
 
         return Optional.of(refund);
     }
 
     public List<PredictionNotPlayedControllerDto> selectBetNotPlayedPredictions(Long idUser) {
-        return predictionDao.selectByUserIdBetNotPlayed(idUser)
+        return predictionRepository.selectByUserIdBetNotPlayed(idUser)
                 .stream()
                 .map(predictionMapper::mapPredictionNotPlayed)
                 .toList();
     }
 
     public List<PredictionPlayedControllerDto> selectBetPlayedPredictions(Long idUser) {
-        return predictionDao.selectByUserIdBetPlayed(idUser)
+        return predictionRepository.selectByUserIdBetPlayed(idUser)
                 .stream()
                 .map(predictionMapper::mapPredictionPlayed)
                 .toList();
