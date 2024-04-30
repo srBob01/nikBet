@@ -129,10 +129,12 @@ public class GameMapper {
     public Game map(GameParametersControllerDto gameParametersControllerDto) {
         return Game.builder()
                 .homeTeam(Team.builder()
-                        .idTeam(gameParametersControllerDto.homeTeamId())
+                        .idTeam(gameParametersControllerDto.homeTeamId() != null
+                                ? gameParametersControllerDto.homeTeamId() : 0)
                         .build())
                 .guestTeam(Team.builder()
-                        .idTeam(gameParametersControllerDto.guestTeamId())
+                        .idTeam(gameParametersControllerDto.guestTeamId() != null
+                                ? gameParametersControllerDto.guestTeamId() : 0)
                         .build())
                 .status(gameParametersControllerDto.status())
                 .result(gameParametersControllerDto.result())

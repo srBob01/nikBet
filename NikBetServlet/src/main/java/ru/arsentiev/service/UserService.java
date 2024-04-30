@@ -40,7 +40,7 @@ public class UserService {
                                                    UpdatedUserFields updatedUserFields,
                                                    UserConstFieldsControllerDto userConstFieldsControllerDto) {
         User user = userMapper.map(userUpdateDescriptionControllerDto);
-        if (userDao.updateDescriptionWithDynamicCreation(user, updatedUserFields)){
+        if (userDao.updateDescriptionWithDynamicCreation(user, updatedUserFields)) {
             return userMapper.map(userConstFieldsControllerDto, userUpdateDescriptionControllerDto);
         } else {
             throw new ServiceException("The user does not exist");
@@ -80,8 +80,11 @@ public class UserService {
                 }
                 String salt = passwordHashed.generateSalt();
                 User user = userMapper.map(userLogoPasControllerDto, salt, passwordHashed::hashPassword);
-                userDao.updatePasswordByLogin(user);
-                return Optional.empty();
+                if (userDao.updatePasswordByLogin(user)) {
+                    return Optional.empty();
+                } else {
+                    throw new ServiceException("The user has not been updated");
+                }
             } else {
                 return Optional.of(UpdatePasswordError.PASSWORDS_DONT_MATCH);
             }

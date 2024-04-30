@@ -312,8 +312,8 @@ public class GameDao implements BaseDao<Long, Game> {
                 , resultSet.getStatement().getConnection()).orElseThrow(() -> new SQLException("HomeTeam not found"));
         Team guestTeam = teamDAO.selectById(resultSet.getLong("idGuestTeam")
                 , resultSet.getStatement().getConnection()).orElseThrow(() -> new SQLException("GuestTeam not found"));
-        int goalHomeTeam = resultSet.getObject("goalHomeTeam", Integer.class);
-        int goalGuestTeam = resultSet.getObject("goalGuestTeam", Integer.class);
+        Integer goalHomeTeam = resultSet.getInt("goalHomeTeam");
+        Integer goalGuestTeam = resultSet.getInt("goalGuestTeam");
         LocalDateTime gameDate = resultSet.getTimestamp("gameDate").toLocalDateTime();
         GameStatus status = GameStatus.valueOf(resultSet.getString("status"));
         float coefficientOnHomeTeam = resultSet.getBigDecimal("coefficientOnHomeTeam") != null ? resultSet.getBigDecimal("coefficientOnHomeTeam").floatValue() : 0;

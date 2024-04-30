@@ -229,7 +229,7 @@
             <p>Game Date: ${game.gameDate()}</p>
             <form class="betting-form" method="post" action="<c:url value='/user/matches/find/bet'/>">
                 <input type="hidden" name="action" value="placeBetInProgress"/>
-                <input type="hidden" name="gameId" value="${game.idGame()}"/>>
+                <input type="hidden" name="gameId" value="${game.idGame()}"/>
                 <p>
                     <label><input type="radio" name="betType" value="HomeWin" checked> ${game.homeTeam()}
                         - ${game.coefficientOnHomeTeam()}</label>
