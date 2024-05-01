@@ -34,7 +34,7 @@ public class TestConnectionGetter implements ConnectionGetter {
     }
 
     @Override
-    public Connection get() throws SQLException, InterruptedException {
+    public Connection get() throws SQLException {
         return DriverManager.getConnection(url, user, password);
     }
 }
