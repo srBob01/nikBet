@@ -48,8 +48,8 @@ public class UserService {
     }
 
     public ReturnValueInCheckLogin checkLogin(UserLoginControllerDto userLoginControllerDto) {
-        UserPasswordAndSaltControllerDto userPasswordAndSaltControllerDto =
-                userRepository.selectPasswordByLogin(userLoginControllerDto.email());
+        User userSelectPassword = userRepository.selectPasswordByLogin(userLoginControllerDto.email());
+        UserPasswordAndSaltControllerDto userPasswordAndSaltControllerDto = userMapper.mapUserToPasswordAndSaltController(userSelectPassword);
         if (userPasswordAndSaltControllerDto.password().isPresent() && userPasswordAndSaltControllerDto.salt().isPresent()) {
             if (userPasswordAndSaltControllerDto.password().get()
                     .equals(passwordHashed.hashPassword(userLoginControllerDto.password(),
@@ -66,10 +66,9 @@ public class UserService {
     }
 
     public Optional<UpdatePasswordError> updatePassword(UserLogoPasControllerDto userLogoPasControllerDto) {
-        UserPasswordAndSaltControllerDto userPasswordAndSaltControllerDto =
-                userRepository.selectPasswordByLogin(userLogoPasControllerDto.email());
-        if (userPasswordAndSaltControllerDto.password().isPresent()
-            && userPasswordAndSaltControllerDto.salt().isPresent()) {
+        User userSelectPassword = userRepository.selectPasswordByLogin(userLogoPasControllerDto.email());
+        UserPasswordAndSaltControllerDto userPasswordAndSaltControllerDto = userMapper.mapUserToPasswordAndSaltController(userSelectPassword);
+        if (userPasswordAndSaltControllerDto.password().isPresent() && userPasswordAndSaltControllerDto.salt().isPresent()) {
             if (userPasswordAndSaltControllerDto.password().get()
                     .equals(passwordHashed.hashPassword(userLogoPasControllerDto.oldPassword(),
                             userPasswordAndSaltControllerDto.salt().get()))) {
@@ -94,7 +93,7 @@ public class UserService {
     }
 
     public boolean depositMoney(UserMoneyControllerDto userMoneyControllerDto) {
-        return userRepository.depositMoneyById(userMoneyControllerDto);
+        return userRepository.depositMoneyById(userMoneyControllerDto.idUser(), userMoneyControllerDto.summa());
     }
 
     public BigDecimal getAccountBalance(Long idUser) {
@@ -114,7 +113,7 @@ public class UserService {
         if (balance.get().compareTo(userMoneyControllerDto.summa()) < 0) {
             return false;
         }
-        return userRepository.withdrawMoneyById(userMoneyControllerDto);
+        return userRepository.withdrawMoneyById(userMoneyControllerDto.idUser(), userMoneyControllerDto.summa());
     }
 
     public List<UserForAdminControllerDto> selectAllUser() {

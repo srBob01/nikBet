@@ -18,10 +18,10 @@ public class RepositoryManager {
     private static final UserExistsRepository userExistRepository;
 
     static {
-        userRepository = new UserRepository(ConnectionManager.getConnectionGetter(), QueryCreatorManager.getUserQueryCreator());
-        userExistRepository = new UserExistsRepository(ConnectionManager.getConnectionGetter());
-        teamRepository = new TeamRepository(ConnectionManager.getConnectionGetter());
-        gameRepository = new GameRepository(ConnectionManager.getConnectionGetter(), teamRepository, QueryCreatorManager.getGameQueryCreator());
-        predictionRepository = new PredictionRepository(ConnectionManager.getConnectionGetter(), gameRepository, userRepository);
+        userRepository = new UserRepository(ConnectionManager.getMyConnectionGetter(), QueryCreatorManager.getUserQueryCreator());
+        userExistRepository = new UserExistsRepository(ConnectionManager.getMyConnectionGetter());
+        teamRepository = new TeamRepository(ConnectionManager.getMyConnectionGetter());
+        gameRepository = new GameRepository(ConnectionManager.getMyConnectionGetter(), teamRepository, QueryCreatorManager.getGameQueryCreator());
+        predictionRepository = new PredictionRepository(ConnectionManager.getMyConnectionGetter(), gameRepository, userRepository);
     }
 }

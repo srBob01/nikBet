@@ -1,7 +1,7 @@
 package ru.arsentiev.repository;
 
 import ru.arsentiev.entity.*;
-import ru.arsentiev.exception.DaoException;
+import ru.arsentiev.exception.RepositoryException;
 import ru.arsentiev.processing.connection.ConnectionGetter;
 
 import java.math.BigDecimal;
@@ -60,20 +60,21 @@ public class PredictionRepository implements BaseRepository<Long, Prediction> {
 
 
     @Override
-    public void insert(Prediction prediction) {
+    public boolean insert(Prediction prediction) {
         try (Connection connection = connectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_PREDICTION, Statement.RETURN_GENERATED_KEYS)) {
 
             setStatement(prediction, preparedStatement);
 
-            preparedStatement.executeUpdate();
+            boolean res = preparedStatement.executeUpdate() > 0;
 
             var generatedKeys = preparedStatement.getGeneratedKeys();
             if (generatedKeys.next()) {
                 prediction.setIdPrediction(generatedKeys.getLong("idPrediction"));
             }
+            return res;
         } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+            throw new RepositoryException(e);
         }
     }
 
@@ -88,7 +89,7 @@ public class PredictionRepository implements BaseRepository<Long, Prediction> {
                 predictions.add(extractPredictionFromResultSet(resultSet));
             }
         } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+            throw new RepositoryException(e);
         }
         return predictions;
     }
@@ -106,7 +107,7 @@ public class PredictionRepository implements BaseRepository<Long, Prediction> {
                 }
             }
         } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+            throw new RepositoryException(e);
         }
         return Optional.empty();
     }
@@ -144,7 +145,7 @@ public class PredictionRepository implements BaseRepository<Long, Prediction> {
                 }
             }
         } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+            throw new RepositoryException(e);
         }
         return predictions;
     }
@@ -157,7 +158,7 @@ public class PredictionRepository implements BaseRepository<Long, Prediction> {
             preparedStatement.setLong(1, id);
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+            throw new RepositoryException(e);
         }
     }
 
@@ -171,7 +172,7 @@ public class PredictionRepository implements BaseRepository<Long, Prediction> {
 
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+            throw new RepositoryException(e);
         }
     }
 
@@ -179,7 +180,7 @@ public class PredictionRepository implements BaseRepository<Long, Prediction> {
         try (Connection connection = connectionGetter.get()) {
             listIdPrediction.forEach(id -> updatePredictionStatus(id, connection));
         } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+            throw new RepositoryException(e);
         }
     }
 
@@ -190,7 +191,7 @@ public class PredictionRepository implements BaseRepository<Long, Prediction> {
 
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new DaoException(e);
+            throw new RepositoryException(e);
         }
     }
 

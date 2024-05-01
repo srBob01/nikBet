@@ -7,6 +7,7 @@ import ru.arsentiev.processing.dateformatter.LocalDateFormatter;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Optional;
 import java.util.function.BiFunction;
 
 public class UserMapper {
@@ -27,6 +28,13 @@ public class UserMapper {
                 .phoneNumber(obj.getPhoneNumber())
                 .role(obj.getRole())
                 .birthDate(obj.getBirthDate())
+                .build();
+    }
+
+    public UserPasswordAndSaltControllerDto mapUserToPasswordAndSaltController(User user) {
+        return UserPasswordAndSaltControllerDto.builder()
+                .password(Optional.ofNullable(user.getPassword()))
+                .salt(Optional.ofNullable(user.getSalt()))
                 .build();
     }
 

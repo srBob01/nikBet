@@ -1,7 +1,7 @@
 package ru.arsentiev.repository;
 
 import ru.arsentiev.entity.*;
-import ru.arsentiev.exception.DaoException;
+import ru.arsentiev.exception.RepositoryException;
 import ru.arsentiev.processing.connection.ConnectionGetter;
 import ru.arsentiev.processing.query.GameQueryCreator;
 import ru.arsentiev.processing.query.entity.CompletedGameFields;
@@ -108,7 +108,7 @@ public class GameRepository implements BaseRepository<Long, Game> {
 
 
     @Override
-    public void insert(Game game) {
+    public boolean insert(Game game) {
         try (Connection connection = connectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_GAME, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -119,13 +119,14 @@ public class GameRepository implements BaseRepository<Long, Game> {
             preparedStatement.setFloat(5, game.getCoefficientOnDraw());
             preparedStatement.setFloat(6, game.getCoefficientOnGuestTeam());
 
-            preparedStatement.executeUpdate();
+            boolean res = preparedStatement.executeUpdate() > 0;
             ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
             if (generatedKeys.next()) {
                 game.setIdGame(generatedKeys.getLong(1));
             }
+            return res;
         } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+            throw new RepositoryException(e);
         }
     }
 
@@ -184,7 +185,7 @@ public class GameRepository implements BaseRepository<Long, Game> {
                 games.add(mapResultSetToGame(resultSet));
             }
         } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+            throw new RepositoryException(e);
         }
         return games;
     }
@@ -194,7 +195,7 @@ public class GameRepository implements BaseRepository<Long, Game> {
         try (Connection connection = connectionGetter.get()) {
             return selectById(id, connection);
         } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+            throw new RepositoryException(e);
         }
     }
 
@@ -208,7 +209,7 @@ public class GameRepository implements BaseRepository<Long, Game> {
             }
             return Optional.ofNullable(game);
         } catch (SQLException e) {
-            throw new DaoException(e);
+            throw new RepositoryException(e);
         }
     }
 
@@ -224,7 +225,7 @@ public class GameRepository implements BaseRepository<Long, Game> {
             preparedStatement.setLong(1, id);
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+            throw new RepositoryException(e);
         }
     }
 
@@ -238,7 +239,7 @@ public class GameRepository implements BaseRepository<Long, Game> {
 
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+            throw new RepositoryException(e);
         }
     }
 
@@ -255,7 +256,7 @@ public class GameRepository implements BaseRepository<Long, Game> {
 
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+            throw new RepositoryException(e);
         }
     }
 
@@ -275,7 +276,7 @@ public class GameRepository implements BaseRepository<Long, Game> {
 
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+            throw new RepositoryException(e);
         }
     }
 
@@ -288,7 +289,7 @@ public class GameRepository implements BaseRepository<Long, Game> {
 
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+            throw new RepositoryException(e);
         }
     }
 

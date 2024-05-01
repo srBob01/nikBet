@@ -1,7 +1,7 @@
 package ru.arsentiev.repository;
 
+import ru.arsentiev.exception.RepositoryException;
 import ru.arsentiev.processing.connection.ConnectionGetter;
-import ru.arsentiev.exception.DaoException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -42,7 +42,7 @@ public class UserExistsRepository {
                 return rs.next();
             }
         } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+            throw new RepositoryException(e);
         }
     }
 }

@@ -1,10 +1,8 @@
 package ru.arsentiev.repository;
 
-import ru.arsentiev.dto.user.controller.UserMoneyControllerDto;
-import ru.arsentiev.dto.user.controller.UserPasswordAndSaltControllerDto;
 import ru.arsentiev.entity.User;
 import ru.arsentiev.entity.UserRole;
-import ru.arsentiev.exception.DaoException;
+import ru.arsentiev.exception.RepositoryException;
 import ru.arsentiev.processing.connection.ConnectionGetter;
 import ru.arsentiev.processing.query.UserQueryCreator;
 import ru.arsentiev.processing.query.entity.UpdatedUserFields;
@@ -17,11 +15,11 @@ import java.util.List;
 import java.util.Optional;
 
 public class UserRepository implements BaseRepository<Long, User> {
-    private final ConnectionGetter connectionGetter;
+    private final ConnectionGetter myConnectionGetter;
     private final UserQueryCreator userQueryCreator;
 
     public UserRepository(ConnectionGetter connectionGetter, UserQueryCreator userQueryCreator) {
-        this.connectionGetter = connectionGetter;
+        this.myConnectionGetter = connectionGetter;
         this.userQueryCreator = userQueryCreator;
     }
 
@@ -54,11 +52,11 @@ public class UserRepository implements BaseRepository<Long, User> {
     private static final String DELETE_USER = "DELETE FROM users WHERE idUser = ?;";
     //language=PostgreSQL
     private static final String SELECT_USER_BY_ID = "SELECT idUser, nickname, firstName, lastName, patronymic," +
-                                                    " password, phoneNumber, email, birthDate, accountBalance, role" +
+                                                    " password, phoneNumber, email, birthDate, accountBalance, role, salt" +
                                                     " FROM users WHERE idUser = ?;";
     //language=PostgreSQL
     private static final String SELECT_ALL_USERS = "SELECT iduser, nickname, firstname, lastname, patronymic," +
-                                                   " password, phonenumber, email, birthdate, accountbalance, role" +
+                                                   " password, phonenumber, email, birthdate, accountbalance, role, salt" +
                                                    " FROM users WHERE role = 'USER' ORDER BY iduser;";
     //language=PostgreSQL
     private static final String SELECT_PASSWORD_SALT_USER = "SELECT password, salt FROM users WHERE email = ?";
@@ -66,16 +64,16 @@ public class UserRepository implements BaseRepository<Long, User> {
     private static final String SELECT_BALANCE_USER = "SELECT accountBalance FROM users WHERE iduser = ?";
     //language=PostgreSQL
     private static final String SELECT_USER_BY_LOGIN = "SELECT idUser, nickname, firstName, lastName, patronymic," +
-                                                       " password, phoneNumber, email, birthDate, accountBalance, role" +
+                                                       " password, phoneNumber, email, birthDate, accountBalance, role, salt" +
                                                        " FROM users WHERE email = ?;";
     //language=PostgreSQL
     private static final String SELECT_USER_BY_NICKNAME = "SELECT idUser, nickname, firstName, lastName, patronymic," +
-                                                          " password, phoneNumber, email, birthDate, accountBalance, role" +
+                                                          " password, phoneNumber, email, birthDate, accountBalance, role, salt" +
                                                           " FROM users WHERE role = 'USER' AND nickname = ?;";
 
     @Override
-    public void insert(User user) { //INSERT_USER
-        try (Connection connection = connectionGetter.get();
+    public boolean insert(User user) { //INSERT_USER
+        try (Connection connection = myConnectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_USER, Statement.RETURN_GENERATED_KEYS)) {
 
             preparedStatement.setString(1, user.getNickname());
@@ -92,38 +90,39 @@ public class UserRepository implements BaseRepository<Long, User> {
             preparedStatement.setDate(8, Date.valueOf(user.getBirthDate()));
             preparedStatement.setString(9, user.getSalt());
 
-            preparedStatement.executeUpdate();
+            boolean res = preparedStatement.executeUpdate() > 0;
 
             var keys = preparedStatement.getGeneratedKeys();
             if (keys.next()) {
                 user.setIdUser(keys.getLong("idUser"));
             }
-        } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+            return res;
+        } catch (SQLException | InterruptedException | NullPointerException e) {
+            throw new RepositoryException(e);
         }
     }
 
     @Override
     public List<User> selectAll() { //SELECT_ALL_USERS
         List<User> users = new ArrayList<>();
-        try (Connection connection = connectionGetter.get();
+        try (Connection connection = myConnectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_USERS);
              ResultSet rs = preparedStatement.executeQuery()) {
             while (rs.next()) {
                 users.add(mapResultSetToUser(rs));
             }
-        } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+        } catch (SQLException | InterruptedException | NullPointerException e) {
+            throw new RepositoryException(e);
         }
         return users;
     }
 
     @Override
     public Optional<User> selectById(Long id) { //SELECT_INFO_USER_BY_ID
-        try (Connection connection = connectionGetter.get()) {
+        try (Connection connection = myConnectionGetter.get()) {
             return selectById(id, connection);
-        } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+        } catch (SQLException | InterruptedException | NullPointerException e) {
+            throw new RepositoryException(e);
         }
     }
 
@@ -133,17 +132,17 @@ public class UserRepository implements BaseRepository<Long, User> {
             preparedStatement.setLong(1, id);
             try (ResultSet rs = preparedStatement.executeQuery()) {
                 if (rs.next()) {
-                    user = mapResultSetToUser(rs);
+                    user = mapResultSetToUserWithoutPassword(rs);
                 }
             }
             return Optional.ofNullable(user);
-        } catch (SQLException e) {
-            throw new DaoException(e);
+        } catch (SQLException | NullPointerException e) {
+            throw new RepositoryException(e);
         }
     }
 
     public User selectByLogin(String login) { //SELECT_USER_BY_LOGIN
-        try (Connection connection = connectionGetter.get();
+        try (Connection connection = myConnectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_USER_BY_LOGIN)) {
             preparedStatement.setString(1, login);
             try (ResultSet rs = preparedStatement.executeQuery()) {
@@ -152,13 +151,13 @@ public class UserRepository implements BaseRepository<Long, User> {
                 }
             }
             return null;
-        } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+        } catch (SQLException | InterruptedException | NullPointerException e) {
+            throw new RepositoryException(e);
         }
     }
 
     public Optional<User> selectByNickname(String nickname) { //SELECT_USER_BY_NICKNAME
-        try (Connection connection = connectionGetter.get();
+        try (Connection connection = myConnectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_USER_BY_NICKNAME)) {
             preparedStatement.setString(1, nickname);
             try (ResultSet rs = preparedStatement.executeQuery()) {
@@ -167,13 +166,13 @@ public class UserRepository implements BaseRepository<Long, User> {
                 }
             }
             return Optional.empty();
-        } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+        } catch (SQLException | InterruptedException | NullPointerException e) {
+            throw new RepositoryException(e);
         }
     }
 
-    public UserPasswordAndSaltControllerDto selectPasswordByLogin(String login) { //SELECT_PASSWORD_USER
-        try (Connection connection = connectionGetter.get();
+    public User selectPasswordByLogin(String login) { //SELECT_PASSWORD_USER
+        try (Connection connection = myConnectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_PASSWORD_SALT_USER)) {
             String password = null;
             String salt = null;
@@ -184,17 +183,17 @@ public class UserRepository implements BaseRepository<Long, User> {
                     salt = rs.getString("salt");
                 }
             }
-            return UserPasswordAndSaltControllerDto.builder()
-                    .salt(Optional.ofNullable(salt))
-                    .password(Optional.ofNullable(password))
+            return User.builder()
+                    .salt(salt)
+                    .password(password)
                     .build();
-        } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+        } catch (SQLException | InterruptedException | NullPointerException e) {
+            throw new RepositoryException(e);
         }
     }
 
     public Optional<BigDecimal> selectBalanceById(Long idUser) { //SELECT_BALANCE_USER
-        try (Connection connection = connectionGetter.get();
+        try (Connection connection = myConnectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_BALANCE_USER)) {
             preparedStatement.setLong(1, idUser);
             try (ResultSet rs = preparedStatement.executeQuery()) {
@@ -203,26 +202,26 @@ public class UserRepository implements BaseRepository<Long, User> {
                 }
             }
             return Optional.empty();
-        } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+        } catch (SQLException | InterruptedException | NullPointerException e) {
+            throw new RepositoryException(e);
         }
     }
 
     @Override
     public boolean delete(Long id) { //DELETE_USER
-        try (Connection connection = connectionGetter.get();
+        try (Connection connection = myConnectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(DELETE_USER)) {
 
             preparedStatement.setLong(1, id);
             return preparedStatement.executeUpdate() > 0;
-        } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+        } catch (SQLException | InterruptedException | NullPointerException e) {
+            throw new RepositoryException(e);
         }
     }
 
     @Override
     public boolean update(User user) { //UPDATE_USER
-        try (Connection connection = connectionGetter.get();
+        try (Connection connection = myConnectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_USER)) {
 
             preparedStatement.setString(1, user.getNickname());
@@ -232,49 +231,50 @@ public class UserRepository implements BaseRepository<Long, User> {
             preparedStatement.setString(5, user.getPatronymic());
             preparedStatement.setString(6, user.getPhoneNumber());
             preparedStatement.setDate(7, Date.valueOf(user.getBirthDate()));
+            preparedStatement.setLong(8, user.getIdUser());
             return preparedStatement.executeUpdate() > 0;
-        } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+        } catch (SQLException | InterruptedException | NullPointerException e) {
+            throw new RepositoryException(e);
         }
     }
 
     public boolean updateDescriptionWithDynamicCreation(User user, UpdatedUserFields fields) {
         String sql = userQueryCreator.createUserUpdateQuery(user, fields);
         if (!sql.equals("empty")) {
-            try (Connection connection = connectionGetter.get();
+            try (Connection connection = myConnectionGetter.get();
                  PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
                 return preparedStatement.executeUpdate() > 0;
-            } catch (SQLException | InterruptedException e) {
-                throw new DaoException(e);
+            } catch (SQLException | InterruptedException | NullPointerException e) {
+                throw new RepositoryException(e);
             }
         }
         return true;
     }
 
-    public boolean depositMoneyById(UserMoneyControllerDto userMoneyControllerDto) { //UPDATE_BALANCE_USER
-        return actionMoneyById(userMoneyControllerDto, DEPOSIT_BALANCE_USER);
+    public boolean depositMoneyById(long idUser, BigDecimal summa) { //UPDATE_BALANCE_USER
+        return actionMoneyById(idUser, summa, DEPOSIT_BALANCE_USER);
     }
 
-    public boolean withdrawMoneyById(UserMoneyControllerDto userMoneyControllerDto) { //UPDATE_BALANCE_USER
-        return actionMoneyById(userMoneyControllerDto, WITHDRAW_BALANCE_USER);
+    public boolean withdrawMoneyById(long idUser, BigDecimal summa) { //UPDATE_BALANCE_USER
+        return actionMoneyById(idUser, summa, WITHDRAW_BALANCE_USER);
     }
 
-    private boolean actionMoneyById(UserMoneyControllerDto userMoneyControllerDto, String action) {
-        try (Connection connection = connectionGetter.get();
+    private boolean actionMoneyById(long idUser, BigDecimal summa, String action) {
+        try (Connection connection = myConnectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(action)) {
 
-            preparedStatement.setBigDecimal(1, userMoneyControllerDto.summa());
-            preparedStatement.setLong(2, userMoneyControllerDto.idUser());
+            preparedStatement.setBigDecimal(1, summa);
+            preparedStatement.setLong(2, idUser);
 
             return preparedStatement.executeUpdate() > 0;
-        } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+        } catch (SQLException | InterruptedException | NullPointerException e) {
+            throw new RepositoryException(e);
         }
     }
 
     public boolean updatePasswordByLogin(User user) { //UPDATE_PAS_USER
-        try (Connection connection = connectionGetter.get();
+        try (Connection connection = myConnectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_PAS_USER)) {
 
             preparedStatement.setString(1, user.getPassword());
@@ -282,15 +282,17 @@ public class UserRepository implements BaseRepository<Long, User> {
             preparedStatement.setString(3, user.getEmail());
 
             return preparedStatement.executeUpdate() > 0;
-        } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+        } catch (SQLException | InterruptedException | NullPointerException e) {
+            throw new RepositoryException(e);
         }
     }
 
     private User mapResultSetToUser(ResultSet rs) throws SQLException {
         String password = rs.getString("password");
+        String salt = rs.getString("salt");
         User user = mapResultSetToUserWithoutPassword(rs);
         user.setPassword(password);
+        user.setSalt(salt);
         return user;
     }
 

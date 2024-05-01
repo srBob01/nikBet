@@ -105,7 +105,7 @@ public class PredictionService {
                 .idUser(predictionForDeleteControllerDto.idUser())
                 .summa(refund)
                 .build();
-        userRepository.depositMoneyById(userMoneyControllerDto);
+        userRepository.depositMoneyById(userMoneyControllerDto.idUser(), userMoneyControllerDto.summa());
 
         return Optional.of(refund);
     }

@@ -1,7 +1,7 @@
 package ru.arsentiev.repository;
 
 import ru.arsentiev.entity.Team;
-import ru.arsentiev.exception.DaoException;
+import ru.arsentiev.exception.RepositoryException;
 import ru.arsentiev.processing.connection.ConnectionGetter;
 
 import java.sql.*;
@@ -28,18 +28,19 @@ public class TeamRepository implements BaseRepository<Long, Team> {
     private static final String UPDATE_TEAM = "UPDATE teams SET title = ?, abbreviation = ? WHERE idTeam = ?;";
 
     @Override
-    public void insert(Team team) {
+    public boolean insert(Team team) {
         try (Connection connection = connectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_TEAM, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, team.getTitle());
             preparedStatement.setString(2, team.getAbbreviation());
-            preparedStatement.executeUpdate();
+            boolean res = preparedStatement.executeUpdate() > 0;
             ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
             if (generatedKeys.next()) {
                 team.setIdTeam(generatedKeys.getLong(1));
             }
+            return res;
         } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+            throw new RepositoryException(e);
         }
     }
 
@@ -53,7 +54,7 @@ public class TeamRepository implements BaseRepository<Long, Team> {
                 teams.add(mapResultSetToTeam(resultSet));
             }
         } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+            throw new RepositoryException(e);
         }
         return teams;
     }
@@ -63,7 +64,7 @@ public class TeamRepository implements BaseRepository<Long, Team> {
         try (Connection connection = connectionGetter.get()) {
             return selectById(id, connection);
         } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+            throw new RepositoryException(e);
         }
     }
 
@@ -77,7 +78,7 @@ public class TeamRepository implements BaseRepository<Long, Team> {
             }
             return Optional.ofNullable(team);
         } catch (SQLException e) {
-            throw new DaoException(e);
+            throw new RepositoryException(e);
         }
     }
 
@@ -88,7 +89,7 @@ public class TeamRepository implements BaseRepository<Long, Team> {
             preparedStatement.setLong(1, id);
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+            throw new RepositoryException(e);
         }
     }
 
@@ -101,7 +102,7 @@ public class TeamRepository implements BaseRepository<Long, Team> {
             preparedStatement.setLong(3, team.getIdTeam());
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException | InterruptedException e) {
-            throw new DaoException(e);
+            throw new RepositoryException(e);
         }
     }
 

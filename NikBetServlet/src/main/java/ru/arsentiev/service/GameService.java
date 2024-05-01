@@ -136,7 +136,7 @@ public class GameService {
                             .idUser(prediction.getUser().getIdUser())
                             .summa(winning)
                             .build();
-                    userRepository.depositMoneyById(userMoneyControllerDto);
+                    userRepository.depositMoneyById(userMoneyControllerDto.idUser(), userMoneyControllerDto.summa());
                 });
         List<Long> listIdPredictions = predictions.stream()
                 .map(Prediction::getIdPrediction)
