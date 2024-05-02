@@ -39,7 +39,7 @@ public class TeamRepository implements BaseRepository<Long, Team> {
                 team.setIdTeam(generatedKeys.getLong(1));
             }
             return res;
-        } catch (SQLException | InterruptedException e) {
+        } catch (SQLException | InterruptedException | NullPointerException e) {
             throw new RepositoryException(e);
         }
     }
@@ -53,7 +53,7 @@ public class TeamRepository implements BaseRepository<Long, Team> {
             while (resultSet.next()) {
                 teams.add(mapResultSetToTeam(resultSet));
             }
-        } catch (SQLException | InterruptedException e) {
+        } catch (SQLException | InterruptedException | NullPointerException e) {
             throw new RepositoryException(e);
         }
         return teams;
@@ -63,7 +63,7 @@ public class TeamRepository implements BaseRepository<Long, Team> {
     public Optional<Team> selectById(Long id) {
         try (Connection connection = connectionGetter.get()) {
             return selectById(id, connection);
-        } catch (SQLException | InterruptedException e) {
+        } catch (SQLException | InterruptedException | NullPointerException e) {
             throw new RepositoryException(e);
         }
     }
@@ -77,7 +77,7 @@ public class TeamRepository implements BaseRepository<Long, Team> {
                 team = mapResultSetToTeam(resultSet);
             }
             return Optional.ofNullable(team);
-        } catch (SQLException e) {
+        } catch (SQLException | NullPointerException e) {
             throw new RepositoryException(e);
         }
     }
@@ -88,7 +88,7 @@ public class TeamRepository implements BaseRepository<Long, Team> {
              PreparedStatement preparedStatement = connection.prepareStatement(DELETE_TEAM)) {
             preparedStatement.setLong(1, id);
             return preparedStatement.executeUpdate() > 0;
-        } catch (SQLException | InterruptedException e) {
+        } catch (SQLException | InterruptedException | NullPointerException e) {
             throw new RepositoryException(e);
         }
     }
@@ -101,7 +101,7 @@ public class TeamRepository implements BaseRepository<Long, Team> {
             preparedStatement.setString(2, team.getAbbreviation());
             preparedStatement.setLong(3, team.getIdTeam());
             return preparedStatement.executeUpdate() > 0;
-        } catch (SQLException | InterruptedException e) {
+        } catch (SQLException | InterruptedException | NullPointerException e) {
             throw new RepositoryException(e);
         }
     }

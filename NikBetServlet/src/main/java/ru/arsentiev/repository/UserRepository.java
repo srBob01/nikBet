@@ -79,7 +79,7 @@ public class UserRepository implements BaseRepository<Long, User> {
             preparedStatement.setString(1, user.getNickname());
             preparedStatement.setString(2, user.getFirstName());
             preparedStatement.setString(3, user.getLastName());
-            if (user.getPatronymic().isEmpty()) {
+            if (user.getPatronymic() == null || user.getPatronymic().isEmpty()) {
                 preparedStatement.setNull(4, Types.VARCHAR);
             } else {
                 preparedStatement.setString(4, user.getPatronymic());

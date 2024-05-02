@@ -20,8 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 
 class UserRepositoryTest {
     private final TestConnectionGetter connectionGetter = TestConnectionGetter.getInstance();
@@ -91,13 +90,13 @@ class UserRepositoryTest {
                 .birthDate(LocalDate.of(1985, 9, 20))
                 .accountBalance(new BigDecimal("0")).role(UserRole.USER)
                 .build();
-        return Stream.of(List.of(user1, user2), List.of(user1), List.of(user2));
+        return Stream.of(List.of(user1, user2), List.of(user1));
     }
 
     private static Stream<User> generateValidUser() {
         User user1 = User.builder()
                 .nickname("user1").firstName("John")
-                .lastName("Doe").patronymic("Smith").password("password1")
+                .lastName("Doe").password("password1")
                 .salt("salt1").phoneNumber("+79969291133").email("user1@example.com")
                 .birthDate(LocalDate.of(1990, 5, 15))
                 .accountBalance(new BigDecimal("0")).role(UserRole.USER)
@@ -111,16 +110,6 @@ class UserRepositoryTest {
                 .accountBalance(new BigDecimal("0")).role(UserRole.USER)
                 .build();
         return Stream.of(user1, user2);
-    }
-
-    private static User defaultUser() {
-        return User.builder()
-                .nickname("user1").firstName("John")
-                .lastName("Doe").patronymic("Smith").password("password1")
-                .salt("salt1").phoneNumber("+79969291133").email("user1@example.com")
-                .birthDate(LocalDate.of(1990, 5, 15))
-                .accountBalance(new BigDecimal("0")).role(UserRole.USER)
-                .build();
     }
 
     private static Stream<User> generateInvalidUser() {
@@ -145,6 +134,16 @@ class UserRepositoryTest {
                 .build();
 
         return Stream.of(user1, user2, user3);
+    }
+
+    private static User defaultUser() {
+        return User.builder()
+                .nickname("user1").firstName("John")
+                .lastName("Doe").patronymic("Smith").password("password1")
+                .salt("salt1").phoneNumber("+79969291133").email("user1@example.com")
+                .birthDate(LocalDate.of(1990, 5, 15))
+                .accountBalance(new BigDecimal("0")).role(UserRole.USER)
+                .build();
     }
 
     private static void settingToDefault(User user) {
@@ -207,10 +206,11 @@ class UserRepositoryTest {
     void selectUserByInvalidSomethingTest() {
         long wrongId = -1L;
         String wrongNickname = "wrongNickname";
+        String wrongEmail = "wrongEmail";
 
         assertThat(userRepository.selectById(wrongId)).isEmpty();
         assertThat(userRepository.selectByNickname(wrongNickname)).isEmpty();
-
+        assertThat(userRepository.selectByLogin(wrongEmail)).isNull();
     }
 
     @Test
