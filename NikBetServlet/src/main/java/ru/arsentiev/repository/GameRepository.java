@@ -13,13 +13,13 @@ import java.util.List;
 import java.util.Optional;
 
 public class GameRepository implements BaseRepository<Long, Game> {
-    private final TeamRepository teamDAO;
+    private final TeamRepository teamRepository;
     private final ConnectionGetter connectionGetter;
     private final GameQueryCreator gameQueryCreator;
 
-    public GameRepository(ConnectionGetter connectionGetter, TeamRepository teamDAO, GameQueryCreator gameQueryCreator) {
+    public GameRepository(ConnectionGetter connectionGetter, TeamRepository teamRepository, GameQueryCreator gameQueryCreator) {
         this.connectionGetter = connectionGetter;
-        this.teamDAO = teamDAO;
+        this.teamRepository = teamRepository;
         this.gameQueryCreator = gameQueryCreator;
     }
 
@@ -125,7 +125,7 @@ public class GameRepository implements BaseRepository<Long, Game> {
                 game.setIdGame(generatedKeys.getLong(1));
             }
             return res;
-        } catch (SQLException | InterruptedException e) {
+        } catch (SQLException | InterruptedException | NullPointerException e) {
             throw new RepositoryException(e);
         }
     }
@@ -184,7 +184,7 @@ public class GameRepository implements BaseRepository<Long, Game> {
             while (resultSet.next()) {
                 games.add(mapResultSetToGame(resultSet));
             }
-        } catch (SQLException | InterruptedException e) {
+        } catch (SQLException | InterruptedException | NullPointerException e) {
             throw new RepositoryException(e);
         }
         return games;
@@ -208,7 +208,7 @@ public class GameRepository implements BaseRepository<Long, Game> {
                 game = mapResultSetToGame(resultSet);
             }
             return Optional.ofNullable(game);
-        } catch (SQLException e) {
+        } catch (SQLException | NullPointerException e) {
             throw new RepositoryException(e);
         }
     }
@@ -224,7 +224,7 @@ public class GameRepository implements BaseRepository<Long, Game> {
              PreparedStatement preparedStatement = connection.prepareStatement(DELETE_GAME)) {
             preparedStatement.setLong(1, id);
             return preparedStatement.executeUpdate() > 0;
-        } catch (SQLException | InterruptedException e) {
+        } catch (SQLException | InterruptedException | NullPointerException e) {
             throw new RepositoryException(e);
         }
     }
@@ -235,10 +235,9 @@ public class GameRepository implements BaseRepository<Long, Game> {
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_GAME)) {
 
             setStatement(game, preparedStatement);
-            preparedStatement.setLong(11, game.getIdGame());
 
             return preparedStatement.executeUpdate() > 0;
-        } catch (SQLException | InterruptedException e) {
+        } catch (SQLException | InterruptedException | NullPointerException e) {
             throw new RepositoryException(e);
         }
     }
@@ -255,7 +254,7 @@ public class GameRepository implements BaseRepository<Long, Game> {
             preparedStatement.setLong(6, game.getIdGame());
 
             return preparedStatement.executeUpdate() > 0;
-        } catch (SQLException | InterruptedException e) {
+        } catch (SQLException | InterruptedException | NullPointerException e) {
             throw new RepositoryException(e);
         }
     }
@@ -275,20 +274,20 @@ public class GameRepository implements BaseRepository<Long, Game> {
             preparedStatement.setLong(1, idGame);
 
             return preparedStatement.executeUpdate() > 0;
-        } catch (SQLException | InterruptedException e) {
+        } catch (SQLException | InterruptedException | NullPointerException e) {
             throw new RepositoryException(e);
         }
     }
 
-    public boolean endGame(Game game) {
+    public boolean endGame(Long idGame, GameResult result) {
         try (Connection connection = connectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(END_GAME)) {
 
-            preparedStatement.setString(1, game.getResult().name());
-            preparedStatement.setLong(2, game.getIdGame());
+            preparedStatement.setString(1, result.name());
+            preparedStatement.setLong(2, idGame);
 
             return preparedStatement.executeUpdate() > 0;
-        } catch (SQLException | InterruptedException e) {
+        } catch (SQLException | InterruptedException | NullPointerException e) {
             throw new RepositoryException(e);
         }
     }
@@ -297,24 +296,49 @@ public class GameRepository implements BaseRepository<Long, Game> {
     private void setStatement(Game game, PreparedStatement preparedStatement) throws SQLException {
         preparedStatement.setLong(1, game.getHomeTeam().getIdTeam());
         preparedStatement.setLong(2, game.getGuestTeam().getIdTeam());
-        preparedStatement.setInt(3, game.getGoalHomeTeam());
-        preparedStatement.setInt(4, game.getGoalGuestTeam());
+        if (game.getGoalHomeTeam() == null) {
+            preparedStatement.setNull(3, Types.INTEGER);
+        } else {
+            preparedStatement.setInt(3, game.getGoalHomeTeam());
+        }
+
+        if (game.getGoalGuestTeam() == null) {
+            preparedStatement.setNull(4, Types.INTEGER);
+        } else {
+            preparedStatement.setInt(4, game.getGoalGuestTeam());
+        }
+
         preparedStatement.setTimestamp(5, Timestamp.valueOf(game.getGameDate()));
         preparedStatement.setString(6, game.getStatus().name());
         preparedStatement.setFloat(7, game.getCoefficientOnHomeTeam());
         preparedStatement.setFloat(8, game.getCoefficientOnDraw());
         preparedStatement.setFloat(9, game.getCoefficientOnGuestTeam());
-        preparedStatement.setString(10, game.getResult().name());
+
+        if (game.getTime() == null) {
+            preparedStatement.setNull(10, Types.VARCHAR);
+        } else {
+            preparedStatement.setString(10, game.getTime().name());
+        }
+
+        if (game.getResult() == null) {
+            preparedStatement.setNull(11, Types.VARCHAR);
+        } else {
+            preparedStatement.setString(11, game.getResult().name());
+        }
+
+        preparedStatement.setLong(12, game.getIdGame());
     }
 
     private Game mapResultSetToGame(ResultSet resultSet) throws SQLException {
         long idGame = resultSet.getLong("idGame");
-        Team homeTeam = teamDAO.selectById(resultSet.getLong("idHomeTeam")
+        Team homeTeam = teamRepository.selectById(resultSet.getLong("idHomeTeam")
                 , resultSet.getStatement().getConnection()).orElseThrow(() -> new SQLException("HomeTeam not found"));
-        Team guestTeam = teamDAO.selectById(resultSet.getLong("idGuestTeam")
+        Team guestTeam = teamRepository.selectById(resultSet.getLong("idGuestTeam")
                 , resultSet.getStatement().getConnection()).orElseThrow(() -> new SQLException("GuestTeam not found"));
-        Integer goalHomeTeam = resultSet.getInt("goalHomeTeam");
-        Integer goalGuestTeam = resultSet.getInt("goalGuestTeam");
+        String stringGoalHomeTeam = resultSet.getString("goalHomeTeam");
+        String stringGoalGuestTeam = resultSet.getString("goalGuestTeam");
+        Integer goalHomeTeam = stringGoalHomeTeam != null ? Integer.parseInt(stringGoalHomeTeam) : null;
+        Integer goalGuestTeam = stringGoalGuestTeam != null ? Integer.parseInt(stringGoalGuestTeam) : null;
         LocalDateTime gameDate = resultSet.getTimestamp("gameDate").toLocalDateTime();
         GameStatus status = GameStatus.valueOf(resultSet.getString("status"));
         float coefficientOnHomeTeam = resultSet.getBigDecimal("coefficientOnHomeTeam") != null ? resultSet.getBigDecimal("coefficientOnHomeTeam").floatValue() : 0;

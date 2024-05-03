@@ -13,13 +13,13 @@ import java.util.Optional;
 
 public class PredictionRepository implements BaseRepository<Long, Prediction> {
     private final ConnectionGetter connectionGetter;
-    private final GameRepository gameDAO;
-    private final UserRepository userDAO;
+    private final GameRepository gameRepository;
+    private final UserRepository userRepository;
 
-    public PredictionRepository(ConnectionGetter connectionGetter, GameRepository gameDAO, UserRepository userDAO) {
+    public PredictionRepository(ConnectionGetter connectionGetter, GameRepository gameRepository, UserRepository userRepository) {
         this.connectionGetter = connectionGetter;
-        this.gameDAO = gameDAO;
-        this.userDAO = userDAO;
+        this.gameRepository = gameRepository;
+        this.userRepository = userRepository;
     }
 
     //language=PostgreSQL
@@ -210,9 +210,9 @@ public class PredictionRepository implements BaseRepository<Long, Prediction> {
         BigDecimal summa = resultSet.getBigDecimal("summa");
         String prediction = resultSet.getString("prediction");
 
-        Game game = gameDAO.selectById(resultSet.getLong("idGame"),
+        Game game = gameRepository.selectById(resultSet.getLong("idGame"),
                 resultSet.getStatement().getConnection()).orElseThrow(() -> new SQLException("Game not found"));
-        User user = userDAO.selectById(resultSet.getLong("idUser"),
+        User user = userRepository.selectById(resultSet.getLong("idUser"),
                 resultSet.getStatement().getConnection()).orElseThrow(() -> new SQLException("User not found"));
 
         float coefficient = resultSet.getBigDecimal("coefficient").floatValue();

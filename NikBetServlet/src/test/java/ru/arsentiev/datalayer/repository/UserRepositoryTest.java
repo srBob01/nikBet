@@ -20,17 +20,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class UserRepositoryTest {
     private final TestConnectionGetter connectionGetter = TestConnectionGetter.getInstance();
     private final UserQueryCreator userQueryCreator = new UserQueryCreator();
     private final UserRepository userRepository = new UserRepository(connectionGetter, userQueryCreator);
-    private static final UpdatedUserFields updatedUserFieldsAll;
-    private static final UpdatedUserFields updatedUserFieldsNothing;
-    private static final UpdatedUserFields updatedUserFieldsOnlyNickname;
+    private final UpdatedUserFields updatedUserFieldsAll;
+    private final UpdatedUserFields updatedUserFieldsNothing;
+    private final UpdatedUserFields updatedUserFieldsOnlyNickname;
 
-    static {
+    {
 
         updatedUserFieldsAll = UpdatedUserFields.builder()
                 .isNewBirthDate(true)
@@ -62,16 +63,6 @@ class UserRepositoryTest {
                 .isNewPhoneNumber(false)
                 .build();
 
-    }
-
-    @SneakyThrows
-    @BeforeEach
-    public void clear() {
-        try (Connection connection = connectionGetter.get()) {
-            //language=PostgreSQL
-            String CLEAR_TABLE = "TRUNCATE nikbet_test.public.users RESTART IDENTITY CASCADE";
-            connection.prepareStatement(CLEAR_TABLE).executeUpdate();
-        }
     }
 
     private static Stream<List<User>> generateValidUserList() {
@@ -136,7 +127,7 @@ class UserRepositoryTest {
         return Stream.of(user1, user2, user3);
     }
 
-    private static User defaultUser() {
+    private User defaultUser() {
         return User.builder()
                 .nickname("user1").firstName("John")
                 .lastName("Doe").patronymic("Smith").password("password1")
@@ -146,9 +137,19 @@ class UserRepositoryTest {
                 .build();
     }
 
-    private static void settingToDefault(User user) {
+    private void settingToDefault(User user) {
         user.setPassword(null);
         user.setSalt(null);
+    }
+
+    @SneakyThrows
+    @BeforeEach
+    public void clear() {
+        try (Connection connection = connectionGetter.get()) {
+            //language=PostgreSQL
+            String CLEAR_TABLE = "TRUNCATE nikbet_test.public.users RESTART IDENTITY CASCADE";
+            connection.prepareStatement(CLEAR_TABLE).executeUpdate();
+        }
     }
 
     @ParameterizedTest

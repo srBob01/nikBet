@@ -122,7 +122,7 @@ public class GameService {
 
     public boolean endGame(GameAdminCompletedControllerDto gameAdminCompletedControllerDto) {
         Game game = gameMapper.mapAdminCompletedControllerToGame(gameAdminCompletedControllerDto);
-        if (!gameRepository.endGame(game)) {
+        if (!gameRepository.endGame(game.getIdGame(), game.getResult())) {
             return false;
         }
         List<Prediction> predictions = predictionRepository.selectByGameId(gameAdminCompletedControllerDto.idGame());

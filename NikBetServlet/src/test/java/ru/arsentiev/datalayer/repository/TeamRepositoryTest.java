@@ -22,16 +22,6 @@ class TeamRepositoryTest {
     private final TestConnectionGetter connectionGetter = TestConnectionGetter.getInstance();
     private final TeamRepository teamRepository = new TeamRepository(connectionGetter);
 
-    @SneakyThrows
-    @BeforeEach
-    public void clear() {
-        try (Connection connection = connectionGetter.get()) {
-            //language=PostgreSQL
-            String CLEAR_TABLE = "TRUNCATE nikbet_test.public.teams RESTART IDENTITY CASCADE";
-            connection.prepareStatement(CLEAR_TABLE).executeUpdate();
-        }
-    }
-
     private static Stream<List<Team>> generateValidTeamList() {
         Team team1 = Team.builder()
                 .title("Liverpool")
@@ -81,6 +71,16 @@ class TeamRepositoryTest {
                 .title("Liverpool")
                 .abbreviation("LIV")
                 .build();
+    }
+
+    @SneakyThrows
+    @BeforeEach
+    public void clear() {
+        try (Connection connection = connectionGetter.get()) {
+            //language=PostgreSQL
+            String CLEAR_TABLE = "TRUNCATE nikbet_test.public.teams RESTART IDENTITY CASCADE";
+            connection.prepareStatement(CLEAR_TABLE).executeUpdate();
+        }
     }
 
     @ParameterizedTest
