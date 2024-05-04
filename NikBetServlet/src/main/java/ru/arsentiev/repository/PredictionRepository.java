@@ -53,7 +53,8 @@ public class PredictionRepository implements BaseRepository<Long, Prediction> {
     //language=PostgreSQL
     private static final String DELETE_PREDICTION = "DELETE FROM predictions WHERE idPrediction = ?;";
     //language=PostgreSQL
-    private static final String UPDATE_PREDICTION = "UPDATE predictions SET idGame = ?, idUser = ?, predictionDate = ?, summa = ?, prediction = ?, predictionstatus = ?, coefficient = ? WHERE idPrediction = ?;";
+    private static final String UPDATE_PREDICTION = "UPDATE predictions SET idGame = ?, idUser = ?, predictionDate = ?, summa = ?, prediction = ?," +
+                                                    " predictionstatus = ?, coefficient = ? WHERE idPrediction = ?;";
 
     //language=PostgreSQL
     private static final String UPDATE_PREDICTION_STATUS = "UPDATE predictions SET predictionstatus = 'BetPlayed' WHERE idPrediction = ?;";
@@ -64,16 +65,22 @@ public class PredictionRepository implements BaseRepository<Long, Prediction> {
         try (Connection connection = connectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(INSERT_PREDICTION, Statement.RETURN_GENERATED_KEYS)) {
 
-            setStatement(prediction, preparedStatement);
+            preparedStatement.setLong(1, prediction.getGame().getIdGame());
+            preparedStatement.setLong(2, prediction.getUser().getIdUser());
+            preparedStatement.setBigDecimal(3, prediction.getSumma());
+            preparedStatement.setString(4, prediction.getPrediction().name());
+            preparedStatement.setFloat(5, prediction.getCoefficient());
 
             boolean res = preparedStatement.executeUpdate() > 0;
 
             var generatedKeys = preparedStatement.getGeneratedKeys();
             if (generatedKeys.next()) {
                 prediction.setIdPrediction(generatedKeys.getLong("idPrediction"));
+                Timestamp timestamp = generatedKeys.getTimestamp("predictionDate");
+                prediction.setPredictionDate(timestamp.toLocalDateTime());
             }
             return res;
-        } catch (SQLException | InterruptedException e) {
+        } catch (SQLException | InterruptedException | NullPointerException e) {
             throw new RepositoryException(e);
         }
     }
@@ -88,7 +95,7 @@ public class PredictionRepository implements BaseRepository<Long, Prediction> {
             while (resultSet.next()) {
                 predictions.add(extractPredictionFromResultSet(resultSet));
             }
-        } catch (SQLException | InterruptedException e) {
+        } catch (SQLException | InterruptedException | NullPointerException e) {
             throw new RepositoryException(e);
         }
         return predictions;
@@ -106,7 +113,7 @@ public class PredictionRepository implements BaseRepository<Long, Prediction> {
                     return Optional.of(extractPredictionFromResultSet(resultSet));
                 }
             }
-        } catch (SQLException | InterruptedException e) {
+        } catch (SQLException | InterruptedException | NullPointerException e) {
             throw new RepositoryException(e);
         }
         return Optional.empty();
@@ -144,7 +151,7 @@ public class PredictionRepository implements BaseRepository<Long, Prediction> {
                     predictions.add(extractPredictionFromResultSet(resultSet));
                 }
             }
-        } catch (SQLException | InterruptedException e) {
+        } catch (SQLException | InterruptedException | NullPointerException e) {
             throw new RepositoryException(e);
         }
         return predictions;
@@ -157,7 +164,7 @@ public class PredictionRepository implements BaseRepository<Long, Prediction> {
 
             preparedStatement.setLong(1, id);
             return preparedStatement.executeUpdate() > 0;
-        } catch (SQLException | InterruptedException e) {
+        } catch (SQLException | InterruptedException | NullPointerException e) {
             throw new RepositoryException(e);
         }
     }
@@ -167,11 +174,17 @@ public class PredictionRepository implements BaseRepository<Long, Prediction> {
         try (Connection connection = connectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_PREDICTION)) {
 
-            setStatement(prediction, preparedStatement);
-            preparedStatement.setLong(6, prediction.getIdPrediction());
+            preparedStatement.setLong(1, prediction.getGame().getIdGame());
+            preparedStatement.setLong(2, prediction.getUser().getIdUser());
+            preparedStatement.setTimestamp(3, Timestamp.valueOf(prediction.getPredictionDate()));
+            preparedStatement.setBigDecimal(4, prediction.getSumma());
+            preparedStatement.setString(5, prediction.getPrediction().name());
+            preparedStatement.setString(6, prediction.getPredictionStatus().name());
+            preparedStatement.setFloat(7, prediction.getCoefficient());
+            preparedStatement.setLong(8, prediction.getIdPrediction());
 
             return preparedStatement.executeUpdate() > 0;
-        } catch (SQLException | InterruptedException e) {
+        } catch (SQLException | InterruptedException | NullPointerException e) {
             throw new RepositoryException(e);
         }
     }
@@ -179,7 +192,7 @@ public class PredictionRepository implements BaseRepository<Long, Prediction> {
     public void updatePredictionStatusOfList(List<Long> listIdPrediction) {
         try (Connection connection = connectionGetter.get()) {
             listIdPrediction.forEach(id -> updatePredictionStatus(id, connection));
-        } catch (SQLException | InterruptedException e) {
+        } catch (SQLException | InterruptedException | NullPointerException e) {
             throw new RepositoryException(e);
         }
     }
@@ -190,18 +203,9 @@ public class PredictionRepository implements BaseRepository<Long, Prediction> {
             preparedStatement.setLong(1, idPrediction);
 
             preparedStatement.executeUpdate();
-        } catch (SQLException e) {
+        } catch (SQLException | NullPointerException e) {
             throw new RepositoryException(e);
         }
-    }
-
-
-    private void setStatement(Prediction prediction, PreparedStatement preparedStatement) throws SQLException {
-        preparedStatement.setLong(1, prediction.getGame().getIdGame());
-        preparedStatement.setLong(2, prediction.getUser().getIdUser());
-        preparedStatement.setBigDecimal(3, prediction.getSumma());
-        preparedStatement.setString(4, prediction.getPrediction().name());
-        preparedStatement.setFloat(5, prediction.getCoefficient());
     }
 
     private Prediction extractPredictionFromResultSet(ResultSet resultSet) throws SQLException {

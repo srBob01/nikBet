@@ -166,7 +166,10 @@ class GameRepositoryTest {
 
     @Test
     void selectByInvalidIdTest() {
-        long wrongId = -1;
+        Game game = defaultScheduledGame();
+        gameRepository.insert(game);
+
+        long wrongId = 2;
         assertThat(gameRepository.selectById(wrongId)).isEmpty();
     }
 
@@ -392,7 +395,10 @@ class GameRepositoryTest {
 
     @Test
     void deleteOnInvalidId() {
-        assertThat(gameRepository.delete(-1L)).isFalse();
+        Game game = defaultScheduledGame();
+        gameRepository.insert(game);
+
+        assertThat(gameRepository.delete(2L)).isFalse();
     }
 
     @Test

@@ -41,7 +41,7 @@ public class User {
                && Objects.equals(getPhoneNumber(), user.getPhoneNumber())
                && Objects.equals(getEmail(), user.getEmail())
                && Objects.equals(getBirthDate(), user.getBirthDate())
-               && Objects.equals(getAccountBalance(), user.getAccountBalance())
+               && getAccountBalance().compareTo(user.getAccountBalance()) == 0
                && getRole() == user.getRole();
     }
 

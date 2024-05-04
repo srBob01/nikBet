@@ -260,7 +260,10 @@ class UserRepositoryTest {
 
     @Test
     void selectAndUpdateBalanceByInvalidIdTest() {
-        long wrongIdUser = -1L;
+        User user = defaultUser();
+        userRepository.insert(user);
+
+        long wrongIdUser = 2L;
         BigDecimal summa = BigDecimal.valueOf(30.4);
         assertThat(userRepository.depositMoneyById(wrongIdUser, summa)).isFalse();
         assertThat(userRepository.withdrawMoneyById(wrongIdUser, summa)).isFalse();
@@ -284,13 +287,15 @@ class UserRepositoryTest {
 
     @Test
     void deleteInvalidUserTest() {
-        long wrongIdUser = -1L;
+        User user = defaultUser();
+        userRepository.insert(user);
 
+        long wrongIdUser = 2L;
         assertThat(userRepository.delete(wrongIdUser)).isFalse();
     }
 
     @Test
-    void updateUserTest() {
+    void updateValidUserTest() {
         User user = defaultUser();
         userRepository.insert(user);
 
@@ -303,6 +308,14 @@ class UserRepositoryTest {
 
         settingToDefault(user);
         assertThat(newUser).isEqualTo(user);
+    }
+
+    @Test
+    void updateInvalidUserTest() {
+        User user = defaultUser();
+
+        user.setNickname("newNickname");
+        assertThat(userRepository.update(user)).isFalse();
     }
 
     @Test
@@ -339,5 +352,24 @@ class UserRepositoryTest {
         assertThat(newUser).isNotNull();
         assertThat(newUser.getPassword()).isEqualTo(user.getPassword());
         assertThat(newUser.getSalt()).isEqualTo(user.getSalt());
+    }
+
+    @Test
+    void updatePasswordByEmptyUserLoginTest() {
+        User user = defaultUser();
+        user.setPassword("newPassword");
+        user.setSalt("newSalt");
+
+        assertThat(userRepository.updatePasswordByLogin(user)).isFalse();
+    }
+
+    @Test
+    void updatePasswordByNullLoginTest() {
+        User user = defaultUser();
+        userRepository.insert(user);
+        user.setPassword(null);
+        user.setSalt(null);
+
+        assertThatThrownBy(() -> userRepository.updatePasswordByLogin(user)).isInstanceOf(RepositoryException.class);
     }
 }

@@ -30,12 +30,16 @@ public class Game {
         if (!(object instanceof Game game)) {
             return false;
         }
-        return getIdGame() == game.getIdGame() && Float.compare(getCoefficientOnHomeTeam(), game.getCoefficientOnHomeTeam()) == 0
+        return getIdGame() == game.getIdGame()
+               && Float.compare(getCoefficientOnHomeTeam(), game.getCoefficientOnHomeTeam()) == 0
                && Float.compare(getCoefficientOnDraw(), game.getCoefficientOnDraw()) == 0
                && Float.compare(getCoefficientOnGuestTeam(), game.getCoefficientOnGuestTeam()) == 0
-               && Objects.equals(getHomeTeam(), game.getHomeTeam()) && Objects.equals(getGuestTeam(), game.getGuestTeam())
-               && Objects.equals(getGoalHomeTeam(), game.getGoalHomeTeam()) && Objects.equals(getGoalGuestTeam(), game.getGoalGuestTeam())
-               && Objects.equals(getGameDate(), game.getGameDate()) && getStatus() == game.getStatus() && getTime() == game.getTime()
+               && Objects.equals(getHomeTeam(), game.getHomeTeam())
+               && Objects.equals(getGuestTeam(), game.getGuestTeam())
+               && Objects.equals(getGoalHomeTeam(), game.getGoalHomeTeam())
+               && Objects.equals(getGoalGuestTeam(), game.getGoalGuestTeam())
+               && Objects.equals(getGameDate(), game.getGameDate())
+               && getStatus() == game.getStatus() && getTime() == game.getTime()
                && getResult() == game.getResult();
     }
 

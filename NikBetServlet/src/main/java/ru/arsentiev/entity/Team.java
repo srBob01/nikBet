@@ -20,7 +20,8 @@ public class Team {
         if (!(object instanceof Team team)) {
             return false;
         }
-        return getIdTeam() == team.getIdTeam() && Objects.equals(getTitle(), team.getTitle())
+        return getIdTeam() == team.getIdTeam()
+               && Objects.equals(getTitle(), team.getTitle())
                && Objects.equals(getAbbreviation(), team.getAbbreviation());
     }
 

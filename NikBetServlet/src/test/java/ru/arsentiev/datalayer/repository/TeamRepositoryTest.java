@@ -125,8 +125,10 @@ class TeamRepositoryTest {
 
     @Test
     void selectTeamByInvalidSomethingTest() {
-        long wrongId = -1L;
+        Team team = defaultTeam();
+        teamRepository.insert(team);
 
+        long wrongId = 2L;
         assertThat(teamRepository.selectById(wrongId)).isEmpty();
     }
 
@@ -145,13 +147,15 @@ class TeamRepositoryTest {
 
     @Test
     void deleteInvalidTeamTest() {
-        long wrongIdUser = -1L;
+        Team team = defaultTeam();
+        teamRepository.insert(team);
 
-        assertThat(teamRepository.delete(wrongIdUser)).isFalse();
+        long wrongId = 2L;
+        assertThat(teamRepository.delete(wrongId)).isFalse();
     }
 
     @Test
-    void updateTeamTest() {
+    void updateValidTeamTest() {
         Team team = defaultTeam();
         teamRepository.insert(team);
 
@@ -164,5 +168,14 @@ class TeamRepositoryTest {
         Team newTeam = optionalTeam.get();
 
         assertThat(newTeam).isEqualTo(team);
+    }
+
+    @Test
+    void updateInvalidTeamTest() {
+        Team team = defaultTeam();
+
+        team.setTitle("Chelsea");
+        team.setAbbreviation("CHE");
+        assertThat(teamRepository.update(team)).isFalse();
     }
 }
