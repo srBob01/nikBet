@@ -1,4 +1,4 @@
-package ru.arsentiev.service.entity.game;
+package ru.arsentiev.servicelayer.service.entity.game;
 
 import lombok.Builder;
 import ru.arsentiev.dto.game.controller.GameCompletedControllerDto;

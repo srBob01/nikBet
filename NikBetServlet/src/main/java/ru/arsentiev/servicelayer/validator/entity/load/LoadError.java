@@ -1,4 +1,4 @@
-package ru.arsentiev.processing.validator.entity.load;
+package ru.arsentiev.servicelayer.validator.entity.load;
 
 import lombok.Value;
 

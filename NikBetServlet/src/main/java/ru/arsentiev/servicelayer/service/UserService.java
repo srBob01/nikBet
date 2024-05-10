@@ -1,4 +1,4 @@
-package ru.arsentiev.service;
+package ru.arsentiev.servicelayer.service;
 
 import ru.arsentiev.dto.user.controller.*;
 import ru.arsentiev.entity.User;
@@ -7,10 +7,9 @@ import ru.arsentiev.mapper.UserMapper;
 import ru.arsentiev.processing.password.PasswordHashed;
 import ru.arsentiev.processing.query.entity.UpdatedUserFields;
 import ru.arsentiev.repository.UserRepository;
-import ru.arsentiev.service.entity.user.ReturnValueInCheckLogin;
-import ru.arsentiev.processing.validator.UpdateUserValidator;
-import ru.arsentiev.processing.validator.entity.login.LoginError;
-import ru.arsentiev.processing.validator.entity.update.UpdatePasswordError;
+import ru.arsentiev.servicelayer.validator.UpdateUserValidator;
+import ru.arsentiev.servicelayer.validator.entity.login.LoginError;
+import ru.arsentiev.servicelayer.validator.entity.update.UpdatePasswordError;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -36,6 +35,29 @@ public class UserService {
         userRepository.insert(user);
     }
 
+    public UserControllerDto selectUser(UserLoginControllerDto userLoginControllerDto) {
+        User user = userRepository.selectByLogin(userLoginControllerDto.email());
+        if (user != null) {
+            return userMapper.map(user);
+        } else {
+            throw new ServiceException("User not found!");
+        }
+    }
+
+    public Optional<LoginError> checkLoginUser(UserLoginControllerDto userLoginControllerDto) {
+        User userSelectPassword = userRepository.selectPasswordByLogin(userLoginControllerDto.email());
+        if (userSelectPassword != null) {
+            UserPasswordAndSaltControllerDto dto = userMapper.mapUserToPasswordAndSaltController(userSelectPassword);
+            if (dto.password().equals(passwordHashed.hashPassword(userLoginControllerDto.password(), dto.salt()))) {
+                return Optional.empty();
+            } else {
+                return Optional.of(LoginError.INCORRECT_PASSWORD);
+            }
+        } else {
+            return Optional.of(LoginError.USER_NOT_FOUND);
+        }
+    }
+
     public UserControllerDto updateDescriptionUser(UserUpdateDescriptionControllerDto userUpdateDescriptionControllerDto,
                                                    UpdatedUserFields updatedUserFields,
                                                    UserConstFieldsControllerDto userConstFieldsControllerDto) {
@@ -43,39 +65,17 @@ public class UserService {
         if (userRepository.updateDescriptionWithDynamicCreation(user, updatedUserFields)) {
             return userMapper.map(userConstFieldsControllerDto, userUpdateDescriptionControllerDto);
         } else {
-            throw new ServiceException("The user does not exist");
+            throw new ServiceException("Update failed");
         }
     }
 
-    public ReturnValueInCheckLogin checkLogin(UserLoginControllerDto userLoginControllerDto) {
-        User userSelectPassword = userRepository.selectPasswordByLogin(userLoginControllerDto.email());
-        UserPasswordAndSaltControllerDto userPasswordAndSaltControllerDto = userMapper.mapUserToPasswordAndSaltController(userSelectPassword);
-        if (userPasswordAndSaltControllerDto.password().isPresent() && userPasswordAndSaltControllerDto.salt().isPresent()) {
-            if (userPasswordAndSaltControllerDto.password().get()
-                    .equals(passwordHashed.hashPassword(userLoginControllerDto.password(),
-                            userPasswordAndSaltControllerDto.salt().get()))) {
-                User user = userRepository.selectByLogin(userLoginControllerDto.email());
-                UserControllerDto userControllerDto = userMapper.map(user);
-                return new ReturnValueInCheckLogin(null, Optional.of(userControllerDto));
-            } else {
-                return new ReturnValueInCheckLogin(LoginError.INCORRECT_PASSWORD, Optional.empty());
-            }
-        } else {
-            return new ReturnValueInCheckLogin(LoginError.USER_NOT_FOUND, Optional.empty());
-        }
-    }
-
-    public Optional<UpdatePasswordError> updatePassword(UserLogoPasControllerDto userLogoPasControllerDto) {
+    public Optional<UpdatePasswordError> updatePasswordUser(UserLogoPasControllerDto userLogoPasControllerDto) {
         User userSelectPassword = userRepository.selectPasswordByLogin(userLogoPasControllerDto.email());
-        UserPasswordAndSaltControllerDto userPasswordAndSaltControllerDto = userMapper.mapUserToPasswordAndSaltController(userSelectPassword);
-        if (userPasswordAndSaltControllerDto.password().isPresent() && userPasswordAndSaltControllerDto.salt().isPresent()) {
-            if (userPasswordAndSaltControllerDto.password().get()
-                    .equals(passwordHashed.hashPassword(userLogoPasControllerDto.oldPassword(),
-                            userPasswordAndSaltControllerDto.salt().get()))) {
-                Optional<UpdatePasswordError> error = updateUserValidator.isValidPassword(userLogoPasControllerDto
-                        .newPassword());
-                if (error.isPresent()) {
-                    return error;
+        if (userSelectPassword != null) {
+            UserPasswordAndSaltControllerDto dto = userMapper.mapUserToPasswordAndSaltController(userSelectPassword);
+            if (dto.password().equals(passwordHashed.hashPassword(userLogoPasControllerDto.oldPassword(), dto.salt()))) {
+                if (!updateUserValidator.isValidPassword(userLogoPasControllerDto.newPassword())) {
+                    return Optional.of(UpdatePasswordError.INCORRECT_NEW_PASSWORD);
                 }
                 String salt = passwordHashed.generateSalt();
                 User user = userMapper.map(userLogoPasControllerDto, salt, passwordHashed::hashPassword);

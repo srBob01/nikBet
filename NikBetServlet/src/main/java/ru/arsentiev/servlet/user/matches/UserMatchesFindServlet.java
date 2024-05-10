@@ -17,9 +17,9 @@ import ru.arsentiev.manager.MapperManager;
 import ru.arsentiev.manager.ServiceManager;
 import ru.arsentiev.mapper.GameMapper;
 import ru.arsentiev.mapper.TeamMapper;
-import ru.arsentiev.service.GameService;
-import ru.arsentiev.service.TeamService;
-import ru.arsentiev.service.entity.game.TripleListOfGameControllerDto;
+import ru.arsentiev.servicelayer.service.GameService;
+import ru.arsentiev.servicelayer.service.TeamService;
+import ru.arsentiev.servicelayer.service.entity.game.TripleListOfGameControllerDto;
 import ru.arsentiev.processing.query.entity.CompletedGameFields;
 import ru.arsentiev.utils.JspPathCreator;
 

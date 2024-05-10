@@ -10,7 +10,7 @@ import ru.arsentiev.dto.user.controller.UserControllerDto;
 import ru.arsentiev.manager.MapperManager;
 import ru.arsentiev.manager.ServiceManager;
 import ru.arsentiev.mapper.PredictionMapper;
-import ru.arsentiev.service.PredictionService;
+import ru.arsentiev.servicelayer.service.PredictionService;
 
 import java.io.IOException;
 import java.math.BigDecimal;

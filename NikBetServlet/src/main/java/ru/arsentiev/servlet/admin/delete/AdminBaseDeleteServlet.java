@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import ru.arsentiev.manager.MapperManager;
 import ru.arsentiev.manager.ServiceManager;
 import ru.arsentiev.mapper.UserMapper;
-import ru.arsentiev.service.UserService;
+import ru.arsentiev.servicelayer.service.UserService;
 
 import java.io.IOException;
 

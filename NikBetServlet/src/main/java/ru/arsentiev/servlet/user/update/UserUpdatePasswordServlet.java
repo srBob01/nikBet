@@ -11,9 +11,9 @@ import ru.arsentiev.dto.user.view.UserLogoPasViewDto;
 import ru.arsentiev.manager.MapperManager;
 import ru.arsentiev.manager.ServiceManager;
 import ru.arsentiev.mapper.UserMapper;
-import ru.arsentiev.service.UserService;
+import ru.arsentiev.servicelayer.service.UserService;
 import ru.arsentiev.utils.JspPathCreator;
-import ru.arsentiev.processing.validator.entity.update.UpdatePasswordError;
+import ru.arsentiev.servicelayer.validator.entity.update.UpdatePasswordError;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -52,7 +52,7 @@ public class UserUpdatePasswordServlet extends HttpServlet {
                 .newPassword(newPassword)
                 .build();
         UserLogoPasControllerDto userLogoPasControllerDto = userMapper.map(userLogoPasViewDto);
-        Optional<UpdatePasswordError> error = userService.updatePassword(userLogoPasControllerDto);
+        Optional<UpdatePasswordError> error = userService.updatePasswordUser(userLogoPasControllerDto);
         if (error.isEmpty()) {
             resp.sendRedirect(USER_DEFAULT_URL);
         } else {

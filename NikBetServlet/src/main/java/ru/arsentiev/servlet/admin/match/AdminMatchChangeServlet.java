@@ -13,7 +13,7 @@ import ru.arsentiev.dto.game.view.GameInProgressViewDto;
 import ru.arsentiev.manager.MapperManager;
 import ru.arsentiev.manager.ServiceManager;
 import ru.arsentiev.mapper.GameMapper;
-import ru.arsentiev.service.GameService;
+import ru.arsentiev.servicelayer.service.GameService;
 import ru.arsentiev.utils.JspPathCreator;
 
 import java.io.IOException;

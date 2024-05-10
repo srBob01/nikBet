@@ -7,7 +7,6 @@ import ru.arsentiev.processing.dateformatter.LocalDateFormatter;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Optional;
 import java.util.function.BiFunction;
 
 public class UserMapper {
@@ -33,8 +32,8 @@ public class UserMapper {
 
     public UserPasswordAndSaltControllerDto mapUserToPasswordAndSaltController(User user) {
         return UserPasswordAndSaltControllerDto.builder()
-                .password(Optional.ofNullable(user.getPassword()))
-                .salt(Optional.ofNullable(user.getSalt()))
+                .password(user.getPassword())
+                .salt(user.getSalt())
                 .build();
     }
 

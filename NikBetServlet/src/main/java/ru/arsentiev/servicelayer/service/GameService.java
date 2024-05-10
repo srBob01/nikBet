@@ -1,4 +1,4 @@
-package ru.arsentiev.service;
+package ru.arsentiev.servicelayer.service;
 
 import ru.arsentiev.dto.game.controller.*;
 import ru.arsentiev.dto.user.controller.UserMoneyControllerDto;
@@ -10,7 +10,7 @@ import ru.arsentiev.processing.query.entity.CompletedGameFields;
 import ru.arsentiev.repository.GameRepository;
 import ru.arsentiev.repository.PredictionRepository;
 import ru.arsentiev.repository.UserRepository;
-import ru.arsentiev.service.entity.game.TripleListOfGameControllerDto;
+import ru.arsentiev.servicelayer.service.entity.game.TripleListOfGameControllerDto;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

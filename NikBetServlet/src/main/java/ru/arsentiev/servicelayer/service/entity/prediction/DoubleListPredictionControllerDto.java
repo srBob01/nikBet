@@ -1,4 +1,4 @@
-package ru.arsentiev.service.entity.prediction;
+package ru.arsentiev.servicelayer.service.entity.prediction;
 
 import lombok.Builder;
 import ru.arsentiev.dto.prediction.controller.PredictionNotPlayedControllerDto;

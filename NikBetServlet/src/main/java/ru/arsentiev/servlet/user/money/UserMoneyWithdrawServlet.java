@@ -11,7 +11,7 @@ import ru.arsentiev.dto.user.view.UserMoneyViewDto;
 import ru.arsentiev.manager.MapperManager;
 import ru.arsentiev.manager.ServiceManager;
 import ru.arsentiev.mapper.UserMapper;
-import ru.arsentiev.service.UserService;
+import ru.arsentiev.servicelayer.service.UserService;
 import ru.arsentiev.utils.JspPathCreator;
 
 import java.io.IOException;

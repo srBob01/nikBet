@@ -1,4 +1,4 @@
-package ru.arsentiev.service;
+package ru.arsentiev.servicelayer.service;
 
 import ru.arsentiev.dto.team.controller.TeamControllerDto;
 import ru.arsentiev.mapper.TeamMapper;

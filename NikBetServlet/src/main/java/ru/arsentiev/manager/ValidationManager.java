@@ -2,8 +2,8 @@ package ru.arsentiev.manager;
 
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
-import ru.arsentiev.processing.validator.RegistrationUserValidator;
-import ru.arsentiev.processing.validator.UpdateUserValidator;
+import ru.arsentiev.servicelayer.validator.RegistrationUserValidator;
+import ru.arsentiev.servicelayer.validator.UpdateUserValidator;
 
 @UtilityClass
 public class ValidationManager {

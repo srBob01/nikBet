@@ -1,4 +1,4 @@
-package ru.arsentiev.processing.validator;
+package ru.arsentiev.servicelayer.validator;
 
 import ru.arsentiev.dto.user.view.UserRegistrationViewDto;
 import ru.arsentiev.repository.UserExistsRepository;
@@ -7,9 +7,9 @@ import ru.arsentiev.processing.check.NameCheck;
 import ru.arsentiev.processing.check.PasswordCheck;
 import ru.arsentiev.processing.check.PhoneNumberCheck;
 import ru.arsentiev.processing.dateformatter.LocalDateFormatter;
-import ru.arsentiev.processing.validator.entity.load.LoadError;
-import ru.arsentiev.processing.validator.entity.load.LoadValidationResult;
-import ru.arsentiev.processing.validator.entity.load.TypeLoadError;
+import ru.arsentiev.servicelayer.validator.entity.load.LoadError;
+import ru.arsentiev.servicelayer.validator.entity.load.LoadValidationResult;
+import ru.arsentiev.servicelayer.validator.entity.load.TypeLoadError;
 
 import java.time.LocalDate;
 import java.time.Period;

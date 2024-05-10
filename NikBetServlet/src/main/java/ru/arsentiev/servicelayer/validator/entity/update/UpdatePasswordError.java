@@ -1,4 +1,4 @@
-package ru.arsentiev.processing.validator.entity.update;
+package ru.arsentiev.servicelayer.validator.entity.update;
 
 public enum UpdatePasswordError {
     PASSWORDS_DONT_MATCH("The entered password does not match your password"),

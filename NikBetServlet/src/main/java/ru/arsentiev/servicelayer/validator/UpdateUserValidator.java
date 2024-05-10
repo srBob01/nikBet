@@ -1,21 +1,19 @@
-package ru.arsentiev.processing.validator;
+package ru.arsentiev.servicelayer.validator;
 
 import ru.arsentiev.dto.user.view.UserUpdateDescriptionViewDto;
-import ru.arsentiev.repository.UserExistsRepository;
 import ru.arsentiev.processing.check.DateCheck;
 import ru.arsentiev.processing.check.NameCheck;
 import ru.arsentiev.processing.check.PasswordCheck;
 import ru.arsentiev.processing.check.PhoneNumberCheck;
-import ru.arsentiev.processing.query.entity.UpdatedUserFields;
 import ru.arsentiev.processing.dateformatter.LocalDateFormatter;
-import ru.arsentiev.processing.validator.entity.load.LoadError;
-import ru.arsentiev.processing.validator.entity.load.LoadValidationResult;
-import ru.arsentiev.processing.validator.entity.load.TypeLoadError;
-import ru.arsentiev.processing.validator.entity.update.UpdatePasswordError;
+import ru.arsentiev.processing.query.entity.UpdatedUserFields;
+import ru.arsentiev.repository.UserExistsRepository;
+import ru.arsentiev.servicelayer.validator.entity.load.LoadError;
+import ru.arsentiev.servicelayer.validator.entity.load.LoadValidationResult;
+import ru.arsentiev.servicelayer.validator.entity.load.TypeLoadError;
 
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.Optional;
 
 public class UpdateUserValidator {
     private final UserExistsRepository userExistsRepository;
@@ -94,10 +92,7 @@ public class UpdateUserValidator {
         return result;
     }
 
-    public Optional<UpdatePasswordError> isValidPassword(String password) {
-        if (password == null || password.trim().isEmpty() || passwordCheck.isIncorrect(password)) {
-            return Optional.of(UpdatePasswordError.INCORRECT_NEW_PASSWORD);
-        }
-        return Optional.empty();
+    public boolean isValidPassword(String password) {
+        return password != null && !password.trim().isEmpty() && !passwordCheck.isIncorrect(password);
     }
 }

@@ -16,9 +16,9 @@ import ru.arsentiev.manager.ServiceManager;
 import ru.arsentiev.mapper.GameMapper;
 import ru.arsentiev.mapper.PredictionMapper;
 import ru.arsentiev.mapper.UserMapper;
-import ru.arsentiev.service.GameService;
-import ru.arsentiev.service.PredictionService;
-import ru.arsentiev.service.UserService;
+import ru.arsentiev.servicelayer.service.GameService;
+import ru.arsentiev.servicelayer.service.PredictionService;
+import ru.arsentiev.servicelayer.service.UserService;
 
 import java.io.IOException;
 

@@ -3,10 +3,10 @@ package ru.arsentiev.manager;
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
 import ru.arsentiev.processing.password.PasswordHashed;
-import ru.arsentiev.service.GameService;
-import ru.arsentiev.service.PredictionService;
-import ru.arsentiev.service.TeamService;
-import ru.arsentiev.service.UserService;
+import ru.arsentiev.servicelayer.service.GameService;
+import ru.arsentiev.servicelayer.service.PredictionService;
+import ru.arsentiev.servicelayer.service.TeamService;
+import ru.arsentiev.servicelayer.service.UserService;
 
 @UtilityClass
 public class ServiceManager {

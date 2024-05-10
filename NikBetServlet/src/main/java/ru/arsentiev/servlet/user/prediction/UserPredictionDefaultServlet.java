@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import ru.arsentiev.dto.prediction.view.PredictionNotPlayedViewDto;
 import ru.arsentiev.dto.prediction.view.PredictionPlayedViewDto;
 import ru.arsentiev.dto.user.controller.UserControllerDto;
-import ru.arsentiev.service.entity.prediction.DoubleListPredictionControllerDto;
+import ru.arsentiev.servicelayer.service.entity.prediction.DoubleListPredictionControllerDto;
 import ru.arsentiev.utils.JspPathCreator;
 
 import java.io.IOException;

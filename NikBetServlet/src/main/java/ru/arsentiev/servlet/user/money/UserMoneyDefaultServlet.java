@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.arsentiev.dto.user.controller.UserControllerDto;
 import ru.arsentiev.manager.ServiceManager;
-import ru.arsentiev.service.UserService;
+import ru.arsentiev.servicelayer.service.UserService;
 import ru.arsentiev.utils.JspPathCreator;
 
 import java.io.IOException;
