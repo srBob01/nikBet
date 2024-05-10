@@ -78,18 +78,22 @@ public class GameService {
                                                                 GameParametersControllerDto gameParametersControllerDto) {
         Game game = gameMapper.map(gameParametersControllerDto);
         List<Game> gameList = gameRepository.selectByParameters(game, completedGameFields);
+
         List<GameProgressControllerDto> gameViewInProgressDtoList = gameList.stream()
                 .filter(game1 -> game1.getStatus().equals(GameStatus.InProgress))
                 .map(gameMapper::mapGameToControllerInProgress)
                 .toList();
+
         List<GameScheduledControllerDto> gameViewScheduledDtoList = gameList.stream()
                 .filter(game1 -> game1.getStatus().equals(GameStatus.Scheduled))
                 .map(gameMapper::mapGameToControllerScheduled)
                 .toList();
+
         List<GameCompletedControllerDto> gameViewCompletedDtoList = gameList.stream()
                 .filter(game1 -> game1.getStatus().equals(GameStatus.Completed))
                 .map(gameMapper::mapGameToControllerCompleted)
                 .toList();
+
         return TripleListOfGameControllerDto.builder()
                 .gameViewScheduledDtoList(gameViewScheduledDtoList)
                 .gameViewCompletedDtoList(gameViewCompletedDtoList)
@@ -129,9 +133,7 @@ public class GameService {
         predictions.stream()
                 .filter(prediction -> prediction.getPrediction().compareTo(game.getResult()) == 0)
                 .forEach(prediction -> {
-                    BigDecimal winning = prediction.getSumma().multiply(
-                                    BigDecimal.valueOf(prediction.getCoefficient()))
-                            .setScale(2, RoundingMode.HALF_UP);
+                    BigDecimal winning = prediction.getSumma().multiply(BigDecimal.valueOf(prediction.getCoefficient())).setScale(2, RoundingMode.HALF_UP);
                     UserMoneyControllerDto userMoneyControllerDto = UserMoneyControllerDto.builder()
                             .idUser(prediction.getUser().getIdUser())
                             .summa(winning)

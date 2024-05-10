@@ -35,17 +35,6 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
-    @Mock
-    UserMapper userMapper;
-    @Mock
-    PasswordHashed passwordHashed;
-    @Mock
-    UserRepository userRepository;
-    @Mock
-    UpdateUserValidator updateUserValidator;
-    @InjectMocks
-    UserService userService;
-
     private static User user;
     private static UserPasswordAndSaltControllerDto userPasswordAndSaltControllerDto;
     private static UserLogoPasControllerDto userLogoPasControllerDto;
@@ -53,8 +42,19 @@ class UserServiceTest {
     private static UserControllerDto userControllerDto;
     private static UserMoneyControllerDto userMoneyControllerDto;
 
+    @Mock
+    private UserMapper userMapper;
+    @Mock
+    private PasswordHashed passwordHashed;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private UpdateUserValidator updateUserValidator;
+    @InjectMocks
+    private UserService userService;
+
     @BeforeAll
-    public static void fillUser() {
+    public static void fillEntity() {
         user = User.builder()
                 .nickname("user1").firstName("John")
                 .lastName("Doe").password("password1")
