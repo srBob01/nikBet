@@ -1,4 +1,4 @@
-package ru.arsentiev.servicelayer;
+package ru.arsentiev.servicelayer.service;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -14,7 +14,6 @@ import ru.arsentiev.mapper.UserMapper;
 import ru.arsentiev.processing.password.PasswordHashed;
 import ru.arsentiev.processing.query.entity.UpdatedUserFields;
 import ru.arsentiev.repository.UserRepository;
-import ru.arsentiev.servicelayer.service.UserService;
 import ru.arsentiev.servicelayer.validator.UpdateUserValidator;
 import ru.arsentiev.servicelayer.validator.entity.login.LoginError;
 import ru.arsentiev.servicelayer.validator.entity.update.UpdatePasswordError;
