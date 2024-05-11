@@ -43,7 +43,9 @@ public class PredictionService {
         };
         Prediction prediction = predictionMapper.map(predictionPlaceControllerDto);
         prediction.setCoefficient(coefficient);
-        predictionRepository.insert(prediction);
+        if (!predictionRepository.insert(prediction)) {
+            throw new ServiceException("The prediction does not insert");
+        }
         String homeTeam = game.get().getHomeTeam().getTitle();
         String guestTeam = game.get().getGuestTeam().getTitle();
         String winner = switch (predictionPlaceControllerDto.prediction()) {
