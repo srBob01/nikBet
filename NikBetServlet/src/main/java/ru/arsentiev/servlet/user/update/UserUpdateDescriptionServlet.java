@@ -13,11 +13,11 @@ import ru.arsentiev.manager.MapperManager;
 import ru.arsentiev.manager.ServiceManager;
 import ru.arsentiev.manager.ValidationManager;
 import ru.arsentiev.mapper.UserMapper;
-import ru.arsentiev.servicelayer.service.UserService;
 import ru.arsentiev.processing.query.entity.UpdatedUserFields;
-import ru.arsentiev.utils.JspPathCreator;
+import ru.arsentiev.servicelayer.service.UserService;
 import ru.arsentiev.servicelayer.validator.UpdateUserValidator;
 import ru.arsentiev.servicelayer.validator.entity.load.LoadValidationResult;
+import ru.arsentiev.utils.JspPathCreator;
 
 import java.io.IOException;
 import java.util.Objects;
