@@ -1,6 +1,8 @@
 package ru.arsentiev.entity;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -40,5 +42,19 @@ public class Prediction {
     @Override
     public int hashCode() {
         return Objects.hash(getIdPrediction(), getGame(), getUser(), getPredictionDate(), getSumma(), getPrediction(), getPredictionStatus(), getCoefficient());
+    }
+
+    @Override
+    public String toString() {
+        return "Prediction{" +
+               "idPrediction=" + idPrediction +
+               ", game=" + game +
+               ", user=" + user +
+               ", predictionDate=" + predictionDate +
+               ", summa=" + summa +
+               ", prediction=" + prediction +
+               ", predictionStatus=" + predictionStatus +
+               ", coefficient=" + coefficient +
+               '}';
     }
 }

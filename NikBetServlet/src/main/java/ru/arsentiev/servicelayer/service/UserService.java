@@ -1,5 +1,7 @@
 package ru.arsentiev.servicelayer.service;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import ru.arsentiev.dto.user.controller.*;
 import ru.arsentiev.entity.User;
 import ru.arsentiev.exception.ServiceException;
@@ -16,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class UserService {
+    private static final Logger logger = LogManager.getLogger();
     private final UserMapper userMapper;
     private final PasswordHashed passwordHashed;
     private final UserRepository userRepository;
@@ -40,6 +43,7 @@ public class UserService {
         if (user != null) {
             return userMapper.map(user);
         } else {
+            logger.error("User with" + userLoginControllerDto.email() + " not found!");
             throw new ServiceException("User not found!");
         }
     }
@@ -65,6 +69,7 @@ public class UserService {
         if (userRepository.updateDescriptionWithDynamicCreation(user, updatedUserFields)) {
             return userMapper.map(userConstFieldsControllerDto, userUpdateDescriptionControllerDto);
         } else {
+            logger.error("Update user" + user.toString() + " failed");
             throw new ServiceException("Update failed");
         }
     }
@@ -82,12 +87,14 @@ public class UserService {
                 if (userRepository.updatePasswordByLogin(user)) {
                     return Optional.empty();
                 } else {
+                    logger.error("The user has not been updated");
                     throw new ServiceException("The user has not been updated");
                 }
             } else {
                 return Optional.of(UpdatePasswordError.PASSWORDS_DONT_MATCH);
             }
         } else {
+            logger.error("The user with email " + userLogoPasControllerDto.email() + " does not exist");
             throw new ServiceException("The user does not exist");
         }
     }
@@ -99,6 +106,7 @@ public class UserService {
     public BigDecimal getAccountBalance(Long idUser) {
         var balance = userRepository.selectBalanceById(idUser);
         if (balance.isEmpty()) {
+            logger.error("The user with id" + idUser + " does not exist");
             throw new ServiceException("The user does not exist");
         }
         return balance.get();
@@ -107,6 +115,7 @@ public class UserService {
     public boolean withdrawMoney(UserMoneyControllerDto userMoneyControllerDto) {
         Optional<BigDecimal> balance = userRepository.selectBalanceById(userMoneyControllerDto.idUser());
         if (balance.isEmpty()) {
+            logger.error("The user with id" + userMoneyControllerDto.idUser() + " does not exist");
             throw new ServiceException("The user does not exist");
         }
 

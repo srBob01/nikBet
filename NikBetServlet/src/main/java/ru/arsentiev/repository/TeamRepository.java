@@ -1,5 +1,7 @@
 package ru.arsentiev.repository;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import ru.arsentiev.entity.Team;
 import ru.arsentiev.exception.RepositoryException;
 import ru.arsentiev.processing.connection.ConnectionGetter;
@@ -10,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class TeamRepository implements BaseRepository<Long, Team> {
+    private static final Logger logger = LogManager.getLogger();
     private final ConnectionGetter connectionGetter;
 
     public TeamRepository(ConnectionGetter connectionGetter) {
@@ -40,6 +43,7 @@ public class TeamRepository implements BaseRepository<Long, Team> {
             }
             return res;
         } catch (SQLException | InterruptedException | NullPointerException e) {
+            logger.error("Failed to insert team: " + team.toString() + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
     }
@@ -54,6 +58,7 @@ public class TeamRepository implements BaseRepository<Long, Team> {
                 teams.add(mapResultSetToTeam(resultSet));
             }
         } catch (SQLException | InterruptedException | NullPointerException e) {
+            logger.error("Failed to select teams. Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
         return teams;
@@ -64,6 +69,7 @@ public class TeamRepository implements BaseRepository<Long, Team> {
         try (Connection connection = connectionGetter.get()) {
             return selectById(id, connection);
         } catch (SQLException | InterruptedException | NullPointerException e) {
+            logger.error("Failed to select team by id: " + id + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
     }
@@ -78,6 +84,7 @@ public class TeamRepository implements BaseRepository<Long, Team> {
             }
             return Optional.ofNullable(team);
         } catch (SQLException | NullPointerException e) {
+            logger.error("Failed to select team by id: " + id + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
     }
@@ -89,6 +96,7 @@ public class TeamRepository implements BaseRepository<Long, Team> {
             preparedStatement.setLong(1, id);
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException | InterruptedException | NullPointerException e) {
+            logger.error("Failed to delete team by id: " + id + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
     }
@@ -102,6 +110,7 @@ public class TeamRepository implements BaseRepository<Long, Team> {
             preparedStatement.setLong(3, team.getIdTeam());
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException | InterruptedException | NullPointerException e) {
+            logger.error("Failed to update team: " + team.toString() + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
     }

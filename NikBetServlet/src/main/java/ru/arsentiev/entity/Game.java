@@ -1,6 +1,8 @@
 package ru.arsentiev.entity;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -47,5 +49,23 @@ public class Game {
     public int hashCode() {
         return Objects.hash(getIdGame(), getHomeTeam(), getGuestTeam(), getGoalHomeTeam(), getGoalGuestTeam(), getGameDate(),
                 getStatus(), getCoefficientOnHomeTeam(), getCoefficientOnDraw(), getCoefficientOnGuestTeam(), getTime(), getResult());
+    }
+
+    @Override
+    public String toString() {
+        return "Game{" +
+               "idGame=" + idGame +
+               ", homeTeam=" + homeTeam +
+               ", guestTeam=" + guestTeam +
+               ", goalHomeTeam=" + goalHomeTeam +
+               ", goalGuestTeam=" + goalGuestTeam +
+               ", gameDate=" + gameDate +
+               ", status=" + status +
+               ", coefficientOnHomeTeam=" + coefficientOnHomeTeam +
+               ", coefficientOnDraw=" + coefficientOnDraw +
+               ", coefficientOnGuestTeam=" + coefficientOnGuestTeam +
+               ", time=" + time +
+               ", result=" + result +
+               '}';
     }
 }

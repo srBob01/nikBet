@@ -29,4 +29,13 @@ public class Team {
     public int hashCode() {
         return Objects.hash(getIdTeam(), getTitle(), getAbbreviation());
     }
+
+    @Override
+    public String toString() {
+        return "Team{" +
+               "idTeam=" + idTeam +
+               ", title='" + title + '\'' +
+               ", abbreviation='" + abbreviation + '\'' +
+               '}';
+    }
 }

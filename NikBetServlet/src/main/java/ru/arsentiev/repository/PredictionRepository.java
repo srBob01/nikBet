@@ -1,5 +1,7 @@
 package ru.arsentiev.repository;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import ru.arsentiev.entity.*;
 import ru.arsentiev.exception.RepositoryException;
 import ru.arsentiev.processing.connection.ConnectionGetter;
@@ -12,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class PredictionRepository implements BaseRepository<Long, Prediction> {
+    private static final Logger logger = LogManager.getLogger();
     private final ConnectionGetter connectionGetter;
     private final GameRepository gameRepository;
     private final UserRepository userRepository;
@@ -81,6 +84,7 @@ public class PredictionRepository implements BaseRepository<Long, Prediction> {
             }
             return res;
         } catch (SQLException | InterruptedException | NullPointerException e) {
+            logger.error("Failed to insert prediction: " + prediction.toString() + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
     }
@@ -96,6 +100,7 @@ public class PredictionRepository implements BaseRepository<Long, Prediction> {
                 predictions.add(extractPredictionFromResultSet(resultSet));
             }
         } catch (SQLException | InterruptedException | NullPointerException e) {
+            logger.error("Failed to select predictions. Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
         return predictions;
@@ -114,6 +119,7 @@ public class PredictionRepository implements BaseRepository<Long, Prediction> {
                 }
             }
         } catch (SQLException | InterruptedException | NullPointerException e) {
+            logger.error("Failed to select prediction by id: " + id + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
         return Optional.empty();
@@ -139,12 +145,12 @@ public class PredictionRepository implements BaseRepository<Long, Prediction> {
         return selectByOtherId(gameId, SELECT_PREDICTIONS_BY_GAME_ID);
     }
 
-    private List<Prediction> selectByOtherId(Long Id, String selectPredictionsById) {
+    private List<Prediction> selectByOtherId(Long id, String selectPredictionsById) {
         List<Prediction> predictions = new ArrayList<>();
         try (Connection connection = connectionGetter.get();
              PreparedStatement preparedStatement = connection.prepareStatement(selectPredictionsById)) {
 
-            preparedStatement.setLong(1, Id);
+            preparedStatement.setLong(1, id);
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
@@ -152,6 +158,7 @@ public class PredictionRepository implements BaseRepository<Long, Prediction> {
                 }
             }
         } catch (SQLException | InterruptedException | NullPointerException e) {
+            logger.error("Failed to select prediction by other id: " + id + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
         return predictions;
@@ -165,6 +172,7 @@ public class PredictionRepository implements BaseRepository<Long, Prediction> {
             preparedStatement.setLong(1, id);
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException | InterruptedException | NullPointerException e) {
+            logger.error("Failed to delete prediction with id: " + id + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
     }
@@ -185,6 +193,7 @@ public class PredictionRepository implements BaseRepository<Long, Prediction> {
 
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException | InterruptedException | NullPointerException e) {
+            logger.error("Failed to update prediction : " + (prediction != null ? prediction.toString() : "null") + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
     }
@@ -193,6 +202,7 @@ public class PredictionRepository implements BaseRepository<Long, Prediction> {
         try (Connection connection = connectionGetter.get()) {
             listIdPrediction.forEach(id -> updatePredictionStatus(id, connection));
         } catch (SQLException | InterruptedException | NullPointerException e) {
+            logger.error("Failed to update predictions status of list(ids) : " + listIdPrediction.toString() + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
     }
@@ -204,6 +214,7 @@ public class PredictionRepository implements BaseRepository<Long, Prediction> {
 
             preparedStatement.executeUpdate();
         } catch (SQLException | NullPointerException e) {
+            logger.error("Failed to update prediction status with id : " + idPrediction + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
     }

@@ -1,5 +1,7 @@
 package ru.arsentiev.repository;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import ru.arsentiev.entity.User;
 import ru.arsentiev.entity.UserRole;
 import ru.arsentiev.exception.RepositoryException;
@@ -15,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class UserRepository implements BaseRepository<Long, User> {
+    private static final Logger logger = LogManager.getLogger();
     private final ConnectionGetter myConnectionGetter;
     private final UserQueryCreator userQueryCreator;
 
@@ -98,6 +101,7 @@ public class UserRepository implements BaseRepository<Long, User> {
             }
             return res;
         } catch (SQLException | InterruptedException | NullPointerException e) {
+            logger.error("Failed to insert user: " + user.toString() + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
     }
@@ -112,6 +116,7 @@ public class UserRepository implements BaseRepository<Long, User> {
                 users.add(mapResultSetToUser(rs));
             }
         } catch (SQLException | InterruptedException | NullPointerException e) {
+            logger.error("Failed to select users. Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
         return users;
@@ -122,6 +127,7 @@ public class UserRepository implements BaseRepository<Long, User> {
         try (Connection connection = myConnectionGetter.get()) {
             return selectById(id, connection);
         } catch (SQLException | InterruptedException | NullPointerException e) {
+            logger.error("Failed to select user by id: " + id + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
     }
@@ -137,6 +143,7 @@ public class UserRepository implements BaseRepository<Long, User> {
             }
             return Optional.ofNullable(user);
         } catch (SQLException | NullPointerException e) {
+            logger.error("Failed to select user by id: " + id + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
     }
@@ -152,6 +159,7 @@ public class UserRepository implements BaseRepository<Long, User> {
             }
             return null;
         } catch (SQLException | InterruptedException | NullPointerException e) {
+            logger.error("Failed to select user by login: " + login + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
     }
@@ -167,6 +175,7 @@ public class UserRepository implements BaseRepository<Long, User> {
             }
             return Optional.empty();
         } catch (SQLException | InterruptedException | NullPointerException e) {
+            logger.error("Failed to select user by nickname: " + nickname + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
     }
@@ -188,6 +197,7 @@ public class UserRepository implements BaseRepository<Long, User> {
                     .password(password)
                     .build();
         } catch (SQLException | InterruptedException | NullPointerException e) {
+            logger.error("Failed to select user by login: " + login + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
     }
@@ -203,6 +213,7 @@ public class UserRepository implements BaseRepository<Long, User> {
             }
             return Optional.empty();
         } catch (SQLException | InterruptedException | NullPointerException e) {
+            logger.error("Failed to select user by id: " + idUser + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
     }
@@ -215,6 +226,7 @@ public class UserRepository implements BaseRepository<Long, User> {
             preparedStatement.setLong(1, id);
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException | InterruptedException | NullPointerException e) {
+            logger.error("Failed to delete user by id: " + id + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
     }
@@ -234,6 +246,7 @@ public class UserRepository implements BaseRepository<Long, User> {
             preparedStatement.setLong(8, user.getIdUser());
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException | InterruptedException | NullPointerException e) {
+            logger.error("Failed to update user : " + user.toString() + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
     }
@@ -246,6 +259,7 @@ public class UserRepository implements BaseRepository<Long, User> {
 
                 return preparedStatement.executeUpdate() > 0;
             } catch (SQLException | InterruptedException | NullPointerException e) {
+                logger.error("Failed to update user : " + user.toString() + ". Error: " + e.getLocalizedMessage());
                 throw new RepositoryException(e);
             }
         }
@@ -269,6 +283,7 @@ public class UserRepository implements BaseRepository<Long, User> {
 
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException | InterruptedException | NullPointerException e) {
+            logger.error("Failed to action with money user with id: " + idUser + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
     }
@@ -283,6 +298,7 @@ public class UserRepository implements BaseRepository<Long, User> {
 
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException | InterruptedException | NullPointerException e) {
+            logger.error("Failed to update password user: " + user.toString() + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
     }

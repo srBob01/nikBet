@@ -1,5 +1,7 @@
 package ru.arsentiev.servicelayer.service;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import ru.arsentiev.dto.prediction.controller.*;
 import ru.arsentiev.dto.user.controller.UserMoneyControllerDto;
 import ru.arsentiev.entity.Game;
@@ -18,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class PredictionService {
+    private static final Logger logger = LogManager.getLogger();
     private final PredictionMapper predictionMapper;
     private final PredictionRepository predictionRepository;
     private final GameRepository gameRepository;
@@ -34,6 +37,7 @@ public class PredictionService {
     public PredictionResultControllerDto insertPrediction(PredictionPlaceControllerDto predictionPlaceControllerDto) {
         Optional<Game> game = gameRepository.selectById(predictionPlaceControllerDto.idGame());
         if (game.isEmpty()) {
+            logger.error("The game with id" + predictionPlaceControllerDto.idGame() + " does not exist");
             throw new ServiceException("The game does not exist");
         }
         float coefficient = switch (predictionPlaceControllerDto.prediction()) {
@@ -44,7 +48,7 @@ public class PredictionService {
         Prediction prediction = predictionMapper.map(predictionPlaceControllerDto);
         prediction.setCoefficient(coefficient);
         if (!predictionRepository.insert(prediction)) {
-            throw new ServiceException("The prediction does not insert");
+            throw new ServiceException("The prediction" + prediction + " does not insert");
         }
         String homeTeam = game.get().getHomeTeam().getTitle();
         String guestTeam = game.get().getGuestTeam().getTitle();
@@ -82,6 +86,7 @@ public class PredictionService {
     public Optional<BigDecimal> deletePrediction(PredictionForDeleteControllerDto predictionForDeleteControllerDto) {
         Optional<Game> game = gameRepository.selectById(predictionForDeleteControllerDto.idGame());
         if (game.isEmpty()) {
+            logger.error("The game with id" + predictionForDeleteControllerDto.idGame() + " does not exist");
             throw new ServiceException("The game does not exist");
         }
 
@@ -100,6 +105,7 @@ public class PredictionService {
                 .divide(BigDecimal.valueOf(2L), 2, RoundingMode.HALF_UP);
 
         if (!predictionRepository.delete(predictionForDeleteControllerDto.idPrediction())) {
+            logger.error("The prediction with id" + predictionForDeleteControllerDto.idPrediction() + " does not delete");
             throw new ServiceException("The prediction does not delete");
         }
 

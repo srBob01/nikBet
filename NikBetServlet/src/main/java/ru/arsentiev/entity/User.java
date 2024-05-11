@@ -1,6 +1,8 @@
 package ru.arsentiev.entity;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -49,5 +51,23 @@ public class User {
     public int hashCode() {
         return Objects.hash(getIdUser(), getNickname(), getFirstName(), getLastName(), getPatronymic(),
                 getPassword(), getSalt(), getPhoneNumber(), getEmail(), getBirthDate(), getAccountBalance(), getRole());
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+               "idUser=" + idUser +
+               ", nickname='" + nickname + '\'' +
+               ", firstName='" + firstName + '\'' +
+               ", lastName='" + lastName + '\'' +
+               ", patronymic='" + patronymic + '\'' +
+               ", password='" + password + '\'' +
+               ", salt='" + salt + '\'' +
+               ", phoneNumber='" + phoneNumber + '\'' +
+               ", email='" + email + '\'' +
+               ", birthDate=" + birthDate +
+               ", accountBalance=" + accountBalance +
+               ", role=" + role +
+               '}';
     }
 }

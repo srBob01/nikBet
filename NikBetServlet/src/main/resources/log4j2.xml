@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <File name="MyExceptions" fileName="logs/log.log">
+            <PatternLayout>
+                <Pattern>[%p] [%d{yyyy-MM-dd HH:mm:ss}] Class: %C;Method %M; Msg: %m%n</Pattern>
+            </PatternLayout>
+        </File>
+    </Appenders>
+    <Loggers>
+        <Root level="error">
+            <AppenderRef ref="MyExceptions"/>
+        </Root>
+    </Loggers>
+</Configuration>

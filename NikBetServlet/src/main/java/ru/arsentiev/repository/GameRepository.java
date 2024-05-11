@@ -1,5 +1,7 @@
 package ru.arsentiev.repository;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import ru.arsentiev.entity.*;
 import ru.arsentiev.exception.RepositoryException;
 import ru.arsentiev.processing.connection.ConnectionGetter;
@@ -13,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class GameRepository implements BaseRepository<Long, Game> {
+    private static final Logger logger = LogManager.getLogger();
     private final TeamRepository teamRepository;
     private final ConnectionGetter connectionGetter;
     private final GameQueryCreator gameQueryCreator;
@@ -126,6 +129,7 @@ public class GameRepository implements BaseRepository<Long, Game> {
             }
             return res;
         } catch (SQLException | InterruptedException | NullPointerException e) {
+            logger.error("Failed to insert game: " + game.toString() + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
     }
@@ -185,6 +189,7 @@ public class GameRepository implements BaseRepository<Long, Game> {
                 games.add(mapResultSetToGame(resultSet));
             }
         } catch (SQLException | InterruptedException | NullPointerException e) {
+            logger.error("Failed to select games. Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
         return games;
@@ -195,6 +200,7 @@ public class GameRepository implements BaseRepository<Long, Game> {
         try (Connection connection = connectionGetter.get()) {
             return selectById(id, connection);
         } catch (SQLException | InterruptedException e) {
+            logger.error("Failed to select game by id: " + id + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
     }
@@ -209,6 +215,7 @@ public class GameRepository implements BaseRepository<Long, Game> {
             }
             return Optional.ofNullable(game);
         } catch (SQLException | NullPointerException e) {
+            logger.error("Failed to select game by id: " + id + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
     }
@@ -225,6 +232,7 @@ public class GameRepository implements BaseRepository<Long, Game> {
             preparedStatement.setLong(1, id);
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException | InterruptedException | NullPointerException e) {
+            logger.error("Failed to delete game by id: " + id + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
     }
@@ -238,6 +246,7 @@ public class GameRepository implements BaseRepository<Long, Game> {
 
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException | InterruptedException | NullPointerException e) {
+            logger.error("Failed to update game : " + (game != null ? game.toString() : "null") + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
     }
@@ -255,6 +264,7 @@ public class GameRepository implements BaseRepository<Long, Game> {
 
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException | InterruptedException | NullPointerException e) {
+            logger.error("Failed to update description game : " + (game != null ? game.toString() : "null") + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
     }
@@ -275,6 +285,7 @@ public class GameRepository implements BaseRepository<Long, Game> {
 
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException | InterruptedException | NullPointerException e) {
+            logger.error("Failed to action with game with id : " + idGame + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
     }
@@ -288,6 +299,7 @@ public class GameRepository implements BaseRepository<Long, Game> {
 
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException | InterruptedException | NullPointerException e) {
+            logger.error("Failed to end game with id : " + idGame + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
     }

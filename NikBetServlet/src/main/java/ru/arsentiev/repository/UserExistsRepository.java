@@ -1,5 +1,7 @@
 package ru.arsentiev.repository;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import ru.arsentiev.exception.RepositoryException;
 import ru.arsentiev.processing.connection.ConnectionGetter;
 
@@ -9,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class UserExistsRepository {
+    private static final Logger logger = LogManager.getLogger();
     private final ConnectionGetter connectionGetter;
 
     public UserExistsRepository(ConnectionGetter connectionGetter) {
@@ -34,14 +37,15 @@ public class UserExistsRepository {
         return executeMyQuery(phoneNumber, SELECT_1_BY_PHONE_NUMBER);
     }
 
-    private boolean executeMyQuery(String nickname, String select1ByNickname) {
+    private boolean executeMyQuery(String what, String select) {
         try (Connection connection = connectionGetter.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(select1ByNickname)) {
-            preparedStatement.setString(1, nickname);
+             PreparedStatement preparedStatement = connection.prepareStatement(select)) {
+            preparedStatement.setString(1, what);
             try (ResultSet rs = preparedStatement.executeQuery()) {
                 return rs.next();
             }
         } catch (SQLException | InterruptedException e) {
+            logger.error("Failed to execute query: " + select + ". Error: " + e.getLocalizedMessage());
             throw new RepositoryException(e);
         }
     }
