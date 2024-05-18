@@ -6,10 +6,11 @@ import lombok.NoArgsConstructor;
 import java.util.regex.Pattern;
 
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
-public class PhoneNumberCheck {
+public class PhoneNumberCheck implements Check {
     private final Pattern PHONE_PATTERN = Pattern.compile("^\\+7\\d{10}$");
 
-    public boolean isIncorrect(String string) {
-        return !PHONE_PATTERN.matcher(string).matches();
+    @Override
+    public boolean isInvalid(String str) {
+        return !PHONE_PATTERN.matcher(str).matches();
     }
 }

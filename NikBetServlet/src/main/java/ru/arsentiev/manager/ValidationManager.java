@@ -2,23 +2,15 @@ package ru.arsentiev.manager;
 
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
-import ru.arsentiev.servicelayer.validator.RegistrationUserValidator;
-import ru.arsentiev.servicelayer.validator.UpdateUserValidator;
+import ru.arsentiev.servicelayer.validator.UserValidator;
 
 @UtilityClass
 public class ValidationManager {
     @Getter
-    private static final RegistrationUserValidator registrationUserValidator;
-    @Getter
-    private static final UpdateUserValidator updateUserValidator;
+    private static final UserValidator userValidator;
 
     static {
-        registrationUserValidator = new RegistrationUserValidator(RepositoryManager.getUserExistRepository(),
-                CheckManager.getDateCheck(), CheckManager.getPasswordCheck(), CheckManager.getPhoneNumberCheck(),
-                CheckManager.getNameCheck(), DateFormatterManager.getLocalDateFormatter());
-
-        updateUserValidator = new UpdateUserValidator(RepositoryManager.getUserExistRepository(),
-                CheckManager.getDateCheck(), CheckManager.getPhoneNumberCheck(),
-                CheckManager.getNameCheck(), CheckManager.getPasswordCheck(), DateFormatterManager.getLocalDateFormatter());
+        userValidator = new UserValidator(CheckManager.getDateCheck(), CheckManager.getPasswordCheck(), CheckManager.getPhoneNumberCheck(),
+                CheckManager.getEmptyCheck(), CheckManager.getNameCheck(), DateFormatterManager.getLocalDateFormatter());
     }
 }

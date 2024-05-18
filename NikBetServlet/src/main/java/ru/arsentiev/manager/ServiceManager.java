@@ -21,7 +21,7 @@ public class ServiceManager {
 
     static {
         userService = new UserService(MapperManager.getUserMapper(), new PasswordHashed(),
-                RepositoryManager.getUserRepository(), ValidationManager.getUpdateUserValidator());
+                RepositoryManager.getUserRepository(), ValidationManager.getUserValidator());
         gameService = new GameService(RepositoryManager.getGameRepository(), RepositoryManager.getPredictionRepository(),
                 RepositoryManager.getUserRepository(), MapperManager.getGameMapper());
         teamService = new TeamService(RepositoryManager.getTeamRepository(), MapperManager.getTeamMapper());

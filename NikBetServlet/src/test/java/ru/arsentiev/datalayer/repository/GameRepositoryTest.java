@@ -4,7 +4,6 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import ru.arsentiev.datalayer.TestConnectionGetter;
@@ -27,17 +26,17 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class GameRepositoryTest {
-    private final Team team1;
-    private final Team team2;
-    private final TestConnectionGetter connectionGetter = TestConnectionGetter.getInstance();
-    private final TeamRepository teamRepository = new TeamRepository(connectionGetter);
+    private static final Team team1;
+    private static final Team team2;
+    private static final TestConnectionGetter connectionGetter = TestConnectionGetter.getInstance();
+    private final static TeamRepository teamRepository = new TeamRepository(connectionGetter);
     private final GameQueryCreator gameQueryCreator = new GameQueryCreator();
     private final GameRepository gameRepository = new GameRepository(connectionGetter, teamRepository, gameQueryCreator);
     private final CompletedGameFields allCompletedGameFields;
     private final CompletedGameFields nothingCompletedGameFields;
     private final CompletedGameFields statusCompletedGameFields;
+    private Game game;
 
     {
         allCompletedGameFields = CompletedGameFields.builder()
@@ -60,7 +59,9 @@ class GameRepositoryTest {
                 .isCompletedGuestTeam(false)
                 .isCompletedHomeTeam(false)
                 .build();
+    }
 
+    static {
         team1 = Team.builder()
                 .title("Liverpool")
                 .abbreviation("LIV")
@@ -72,7 +73,7 @@ class GameRepositoryTest {
                 .build();
     }
 
-    private Stream<Game> generateInValidGame() {
+    private static Stream<Game> generateInValidGame() {
         Game game1 = Game.builder()
                 .homeTeam(team2)
                 .gameDate(LocalDateTime.of(LocalDate.of(2024, 4, 22), LocalTime.of(15, 0, 0)))
@@ -113,7 +114,7 @@ class GameRepositoryTest {
 
     @SneakyThrows
     @BeforeAll
-    public void insertTeams() {
+    public static void insertTeams() {
         try (Connection connection = connectionGetter.get()) {
             //language=PostgreSQL
             String CLEAR_TABLE = "TRUNCATE nikbet_test.public.teams RESTART IDENTITY CASCADE";
@@ -131,12 +132,11 @@ class GameRepositoryTest {
             String CLEAR_TABLE = "TRUNCATE nikbet_test.public.games RESTART IDENTITY CASCADE";
             connection.prepareStatement(CLEAR_TABLE).executeUpdate();
         }
+        game = defaultScheduledGame();
     }
 
     @Test
     void insertValidGameTest() {
-        Game game = defaultScheduledGame();
-
         assertThat(gameRepository.insert(game)).isTrue();
         assertThat(game.getIdGame()).isNotZero();
 
@@ -154,7 +154,6 @@ class GameRepositoryTest {
 
     @Test
     void selectByValidIdTest() {
-        Game game = defaultScheduledGame();
         gameRepository.insert(game);
 
         Optional<Game> gameFromDBOptional = gameRepository.selectById(game.getIdGame());
@@ -166,7 +165,6 @@ class GameRepositoryTest {
 
     @Test
     void selectByInvalidIdTest() {
-        Game game = defaultScheduledGame();
         gameRepository.insert(game);
 
         long wrongId = 2;
@@ -180,7 +178,6 @@ class GameRepositoryTest {
 
     @Test
     void functionWithValidGameTest() {
-        Game game = defaultScheduledGame();
         gameRepository.insert(game);
 
         game.setStatus(GameStatus.InProgress);
@@ -237,8 +234,6 @@ class GameRepositoryTest {
 
     @Test
     void selectHotGameScheduledTest() {
-        Game game = defaultScheduledGame();
-
         gameRepository.insert(game);
 
         assertThat(gameRepository.selectHotGameScheduled()).isEmpty();
@@ -384,8 +379,6 @@ class GameRepositoryTest {
 
     @Test
     void deleteOnValidId() {
-        Game game = defaultScheduledGame();
-
         gameRepository.insert(game);
 
         assertThat(gameRepository.delete(game.getIdGame())).isTrue();
@@ -395,7 +388,6 @@ class GameRepositoryTest {
 
     @Test
     void deleteOnInvalidId() {
-        Game game = defaultScheduledGame();
         gameRepository.insert(game);
 
         assertThat(gameRepository.delete(2L)).isFalse();
@@ -408,8 +400,6 @@ class GameRepositoryTest {
 
     @Test
     void updateOnValidId() {
-        Game game = defaultScheduledGame();
-
         gameRepository.insert(game);
 
         game.setStatus(GameStatus.Completed);
@@ -427,8 +417,6 @@ class GameRepositoryTest {
 
     @Test
     void updateDescriptionOnValidId() {
-        Game game = defaultScheduledGame();
-
         gameRepository.insert(game);
 
         game.setGoalGuestTeam(2);
@@ -448,7 +436,6 @@ class GameRepositoryTest {
 
     @Test
     void updateOnInvalidId() {
-        Game game = defaultScheduledGame();
         game.setGoalGuestTeam(2);
         game.setGoalHomeTeam(2);
         assertThat(gameRepository.update(game)).isFalse();

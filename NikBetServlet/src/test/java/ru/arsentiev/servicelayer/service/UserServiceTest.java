@@ -1,20 +1,21 @@
 package ru.arsentiev.servicelayer.service;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import ru.arsentiev.dto.user.controller.*;
+import ru.arsentiev.dto.user.view.UserRegistrationViewDto;
+import ru.arsentiev.dto.user.view.UserValidatorViewDto;
 import ru.arsentiev.entity.User;
 import ru.arsentiev.entity.UserRole;
 import ru.arsentiev.exception.ServiceException;
 import ru.arsentiev.mapper.UserMapper;
+import ru.arsentiev.processing.dateformatter.LocalDateFormatter;
 import ru.arsentiev.processing.password.PasswordHashed;
-import ru.arsentiev.processing.query.entity.UpdatedUserFields;
 import ru.arsentiev.repository.UserRepository;
-import ru.arsentiev.servicelayer.validator.UpdateUserValidator;
+import ru.arsentiev.servicelayer.validator.UserValidator;
+import ru.arsentiev.servicelayer.validator.entity.load.LoadError;
+import ru.arsentiev.servicelayer.validator.entity.load.LoadValidationResult;
+import ru.arsentiev.servicelayer.validator.entity.load.TypeLoadError;
 import ru.arsentiev.servicelayer.validator.entity.login.LoginError;
 import ru.arsentiev.servicelayer.validator.entity.update.UpdatePasswordError;
 
@@ -28,33 +29,25 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 class UserServiceTest {
-    private static User user;
-    private static UserPasswordAndSaltControllerDto userPasswordAndSaltControllerDto;
-    private static UserLogoPasControllerDto userLogoPasControllerDto;
-    private static UserLoginControllerDto userLoginControllerDto;
-    private static UserControllerDto userControllerDto;
-    private static UserMoneyControllerDto userMoneyControllerDto;
-
-    @Mock
-    private UserMapper userMapper;
-    @Mock
+    private final User user;
+    private final UserPasswordAndSaltControllerDto userPasswordAndSaltControllerDto;
+    private final UserLogoPasControllerDto userLogoPasControllerDto;
+    private final UserLoginControllerDto userLoginControllerDto;
+    private final UserControllerDto userControllerDto;
+    private final UserMoneyControllerDto userMoneyControllerDto;
+    private final UserMapper userMapper;
     private PasswordHashed passwordHashed;
-    @Mock
     private UserRepository userRepository;
-    @Mock
-    private UpdateUserValidator updateUserValidator;
-    @InjectMocks
+    private UserValidator userValidator;
     private UserService userService;
 
-    @BeforeAll
-    public static void fillEntity() {
+    {
+        LocalDateFormatter localDateFormatter = new LocalDateFormatter();
+        userMapper = new UserMapper(localDateFormatter);
+
         user = User.builder()
                 .nickname("user1").firstName("John")
                 .lastName("Doe").password("password1")
@@ -93,51 +86,75 @@ class UserServiceTest {
                 .build();
     }
 
-    @Test
-    void insertUserTest() {
-        UserRegistrationControllerDto dto = UserRegistrationControllerDto.builder().build();
+    @BeforeEach
+    void createUserService() {
+        passwordHashed = mock(PasswordHashed.class);
+        userRepository = mock(UserRepository.class);
+        userValidator = mock(UserValidator.class);
+        userService = new UserService(userMapper, passwordHashed, userRepository, userValidator);
+    }
 
+
+    @Test
+    void insertUserTest_Valid() {
+        UserRegistrationViewDto userRegistrationViewDto = UserRegistrationViewDto.builder()
+                .nickname(user.getNickname())
+                .phoneNumber(user.getPhoneNumber())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .birthDate(user.getBirthDate().toString())
+                .patronymic(user.getPatronymic())
+                .password(user.getPassword())
+                .email(user.getEmail()).build();
+
+        UserValidatorViewDto userValidatorViewDto = UserValidatorViewDto.builder()
+                .nickname(user.getNickname())
+                .phoneNumber(user.getPhoneNumber())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .birthDate(user.getBirthDate().toString())
+                .patronymic(user.getPatronymic())
+                .password(user.getPassword())
+                .email(user.getEmail()).build();
+
+        when(userRepository.selectAll()).thenReturn(Collections.emptyList());
+        when(userValidator.isValid(userValidatorViewDto)).thenReturn(new LoadValidationResult());
         when(passwordHashed.generateSalt()).thenReturn(user.getSalt());
-        when(userMapper.map(eq(dto), eq(user.getSalt()), any())).thenReturn(user);
 
-        userService.insertUser(dto);
-
-        verify(passwordHashed, times(1)).generateSalt();
-        verify(userMapper, times(1)).map(eq(dto), eq(user.getSalt()), any());
+        List<LoadError> result = userService.insertUser(userRegistrationViewDto);
+        assertThat(result).isEmpty();
     }
 
     @Test
-    void updateDescription_ValidUserTest() {
-        var userUpdateDescriptionControllerDto = UserUpdateDescriptionControllerDto.builder().build();
-        var updatedUserFields = UpdatedUserFields.builder().build();
-        var userConstFieldsControllerDto = UserConstFieldsControllerDto.builder().build();
-        var userControllerDto = UserControllerDto.builder()
-                .nickname(user.getNickname()).firstName(user.getFirstName())
-                .lastName(user.getLastName()).phoneNumber(user.getPhoneNumber()).email(user.getEmail())
-                .birthDate(user.getBirthDate()).role(user.getRole())
-                .build();
+    void insertUserTest_Invalid() {
+        UserRegistrationViewDto userRegistrationViewDto = UserRegistrationViewDto.builder()
+                .nickname(user.getNickname())
+                .phoneNumber(user.getPhoneNumber())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .birthDate(user.getBirthDate().toString())
+                .patronymic(user.getPatronymic())
+                .password(user.getPassword())
+                .email(user.getEmail()).build();
 
-        when(userMapper.map(userUpdateDescriptionControllerDto)).thenReturn(user);
-        when(userRepository.updateDescriptionWithDynamicCreation(user, updatedUserFields)).thenReturn(true);
-        when(userMapper.map(userConstFieldsControllerDto, userUpdateDescriptionControllerDto)).thenReturn(userControllerDto);
+        UserValidatorViewDto userValidatorViewDto = UserValidatorViewDto.builder()
+                .nickname(user.getNickname())
+                .phoneNumber(user.getPhoneNumber())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .birthDate(user.getBirthDate().toString())
+                .patronymic(user.getPatronymic())
+                .password(user.getPassword())
+                .email(user.getEmail()).build();
 
-        UserControllerDto result = userService.updateDescriptionUser(userUpdateDescriptionControllerDto, updatedUserFields, userConstFieldsControllerDto);
+        when(userRepository.selectAll()).thenReturn(Collections.singletonList(user));
+        LoadValidationResult loadValidationResult = new LoadValidationResult();
+        loadValidationResult.add(LoadError.of("k", TypeLoadError.INCORRECT));
+        when(userValidator.isValid(userValidatorViewDto)).thenReturn(loadValidationResult);
+        when(passwordHashed.generateSalt()).thenReturn(user.getSalt());
 
-        assertNotNull(result);
-        assertThat(userControllerDto).isEqualTo(result);
-    }
-
-    @Test
-    void updateDescription_InvalidUserTest() {
-        var userUpdateDescriptionControllerDto = UserUpdateDescriptionControllerDto.builder().build();
-        var updatedUserFields = UpdatedUserFields.builder().build();
-        var userConstFieldsControllerDto = UserConstFieldsControllerDto.builder().build();
-
-        when(userMapper.map(userUpdateDescriptionControllerDto)).thenReturn(user);
-        when(userRepository.updateDescriptionWithDynamicCreation(user, updatedUserFields)).thenReturn(false);
-
-        assertThatThrownBy(() -> userService.updateDescriptionUser(userUpdateDescriptionControllerDto,
-                updatedUserFields, userConstFieldsControllerDto)).isInstanceOf(ServiceException.class);
+        List<LoadError> result = userService.insertUser(userRegistrationViewDto);
+        assertThat(result).isNotEmpty();
     }
 
     @Test
@@ -151,7 +168,6 @@ class UserServiceTest {
     void updatePassword_PasswordsDoNotMatch() {
 
         when(userRepository.selectPasswordByLogin(user.getEmail())).thenReturn(user);
-        when(userMapper.mapUserToPasswordAndSaltController(user)).thenReturn(userPasswordAndSaltControllerDto);
         when(passwordHashed.hashPassword(userLogoPasControllerDto.oldPassword(), userPasswordAndSaltControllerDto.salt())).thenReturn("differentHashedPassword");
 
         Optional<UpdatePasswordError> result = userService.updatePasswordUser(userLogoPasControllerDto);
@@ -164,9 +180,8 @@ class UserServiceTest {
     void updatePassword_NewPasswordsInvalid() {
 
         when(userRepository.selectPasswordByLogin(user.getEmail())).thenReturn(user);
-        when(userMapper.mapUserToPasswordAndSaltController(user)).thenReturn(userPasswordAndSaltControllerDto);
         when(passwordHashed.hashPassword(userLogoPasControllerDto.oldPassword(), userPasswordAndSaltControllerDto.salt())).thenReturn(user.getPassword());
-        when(updateUserValidator.isValidPassword(userLogoPasControllerDto.newPassword())).thenReturn(false);
+        when(userValidator.isValidPassword(userLogoPasControllerDto.newPassword())).thenReturn(false);
 
         Optional<UpdatePasswordError> result = userService.updatePasswordUser(userLogoPasControllerDto);
 
@@ -178,11 +193,9 @@ class UserServiceTest {
     void updatePassword_InvalidUpdate() {
 
         when(userRepository.selectPasswordByLogin(user.getEmail())).thenReturn(user);
-        when(userMapper.mapUserToPasswordAndSaltController(user)).thenReturn(userPasswordAndSaltControllerDto);
         when(passwordHashed.hashPassword(userLogoPasControllerDto.oldPassword(), userPasswordAndSaltControllerDto.salt())).thenReturn(user.getPassword());
-        when(updateUserValidator.isValidPassword(userLogoPasControllerDto.newPassword())).thenReturn(true);
+        when(userValidator.isValidPassword(userLogoPasControllerDto.newPassword())).thenReturn(true);
         when(passwordHashed.generateSalt()).thenReturn(user.getSalt());
-        when(userMapper.map(eq(userLogoPasControllerDto), eq(user.getSalt()), any())).thenReturn(user);
         when(userRepository.updatePasswordByLogin(user)).thenReturn(false);
 
         assertThatThrownBy(() -> userService.updatePasswordUser(userLogoPasControllerDto)).isInstanceOf(ServiceException.class);
@@ -192,12 +205,10 @@ class UserServiceTest {
     void updatePassword_ValidUpdate() {
 
         when(userRepository.selectPasswordByLogin(user.getEmail())).thenReturn(user);
-        when(userMapper.mapUserToPasswordAndSaltController(user)).thenReturn(userPasswordAndSaltControllerDto);
         when(passwordHashed.hashPassword(userLogoPasControllerDto.oldPassword(), userPasswordAndSaltControllerDto.salt())).thenReturn(user.getPassword());
-        when(updateUserValidator.isValidPassword(userLogoPasControllerDto.newPassword())).thenReturn(true);
+        when(userValidator.isValidPassword(userLogoPasControllerDto.newPassword())).thenReturn(true);
         when(passwordHashed.generateSalt()).thenReturn(user.getSalt());
-        when(userMapper.map(eq(userLogoPasControllerDto), eq(user.getSalt()), any())).thenReturn(user);
-        when(userRepository.updatePasswordByLogin(user)).thenReturn(true);
+        when(userRepository.updatePasswordByLogin(any(User.class))).thenReturn(true);
 
         Optional<UpdatePasswordError> result = userService.updatePasswordUser(userLogoPasControllerDto);
 
@@ -217,7 +228,6 @@ class UserServiceTest {
     @Test
     void checkLoginUser_IncorrectPassword() {
         when(userRepository.selectPasswordByLogin(userLoginControllerDto.email())).thenReturn(user);
-        when(userMapper.mapUserToPasswordAndSaltController(user)).thenReturn(userPasswordAndSaltControllerDto);
         when(passwordHashed.hashPassword(userLoginControllerDto.password(), userPasswordAndSaltControllerDto.salt())).thenReturn("otherPassword");
 
         Optional<LoginError> error = userService.checkLoginUser(userLoginControllerDto);
@@ -229,7 +239,6 @@ class UserServiceTest {
     @Test
     void checkLoginUser_CorrectPassword() {
         when(userRepository.selectPasswordByLogin(userLoginControllerDto.email())).thenReturn(user);
-        when(userMapper.mapUserToPasswordAndSaltController(user)).thenReturn(userPasswordAndSaltControllerDto);
         when(passwordHashed.hashPassword(userLoginControllerDto.password(), userPasswordAndSaltControllerDto.salt())).thenReturn(user.getPassword());
 
         Optional<LoginError> error = userService.checkLoginUser(userLoginControllerDto);
@@ -240,7 +249,6 @@ class UserServiceTest {
     @Test
     void selectUser_Valid() {
         when(userRepository.selectByLogin(userLoginControllerDto.email())).thenReturn(user);
-        when(userMapper.map(user)).thenReturn(userControllerDto);
 
         UserControllerDto dto = userService.selectUser(userLoginControllerDto);
 
@@ -332,10 +340,17 @@ class UserServiceTest {
         String nickname = user.getNickname();
         UserForAdminControllerDto userForAdminControllerDto = UserForAdminControllerDto.builder()
                 .idUser(user.getIdUser())
+                .nickname(user.getNickname())
+                .phoneNumber(user.getPhoneNumber())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .birthDate(user.getBirthDate())
+                .patronymic(user.getPatronymic())
+                .accountBalance(user.getAccountBalance())
+                .email(user.getEmail())
                 .build();
 
         when(userRepository.selectByNickname(nickname)).thenReturn(Optional.of(user));
-        when(userMapper.mapUserToControllerForAdmin(user)).thenReturn(userForAdminControllerDto);
 
         Optional<UserForAdminControllerDto> result = userService.selectUserByNickname(nickname);
 
@@ -357,18 +372,38 @@ class UserServiceTest {
     @Test
     void selectAllUser_Valid() {
         List<User> users = Arrays.asList(
-                User.builder().idUser(1).nickname("nick1").build(),
-                User.builder().idUser(2).nickname("nick2").build()
+                User.builder().idUser(1)
+                        .nickname(user.getNickname())
+                        .phoneNumber(user.getPhoneNumber())
+                        .firstName(user.getFirstName())
+                        .lastName(user.getLastName())
+                        .birthDate(user.getBirthDate())
+                        .patronymic(user.getPatronymic())
+                        .accountBalance(user.getAccountBalance())
+                        .email(user.getEmail()).build(),
+                User.builder().idUser(2)
+                        .nickname(user.getNickname())
+                        .phoneNumber(user.getPhoneNumber())
+                        .firstName(user.getFirstName())
+                        .lastName(user.getLastName())
+                        .birthDate(user.getBirthDate())
+                        .patronymic(user.getPatronymic())
+                        .accountBalance(user.getAccountBalance())
+                        .email(user.getEmail()).build()
         );
         List<UserForAdminControllerDto> listExpectedDto = users.stream()
-                .map(user -> UserForAdminControllerDto.builder().idUser(user.getIdUser()).nickname(user.getNickname()).build())
+                .map(user -> UserForAdminControllerDto.builder().idUser(user.getIdUser())
+                        .nickname(user.getNickname())
+                        .phoneNumber(user.getPhoneNumber())
+                        .firstName(user.getFirstName())
+                        .lastName(user.getLastName())
+                        .birthDate(user.getBirthDate())
+                        .patronymic(user.getPatronymic())
+                        .accountBalance(user.getAccountBalance())
+                        .email(user.getEmail()).build())
                 .collect(Collectors.toList());
 
-        when(userRepository.selectAll()).thenReturn(users);
-        when(userMapper.mapUserToControllerForAdmin(any(User.class))).thenAnswer(invocation -> {
-            User user = invocation.getArgument(0);
-            return UserForAdminControllerDto.builder().idUser(user.getIdUser()).nickname(user.getNickname()).build();
-        });
+        when(userRepository.selectAllOnlyUser()).thenReturn(users);
 
         List<UserForAdminControllerDto> result = userService.selectAllUser();
 

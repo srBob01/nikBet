@@ -176,4 +176,30 @@ public class UserMapper {
                 .patronymic(user.patronymic())
                 .build();
     }
+
+    public UserValidatorViewDto mapRegistrationToValidator(UserRegistrationViewDto dto) {
+        return UserValidatorViewDto.builder()
+                .nickname(dto.getNickname())
+                .firstName(dto.getFirstName())
+                .lastName(dto.getLastName())
+                .patronymic(dto.getPatronymic())
+                .phoneNumber(dto.getPhoneNumber())
+                .email(dto.getEmail())
+                .password(dto.getPassword())
+                .birthDate(dto.getBirthDate())
+                .build();
+    }
+
+    public UserValidatorViewDto mapUpdateToValidator(UserUpdateDescriptionViewDto dto) {
+        return UserValidatorViewDto.builder()
+                .nickname(dto.getNickname())
+                .firstName(dto.getFirstName())
+                .lastName(dto.getLastName())
+                .patronymic(dto.getPatronymic())
+                .phoneNumber(dto.getPhoneNumber())
+                .email(dto.getEmail())
+                .password(null)
+                .birthDate(dto.getBirthDate())
+                .build();
+    }
 }

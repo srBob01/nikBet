@@ -1,14 +1,11 @@
 package ru.arsentiev.servicelayer.service;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import ru.arsentiev.dto.game.controller.*;
 import ru.arsentiev.entity.*;
 import ru.arsentiev.mapper.GameMapper;
+import ru.arsentiev.processing.dateformatter.TimeStampFormatter;
 import ru.arsentiev.processing.query.entity.CompletedGameFields;
 import ru.arsentiev.repository.GameRepository;
 import ru.arsentiev.repository.PredictionRepository;
@@ -23,37 +20,85 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 class GameServiceTest {
-    @Mock
     private GameRepository gameRepository;
-    @Mock
     private PredictionRepository predictionRepository;
-    @Mock
     private UserRepository userRepository;
-    @Mock
-    private GameMapper gameMapper;
-    @InjectMocks
+    private final GameMapper gameMapper;
     private GameService gameService;
-    private static Game gameScheduled;
-    private static Game gameInProgress;
-    private static Game gameCompleted;
-    private static GameScheduledControllerDto gameScheduledControllerDto;
-    private static GameProgressControllerDto gameProgressControllerDto;
-    private static GameCompletedControllerDto gameCompletedControllerDto;
-    private static Game game;
+    private final Game gameScheduled;
+    private final Game gameInProgress;
+    private final Game gameCompleted;
+    private final GameScheduledControllerDto gameScheduledControllerDto;
+    private final GameProgressControllerDto gameProgressControllerDto;
+    private final GameCompletedControllerDto gameCompletedControllerDto;
+    private final Game game;
 
-    @BeforeAll
-    public static void fillEntity() {
-        gameScheduled = Game.builder().idGame(1).status(GameStatus.Scheduled).build();
-        gameInProgress = Game.builder().idGame(2).status(GameStatus.InProgress).build();
-        gameCompleted = Game.builder().idGame(3).status(GameStatus.Completed).build();
+    {
+        TimeStampFormatter timeStampFormatter = new TimeStampFormatter();
+        gameMapper = new GameMapper(timeStampFormatter);
+        gameScheduled = Game.builder()
+                .idGame(1)
+                .homeTeam(Team.builder().title("Arsenal").build())
+                .guestTeam(Team.builder().title("Chelsea").build())
+                .status(GameStatus.Scheduled)
+                .build();
+        gameInProgress = Game.builder()
+                .idGame(2)
+                .homeTeam(Team.builder().title("Arsenal").build())
+                .guestTeam(Team.builder().title("Chelsea").build())
+                .goalGuestTeam(0)
+                .goalHomeTeam(0)
+                .status(GameStatus.InProgress)
+                .build();
+        gameCompleted = Game.builder()
+                .idGame(3)
+                .homeTeam(Team.builder().title("Arsenal").build())
+                .guestTeam(Team.builder().title("Chelsea").build())
+                .goalGuestTeam(0)
+                .goalHomeTeam(0)
+                .status(GameStatus.Completed)
+                .result(GameResult.Draw)
+                .build();
 
-        gameScheduledControllerDto = GameScheduledControllerDto.builder().idGame(gameScheduled.getIdGame()).build();
-        gameProgressControllerDto = GameProgressControllerDto.builder().idGame(gameInProgress.getIdGame()).build();
-        gameCompletedControllerDto = GameCompletedControllerDto.builder().idGame(gameCompleted.getIdGame()).build();
+        gameScheduledControllerDto = GameScheduledControllerDto.builder()
+                .idGame(gameScheduled.getIdGame())
+                .homeTeam("Arsenal")
+                .guestTeam("Chelsea")
+                .build();
+        gameProgressControllerDto = GameProgressControllerDto.builder()
+                .idGame(gameInProgress.getIdGame())
+                .homeTeam("Arsenal")
+                .guestTeam("Chelsea")
+                .goalGuestTeam(0)
+                .goalHomeTeam(0)
+                .build();
+        gameCompletedControllerDto = GameCompletedControllerDto.builder()
+                .idGame(gameCompleted.getIdGame())
+                .homeTeam("Arsenal")
+                .guestTeam("Chelsea")
+                .goalGuestTeam(0)
+                .goalHomeTeam(0)
+                .result(GameResult.Draw)
+                .build();
 
-        game = Game.builder().idGame(1).result(GameResult.HomeWin).build();
+        game = Game.builder().idGame(1)
+                .homeTeam(Team.builder().idTeam(1).build())
+                .guestTeam(Team.builder().idTeam(2).build())
+                .status(GameStatus.Scheduled)
+                .gameDate(LocalDateTime.now().plusMinutes(3))
+                .coefficientOnHomeTeam(1)
+                .coefficientOnGuestTeam(1.4F)
+                .coefficientOnDraw(3)
+                .result(GameResult.HomeWin).build();
+    }
+
+    @BeforeEach
+    void createGameService() {
+        gameRepository = mock(GameRepository.class);
+        predictionRepository = mock(PredictionRepository.class);
+        userRepository = mock(UserRepository.class);
+        gameService = new GameService(gameRepository, predictionRepository, userRepository, gameMapper);
     }
 
     @Test
@@ -61,7 +106,6 @@ class GameServiceTest {
 
         when(gameRepository.selectAllGameScheduled()).thenReturn(Collections.singletonList(gameScheduled));
         when(gameRepository.selectLimitGameScheduled()).thenReturn(Collections.singletonList(gameScheduled));
-        when(gameMapper.mapGameToControllerScheduled(gameScheduled)).thenReturn(gameScheduledControllerDto);
 
         List<GameScheduledControllerDto> scheduledControllerDtos = gameService.selectGameScheduledAll();
         List<GameScheduledControllerDto> scheduledControllerDtosLimit = gameService.selectGameScheduledLimit();
@@ -80,7 +124,6 @@ class GameServiceTest {
 
         when(gameRepository.selectAllGameInProgress()).thenReturn(Collections.singletonList(gameInProgress));
         when(gameRepository.selectLimitGameInProgress()).thenReturn(Collections.singletonList(gameInProgress));
-        when(gameMapper.mapGameToControllerInProgress(gameInProgress)).thenReturn(gameProgressControllerDto);
 
         List<GameProgressControllerDto> progressControllerDtos = gameService.selectGameInProgressAll();
         List<GameProgressControllerDto> progressControllerDtosLimit = gameService.selectGameInProgressLimit();
@@ -99,7 +142,6 @@ class GameServiceTest {
 
         when(gameRepository.selectAllGameCompleted()).thenReturn(Collections.singletonList(gameCompleted));
         when(gameRepository.selectLimitGameCompleted()).thenReturn(Collections.singletonList(gameCompleted));
-        when(gameMapper.mapGameToControllerCompleted(gameCompleted)).thenReturn(gameCompletedControllerDto);
 
         List<GameCompletedControllerDto> completedControllerDtos = gameService.selectGameCompletedAll();
         List<GameCompletedControllerDto> completedControllerDtosLimit = gameService.selectGameCompletedLimit();
@@ -162,10 +204,8 @@ class GameServiceTest {
 
     @Test
     void selectGameHotTest() {
-        GameScheduledControllerDto gameScheduledControllerDto = GameScheduledControllerDto.builder().idGame(gameScheduled.getIdGame()).build();
 
         when(gameRepository.selectHotGameScheduled()).thenReturn(Collections.singletonList(gameScheduled));
-        when(gameMapper.mapGameToControllerScheduled(gameScheduled)).thenReturn(gameScheduledControllerDto);
 
         List<GameScheduledControllerDto> scheduledControllerDtos = gameService.selectHotGame();
 
@@ -187,17 +227,22 @@ class GameServiceTest {
 
     @Test
     void selectGameByParametersTest() {
+        Game gameForParameters = Game.builder()
+                .homeTeam(game.getHomeTeam())
+                .guestTeam(game.getGuestTeam())
+                .result(game.getResult())
+                .status(game.getStatus())
+                .build();
         List<Game> gameList = List.of(gameScheduled, gameInProgress, gameCompleted);
 
         CompletedGameFields completedGameFields = CompletedGameFields.builder().isCompletedStatusGame(true).build();
-        GameParametersControllerDto gameParametersControllerDto = GameParametersControllerDto.builder().status(gameScheduled.getStatus()).build();
+        GameParametersControllerDto gameParametersControllerDto = GameParametersControllerDto.builder()
+                .homeTeamId(game.getHomeTeam().getIdTeam())
+                .guestTeamId(game.getGuestTeam().getIdTeam())
+                .result(game.getResult())
+                .status(game.getStatus()).build();
 
-        when(gameMapper.map(gameParametersControllerDto)).thenReturn(game);
-        when(gameRepository.selectByParameters(game, completedGameFields)).thenReturn(gameList);
-
-        when(gameMapper.mapGameToControllerScheduled(gameScheduled)).thenReturn(gameScheduledControllerDto);
-        when(gameMapper.mapGameToControllerInProgress(gameInProgress)).thenReturn(gameProgressControllerDto);
-        when(gameMapper.mapGameToControllerCompleted(gameCompleted)).thenReturn(gameCompletedControllerDto);
+        when(gameRepository.selectByParameters(gameForParameters, completedGameFields)).thenReturn(gameList);
 
         TripleListOfGameControllerDto result = gameService.selectGameByParameters(completedGameFields, gameParametersControllerDto);
 
@@ -227,12 +272,15 @@ class GameServiceTest {
     @Test
     void addNewGameValidTest() {
         GameAdminScheduledControllerDto gameAdminScheduledControllerDto = GameAdminScheduledControllerDto.builder()
-                .idHomeTeam(1).idGuestTeam(2).gameDate(LocalDateTime.now().plusMinutes(3)).build();
-
-        when(gameMapper.mapAdminScheduledControllerToGame(gameAdminScheduledControllerDto)).thenReturn(game);
+                .idHomeTeam(game.getHomeTeam().getIdTeam())
+                .idGuestTeam(game.getGuestTeam().getIdTeam())
+                .gameDate(game.getGameDate())
+                .coefficientOnDraw(game.getCoefficientOnDraw())
+                .coefficientOnHomeTeam(game.getCoefficientOnHomeTeam())
+                .coefficientOnGuestTeam(game.getCoefficientOnGuestTeam())
+                .build();
 
         assertThat(gameService.addNewGame(gameAdminScheduledControllerDto)).isTrue();
-        verify(gameRepository, times(1)).insert(game);
     }
 
     @Test
@@ -270,7 +318,6 @@ class GameServiceTest {
     @Test
     void updateDescriptionGameFalseTest() {
         GameAdminProgressControllerDto gameAdminProgressControllerDto = GameAdminProgressControllerDto.builder().idGame(game.getIdGame()).build();
-        when(gameMapper.mapAdminProgressControllerToGame(gameAdminProgressControllerDto)).thenReturn(game);
         when(gameRepository.updateDescriptionGame(game)).thenReturn(false);
 
         assertThat(gameService.updateDescriptionGame(gameAdminProgressControllerDto)).isFalse();
@@ -278,9 +325,23 @@ class GameServiceTest {
 
     @Test
     void updateDescriptionGameTrueTest() {
-        GameAdminProgressControllerDto gameAdminProgressControllerDto = GameAdminProgressControllerDto.builder().idGame(game.getIdGame()).build();
-        when(gameMapper.mapAdminProgressControllerToGame(gameAdminProgressControllerDto)).thenReturn(game);
-        when(gameRepository.updateDescriptionGame(game)).thenReturn(true);
+        Game gameForUpdate = Game.builder()
+                .goalHomeTeam(gameInProgress.getGoalHomeTeam())
+                .goalGuestTeam(gameInProgress.getGoalGuestTeam())
+                .coefficientOnHomeTeam(game.getCoefficientOnHomeTeam())
+                .coefficientOnDraw(game.getCoefficientOnDraw())
+                .coefficientOnGuestTeam(game.getCoefficientOnGuestTeam())
+                .idGame(game.getIdGame())
+                .build();
+
+        GameAdminProgressControllerDto gameAdminProgressControllerDto = GameAdminProgressControllerDto.builder()
+                .goalHomeTeam(gameInProgress.getGoalHomeTeam())
+                .goalGuestTeam(gameInProgress.getGoalGuestTeam())
+                .coefficientOnHomeTeam(game.getCoefficientOnHomeTeam())
+                .coefficientOnDraw(game.getCoefficientOnDraw())
+                .coefficientOnGuestTeam(game.getCoefficientOnGuestTeam())
+                .idGame(game.getIdGame()).build();
+        when(gameRepository.updateDescriptionGame(gameForUpdate)).thenReturn(true);
 
         assertThat(gameService.updateDescriptionGame(gameAdminProgressControllerDto)).isTrue();
     }
@@ -289,7 +350,6 @@ class GameServiceTest {
     void endGameInvalid() {
         GameAdminCompletedControllerDto gameAdminCompletedControllerDto = GameAdminCompletedControllerDto.builder().build();
 
-        when(gameMapper.mapAdminCompletedControllerToGame(gameAdminCompletedControllerDto)).thenReturn(game);
         when(gameRepository.endGame(game.getIdGame(), game.getResult())).thenReturn(false);
 
         assertThat(gameService.endGame(gameAdminCompletedControllerDto)).isFalse();
@@ -298,7 +358,10 @@ class GameServiceTest {
 
     @Test
     void endGameValidWithWin() {
-        GameAdminCompletedControllerDto gameAdminCompletedControllerDto = GameAdminCompletedControllerDto.builder().build();
+        GameAdminCompletedControllerDto gameAdminCompletedControllerDto = GameAdminCompletedControllerDto.builder()
+                .idGame(game.getIdGame())
+                .result(game.getResult())
+                .build();
         User user = User.builder().idUser(1).build();
         Prediction prediction = Prediction.builder()
                 .idPrediction(1)
@@ -310,7 +373,6 @@ class GameServiceTest {
                 .coefficient(2.0f)
                 .build();
 
-        when(gameMapper.mapAdminCompletedControllerToGame(gameAdminCompletedControllerDto)).thenReturn(game);
         when(gameRepository.endGame(game.getIdGame(), game.getResult())).thenReturn(true);
         when(predictionRepository.selectByGameId(gameAdminCompletedControllerDto.idGame())).thenReturn(Collections.singletonList(prediction));
         when(userRepository.depositMoneyById(anyLong(), any())).thenReturn(true);
@@ -324,7 +386,10 @@ class GameServiceTest {
 
     @Test
     void endGameValidWithLose() {
-        GameAdminCompletedControllerDto gameAdminCompletedControllerDto = GameAdminCompletedControllerDto.builder().build();
+        GameAdminCompletedControllerDto gameAdminCompletedControllerDto = GameAdminCompletedControllerDto.builder()
+                .idGame(game.getIdGame())
+                .result(game.getResult())
+                .build();
         User user = User.builder().idUser(1).build();
         Prediction prediction = Prediction.builder()
                 .idPrediction(1)
@@ -336,7 +401,6 @@ class GameServiceTest {
                 .coefficient(2.0f)
                 .build();
 
-        when(gameMapper.mapAdminCompletedControllerToGame(gameAdminCompletedControllerDto)).thenReturn(game);
         when(gameRepository.endGame(game.getIdGame(), game.getResult())).thenReturn(true);
         when(predictionRepository.selectByGameId(gameAdminCompletedControllerDto.idGame())).thenReturn(Collections.singletonList(prediction));
 

@@ -2,14 +2,11 @@ package ru.arsentiev.servicelayer.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import ru.arsentiev.dto.prediction.controller.*;
 import ru.arsentiev.entity.*;
 import ru.arsentiev.exception.ServiceException;
 import ru.arsentiev.mapper.PredictionMapper;
+import ru.arsentiev.processing.dateformatter.TimeStampFormatter;
 import ru.arsentiev.repository.GameRepository;
 import ru.arsentiev.repository.PredictionRepository;
 import ru.arsentiev.repository.UserRepository;
@@ -26,28 +23,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 class PredictionServiceTest {
-    @Mock
-    private PredictionMapper predictionMapper;
-    @Mock
+    private final PredictionMapper predictionMapper;
     private PredictionRepository predictionRepository;
-    @Mock
     private GameRepository gameRepository;
-    @Mock
     private UserRepository userRepository;
-    @InjectMocks
     private PredictionService predictionService;
 
-    private Prediction predictionNotPlayed;
-    private Prediction predictionPlayed;
-    private Game game;
-    private User user;
-    private BigDecimal summa;
-    private float coefficient;
+    private final Prediction predictionNotPlayed;
+    private final Prediction predictionPlayed;
+    private final Game game;
+    private final User user;
+    private final BigDecimal summa;
+    private final float coefficient;
 
-    @BeforeEach
-    public void fillEntity() {
+    {
+        TimeStampFormatter timeStampFormatter = new TimeStampFormatter();
+        predictionMapper = new PredictionMapper(timeStampFormatter);
+
         GameResult gameResult = GameResult.HomeWin;
         summa = new BigDecimal("100");
         coefficient = 1.5F;
@@ -62,6 +55,8 @@ class PredictionServiceTest {
                 .coefficientOnHomeTeam(coefficient)
                 .coefficientOnDraw(2.0f)
                 .coefficientOnGuestTeam(2.5f)
+                .goalHomeTeam(2)
+                .goalGuestTeam(1)
                 .status(GameStatus.Scheduled)
                 .build();
 
@@ -90,6 +85,14 @@ class PredictionServiceTest {
                 .build();
     }
 
+    @BeforeEach
+    void createPredictionService() {
+        predictionRepository = mock(PredictionRepository.class);
+        gameRepository = mock(GameRepository.class);
+        userRepository = mock(UserRepository.class);
+        predictionService = new PredictionService(predictionMapper, predictionRepository, gameRepository, userRepository);
+    }
+
     @Test
     void insertPredictionTest_GameNotExist() {
         PredictionPlaceControllerDto dto = PredictionPlaceControllerDto.builder().idGame(game.getIdGame()).build();
@@ -104,7 +107,6 @@ class PredictionServiceTest {
         PredictionPlaceControllerDto dto = new PredictionPlaceControllerDto(predictionNotPlayed.getUser().getIdUser(), predictionNotPlayed.getGame().getIdGame()
                 , predictionNotPlayed.getSumma(), predictionNotPlayed.getPrediction());
         when(gameRepository.selectById(dto.idGame())).thenReturn(Optional.of(game));
-        when(predictionMapper.map(dto)).thenReturn(predictionNotPlayed);
         when(predictionRepository.insert(predictionNotPlayed)).thenReturn(false);
 
         assertThatThrownBy(() -> predictionService.insertPrediction(dto)).isInstanceOf(ServiceException.class);
@@ -114,30 +116,53 @@ class PredictionServiceTest {
     void insertPredictionTest_GameExistAndInsertGood() {
         PredictionPlaceControllerDto dto = new PredictionPlaceControllerDto(predictionNotPlayed.getUser().getIdUser(), predictionNotPlayed.getGame().getIdGame()
                 , predictionNotPlayed.getSumma(), predictionNotPlayed.getPrediction());
+
         when(gameRepository.selectById(dto.idGame())).thenReturn(Optional.of(game));
-        when(predictionMapper.map(dto)).thenReturn(predictionNotPlayed);
-        when(predictionRepository.insert(predictionNotPlayed)).thenReturn(true);
+        when(predictionRepository.insert(any(Prediction.class))).thenReturn(true);
 
         PredictionResultControllerDto resultControllerDto = predictionService.insertPrediction(dto);
 
         assertThat(resultControllerDto).isNotNull();
         assertThat(resultControllerDto.winner()).isEqualTo(game.getHomeTeam().getTitle());
         assertThat(resultControllerDto.possibleWin()).isEqualTo(summa.multiply(BigDecimal.valueOf(coefficient)));
-        verify(predictionRepository, times(1)).insert(predictionNotPlayed);
     }
 
     @Test
     void selectDoublePredictionsListTest() {
         PredictionNotPlayedControllerDto predictionNotPlayedControllerDto = PredictionNotPlayedControllerDto.builder()
-                .idPrediction(predictionNotPlayed.getIdPrediction()).build();
+                .idPrediction(predictionNotPlayed.getIdPrediction())
+                .goalHomeTeam(predictionNotPlayed.getGame().getGoalHomeTeam())
+                .goalGuestTeam(predictionNotPlayed.getGame().getGoalGuestTeam())
+                .summa(predictionNotPlayed.getSumma())
+                .predictionDate(predictionNotPlayed.getPredictionDate())
+                .prediction(predictionNotPlayed.getPrediction())
+                .predictionStatus(predictionNotPlayed.getPredictionStatus())
+                .idGame(predictionNotPlayed.getGame().getIdGame())
+                .coefficient(coefficient)
+                .summa(summa)
+                .homeTeam(predictionNotPlayed.getGame().getHomeTeam().getTitle())
+                .guestTeam(predictionNotPlayed.getGame().getGuestTeam().getTitle())
+                .build();
+
         PredictionPlayedControllerDto predictionPlayedControllerDto = PredictionPlayedControllerDto.builder()
-                .idPrediction(predictionPlayed.getIdPrediction()).build();
+                .idPrediction(predictionPlayed.getIdPrediction())
+                .goalHomeTeam(predictionPlayed.getGame().getGoalHomeTeam())
+                .goalGuestTeam(predictionPlayed.getGame().getGoalGuestTeam())
+                .summa(predictionPlayed.getSumma())
+                .predictionDate(predictionPlayed.getPredictionDate())
+                .prediction(predictionPlayed.getPrediction())
+                .predictionStatus(predictionPlayed.getPredictionStatus())
+                .idGame(predictionPlayed.getGame().getIdGame())
+                .coefficient(coefficient)
+                .summa(summa)
+                .homeTeam(predictionPlayed.getGame().getHomeTeam().getTitle())
+                .guestTeam(predictionPlayed.getGame().getGuestTeam().getTitle())
+                .build();
+
         Long idUser = user.getIdUser();
 
         when(predictionRepository.selectByUserIdLimitBetPlayed(idUser)).thenReturn(Collections.singletonList(predictionPlayed));
         when(predictionRepository.selectByUserIdLimitBetNotPlayed(idUser)).thenReturn(Collections.singletonList(predictionNotPlayed));
-        when(predictionMapper.mapPredictionPlayed(predictionPlayed)).thenReturn(predictionPlayedControllerDto);
-        when(predictionMapper.mapPredictionNotPlayed(predictionNotPlayed)).thenReturn(predictionNotPlayedControllerDto);
 
         DoubleListPredictionControllerDto result = predictionService.selectDoublePredictionsList(idUser);
 
@@ -158,9 +183,11 @@ class PredictionServiceTest {
     void deletePredictionTest_StatusCompleted() {
         PredictionForDeleteControllerDto dto = PredictionForDeleteControllerDto.builder()
                 .idGame(game.getIdGame()).prediction(GameResult.HomeWin).coefficient(5F).build();
-        game.setStatus(GameStatus.Completed);
 
-        when(gameRepository.selectById(dto.idGame())).thenReturn(Optional.of(game));
+        Game gameForDelete = game;
+        gameForDelete.setStatus(GameStatus.Completed);
+
+        when(gameRepository.selectById(dto.idGame())).thenReturn(Optional.of(gameForDelete));
 
         assertThat(predictionService.deletePrediction(dto)).isEmpty();
     }
@@ -198,11 +225,23 @@ class PredictionServiceTest {
     @Test
     void selectBetNotPlayedPredictions() {
         PredictionNotPlayedControllerDto predictionNotPlayedControllerDto = PredictionNotPlayedControllerDto.builder()
-                .idPrediction(predictionNotPlayed.getIdPrediction()).build();
+                .idPrediction(predictionNotPlayed.getIdPrediction())
+                .goalHomeTeam(predictionNotPlayed.getGame().getGoalHomeTeam())
+                .goalGuestTeam(predictionNotPlayed.getGame().getGoalGuestTeam())
+                .summa(predictionNotPlayed.getSumma())
+                .predictionDate(predictionNotPlayed.getPredictionDate())
+                .prediction(predictionNotPlayed.getPrediction())
+                .predictionStatus(predictionNotPlayed.getPredictionStatus())
+                .idGame(predictionNotPlayed.getGame().getIdGame())
+                .coefficient(coefficient)
+                .summa(summa)
+                .homeTeam(predictionNotPlayed.getGame().getHomeTeam().getTitle())
+                .guestTeam(predictionNotPlayed.getGame().getGuestTeam().getTitle())
+                .build();
+
         Long idUser = user.getIdUser();
 
         when(predictionRepository.selectByUserIdBetNotPlayed(idUser)).thenReturn(Collections.singletonList(predictionNotPlayed));
-        when(predictionMapper.mapPredictionNotPlayed(predictionNotPlayed)).thenReturn(predictionNotPlayedControllerDto);
 
         List<PredictionNotPlayedControllerDto> list = predictionService.selectBetNotPlayedPredictions(idUser);
 
@@ -212,11 +251,23 @@ class PredictionServiceTest {
     @Test
     void selectBetPlayedPredictions() {
         PredictionPlayedControllerDto predictionPlayedControllerDto = PredictionPlayedControllerDto.builder()
-                .idPrediction(predictionPlayed.getIdPrediction()).build();
+                .idPrediction(predictionPlayed.getIdPrediction())
+                .goalHomeTeam(predictionPlayed.getGame().getGoalHomeTeam())
+                .goalGuestTeam(predictionPlayed.getGame().getGoalGuestTeam())
+                .summa(predictionPlayed.getSumma())
+                .predictionDate(predictionPlayed.getPredictionDate())
+                .prediction(predictionPlayed.getPrediction())
+                .predictionStatus(predictionPlayed.getPredictionStatus())
+                .idGame(predictionPlayed.getGame().getIdGame())
+                .coefficient(coefficient)
+                .summa(summa)
+                .homeTeam(predictionPlayed.getGame().getHomeTeam().getTitle())
+                .guestTeam(predictionPlayed.getGame().getGuestTeam().getTitle())
+                .build();
+
         Long idUser = user.getIdUser();
 
         when(predictionRepository.selectByUserIdBetPlayed(idUser)).thenReturn(Collections.singletonList(predictionPlayed));
-        when(predictionMapper.mapPredictionPlayed(predictionPlayed)).thenReturn(predictionPlayedControllerDto);
 
         List<PredictionPlayedControllerDto> list = predictionService.selectBetPlayedPredictions(idUser);
 

@@ -3,17 +3,24 @@ package ru.arsentiev.servicelayer.service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.arsentiev.dto.user.controller.*;
+import ru.arsentiev.dto.user.view.UserRegistrationViewDto;
+import ru.arsentiev.dto.user.view.UserUpdateDescriptionViewDto;
+import ru.arsentiev.dto.user.view.UserValidatorViewDto;
 import ru.arsentiev.entity.User;
 import ru.arsentiev.exception.ServiceException;
 import ru.arsentiev.mapper.UserMapper;
 import ru.arsentiev.processing.password.PasswordHashed;
 import ru.arsentiev.processing.query.entity.UpdatedUserFields;
 import ru.arsentiev.repository.UserRepository;
-import ru.arsentiev.servicelayer.validator.UpdateUserValidator;
+import ru.arsentiev.servicelayer.service.entity.user.ReturnValueFromUpdateDescription;
+import ru.arsentiev.servicelayer.validator.UserValidator;
+import ru.arsentiev.servicelayer.validator.entity.load.LoadError;
+import ru.arsentiev.servicelayer.validator.entity.load.LoadValidationResult;
 import ru.arsentiev.servicelayer.validator.entity.login.LoginError;
 import ru.arsentiev.servicelayer.validator.entity.update.UpdatePasswordError;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,20 +29,32 @@ public class UserService {
     private final UserMapper userMapper;
     private final PasswordHashed passwordHashed;
     private final UserRepository userRepository;
-    private final UpdateUserValidator updateUserValidator;
+    private final UserValidator userValidator;
 
-    public UserService(UserMapper userMapper, PasswordHashed passwordHashed, UserRepository userRepository,
-                       UpdateUserValidator updateUserValidator) {
+    public UserService(UserMapper userMapper, PasswordHashed passwordHashed, UserRepository userRepository, UserValidator userValidator) {
         this.userMapper = userMapper;
         this.passwordHashed = passwordHashed;
         this.userRepository = userRepository;
-        this.updateUserValidator = updateUserValidator;
+        this.userValidator = userValidator;
     }
 
-    public void insertUser(UserRegistrationControllerDto userRegistrationControllerDto) {
-        String salt = passwordHashed.generateSalt();
-        User user = userMapper.map(userRegistrationControllerDto, salt, passwordHashed::hashPassword);
-        userRepository.insert(user);
+    public List<LoadError> insertUser(UserRegistrationViewDto userRegistrationViewDto) {
+        UserValidatorViewDto userValidatorViewDto = userMapper.mapRegistrationToValidator(userRegistrationViewDto);
+        List<User> users = userRepository.selectAll();
+        List<String> nicknames = users.stream().map(User::getNickname).toList();
+        List<String> emails = users.stream().map(User::getEmail).toList();
+        List<String> phoneNumbers = users.stream().map(User::getPhoneNumber).toList();
+        userValidator.setToRegistration(nicknames, emails, phoneNumbers);
+        LoadValidationResult loadValidationResult = userValidator.isValid(userValidatorViewDto);
+        if (loadValidationResult.isEmpty()) {
+            UserRegistrationControllerDto userRegistrationControllerDto = userMapper.map(userRegistrationViewDto);
+            String salt = passwordHashed.generateSalt();
+            User user = userMapper.map(userRegistrationControllerDto, salt, passwordHashed::hashPassword);
+            userRepository.insert(user);
+            return Collections.emptyList();
+        } else {
+            return loadValidationResult.getLoadErrors();
+        }
     }
 
     public UserControllerDto selectUser(UserLoginControllerDto userLoginControllerDto) {
@@ -62,16 +81,36 @@ public class UserService {
         }
     }
 
-    public UserControllerDto updateDescriptionUser(UserUpdateDescriptionControllerDto userUpdateDescriptionControllerDto,
-                                                   UpdatedUserFields updatedUserFields,
-                                                   UserConstFieldsControllerDto userConstFieldsControllerDto) {
-        User user = userMapper.map(userUpdateDescriptionControllerDto);
-        if (userRepository.updateDescriptionWithDynamicCreation(user, updatedUserFields)) {
-            return userMapper.map(userConstFieldsControllerDto, userUpdateDescriptionControllerDto);
+    public ReturnValueFromUpdateDescription updateDescriptionUser(UserUpdateDescriptionViewDto userUpdateDescriptionViewDto,
+                                                                  UpdatedUserFields updatedUserFields,
+                                                                  UserConstFieldsControllerDto userConstFieldsControllerDto) {
+        UserValidatorViewDto userValidatorViewDto = userMapper.mapUpdateToValidator(userUpdateDescriptionViewDto);
+        List<User> users = userRepository.selectAll();
+        List<String> nicknames = users.stream().map(User::getNickname).toList();
+        List<String> emails = users.stream().map(User::getEmail).toList();
+        List<String> phoneNumbers = users.stream().map(User::getPhoneNumber).toList();
+        userValidator.setToUpdate(updatedUserFields, nicknames, emails, phoneNumbers);
+        LoadValidationResult result = userValidator.isValid(userValidatorViewDto);
+        if (result.isEmpty()) {
+            UserUpdateDescriptionControllerDto userUpdateDescriptionControllerDto =
+                    userMapper.map(userUpdateDescriptionViewDto);
+            User user = userMapper.map(userUpdateDescriptionControllerDto);
+            if (userRepository.updateDescriptionWithDynamicCreation(user, updatedUserFields)) {
+                return ReturnValueFromUpdateDescription.builder()
+                        .loadErrors(Collections.emptyList())
+                        .userControllerDtoOptional(Optional.of(userMapper.map(userConstFieldsControllerDto, userUpdateDescriptionControllerDto)))
+                        .build();
+            } else {
+                logger.error("Update user" + user.toString() + " failed");
+                throw new ServiceException("Update failed");
+            }
         } else {
-            logger.error("Update user" + user.toString() + " failed");
-            throw new ServiceException("Update failed");
+            return ReturnValueFromUpdateDescription.builder()
+                    .loadErrors(result.getLoadErrors())
+                    .userControllerDtoOptional(Optional.empty())
+                    .build();
         }
+
     }
 
     public Optional<UpdatePasswordError> updatePasswordUser(UserLogoPasControllerDto userLogoPasControllerDto) {
@@ -79,7 +118,7 @@ public class UserService {
         if (userSelectPassword != null) {
             UserPasswordAndSaltControllerDto dto = userMapper.mapUserToPasswordAndSaltController(userSelectPassword);
             if (dto.password().equals(passwordHashed.hashPassword(userLogoPasControllerDto.oldPassword(), dto.salt()))) {
-                if (!updateUserValidator.isValidPassword(userLogoPasControllerDto.newPassword())) {
+                if (!userValidator.isValidPassword(userLogoPasControllerDto.newPassword())) {
                     return Optional.of(UpdatePasswordError.INCORRECT_NEW_PASSWORD);
                 }
                 String salt = passwordHashed.generateSalt();
@@ -126,7 +165,7 @@ public class UserService {
     }
 
     public List<UserForAdminControllerDto> selectAllUser() {
-        return userRepository.selectAll().stream()
+        return userRepository.selectAllOnlyUser().stream()
                 .map(userMapper::mapUserToControllerForAdmin)
                 .toList();
     }

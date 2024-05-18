@@ -7,16 +7,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.arsentiev.dto.user.controller.UserConstFieldsControllerDto;
 import ru.arsentiev.dto.user.controller.UserControllerDto;
-import ru.arsentiev.dto.user.controller.UserUpdateDescriptionControllerDto;
 import ru.arsentiev.dto.user.view.UserUpdateDescriptionViewDto;
-import ru.arsentiev.manager.MapperManager;
 import ru.arsentiev.manager.ServiceManager;
-import ru.arsentiev.manager.ValidationManager;
-import ru.arsentiev.mapper.UserMapper;
 import ru.arsentiev.processing.query.entity.UpdatedUserFields;
 import ru.arsentiev.servicelayer.service.UserService;
-import ru.arsentiev.servicelayer.validator.UpdateUserValidator;
-import ru.arsentiev.servicelayer.validator.entity.load.LoadValidationResult;
+import ru.arsentiev.servicelayer.service.entity.user.ReturnValueFromUpdateDescription;
 import ru.arsentiev.utils.JspPathCreator;
 
 import java.io.IOException;
@@ -31,14 +26,10 @@ import static ru.arsentiev.utils.UrlPathGetter.USER_UPDATE_DESCRIPTION_URL;
 @WebServlet(USER_UPDATE_DESCRIPTION_URL)
 public class UserUpdateDescriptionServlet extends HttpServlet {
     private UserService userService;
-    private UserMapper userMapper;
-    private UpdateUserValidator updateUserValidator;
 
     @Override
     public void init() throws ServletException {
         userService = ServiceManager.getUserService();
-        userMapper = MapperManager.getUserMapper();
-        updateUserValidator = ValidationManager.getUpdateUserValidator();
     }
 
     @Override
@@ -63,28 +54,24 @@ public class UserUpdateDescriptionServlet extends HttpServlet {
         final UserUpdateDescriptionViewDto userUpdateDescriptionViewDto = getUserUpdateDto(nickname,
                 firstName, lastName, patronymic, email, phoneNumber, birthDate, String.valueOf(user.idUser()));
 
-        final LoadValidationResult result = updateUserValidator.isValidDescription(userUpdateDescriptionViewDto,
-                updatedUserFields);
+        final UserConstFieldsControllerDto userConstFieldsControllerDto = UserConstFieldsControllerDto.builder()
+                .idUser(user.idUser())
+                .role(user.role())
+                .build();
 
-        if (result.getLoadErrors().isEmpty()) {
+        ReturnValueFromUpdateDescription result = userService.updateDescriptionUser(userUpdateDescriptionViewDto,
+                updatedUserFields, userConstFieldsControllerDto);
 
-            final UserUpdateDescriptionControllerDto userUpdateDescriptionControllerDto =
-                    userMapper.map(userUpdateDescriptionViewDto);
+        if (result.userControllerDtoOptional().isPresent()) {
 
-            final UserConstFieldsControllerDto userConstFieldsControllerDto = UserConstFieldsControllerDto.builder()
-                    .idUser(user.idUser())
-                    .role(user.role())
-                    .build();
-
-            final UserControllerDto userControllerDto = userService.updateDescriptionUser
-                    (userUpdateDescriptionControllerDto, updatedUserFields, userConstFieldsControllerDto);
+            final UserControllerDto userControllerDto = result.userControllerDtoOptional().get();
 
             req.getSession().removeAttribute(NAME_ATTRIBUTE_USER);
             req.getSession().setAttribute(NAME_ATTRIBUTE_USER, userControllerDto);
             resp.sendRedirect(USER_DEFAULT_URL);
 
         } else {
-            req.setAttribute(NAME_ATTRIBUTE_ERRORS, result.getLoadErrors());
+            req.setAttribute(NAME_ATTRIBUTE_ERRORS, result.loadErrors());
             doGet(req, resp);
         }
     }

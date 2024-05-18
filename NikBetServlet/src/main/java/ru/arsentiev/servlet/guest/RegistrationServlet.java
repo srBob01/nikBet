@@ -6,18 +6,14 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import ru.arsentiev.dto.user.controller.UserRegistrationControllerDto;
 import ru.arsentiev.dto.user.view.UserRegistrationViewDto;
-import ru.arsentiev.manager.MapperManager;
 import ru.arsentiev.manager.ServiceManager;
-import ru.arsentiev.manager.ValidationManager;
-import ru.arsentiev.mapper.UserMapper;
 import ru.arsentiev.servicelayer.service.UserService;
+import ru.arsentiev.servicelayer.validator.entity.load.LoadError;
 import ru.arsentiev.utils.JspPathCreator;
-import ru.arsentiev.servicelayer.validator.RegistrationUserValidator;
-import ru.arsentiev.servicelayer.validator.entity.load.LoadValidationResult;
 
 import java.io.IOException;
+import java.util.List;
 
 import static ru.arsentiev.utils.AttributeGetter.NAME_ATTRIBUTE_ERRORS;
 import static ru.arsentiev.utils.JspPathGetter.REGISTRATION_JSP;
@@ -28,15 +24,10 @@ import static ru.arsentiev.utils.UrlPathGetter.REGISTRATION_URL;
 public class RegistrationServlet extends HttpServlet {
 
     private static UserService userService;
-    private RegistrationUserValidator registrationUserValidator;
-    private static UserMapper userMapper;
-
 
     @Override
     public void init(ServletConfig config) {
         userService = ServiceManager.getUserService();
-        registrationUserValidator = ValidationManager.getRegistrationUserValidator();
-        userMapper = MapperManager.getUserMapper();
     }
 
     @Override
@@ -47,14 +38,12 @@ public class RegistrationServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         final UserRegistrationViewDto userRegistrationViewDto = getUserRegistrationViewDto(req);
-        final LoadValidationResult result = registrationUserValidator.isValid(userRegistrationViewDto);
+        final List<LoadError> result = userService.insertUser(userRegistrationViewDto);
 
         if (result.isEmpty()) {
-            UserRegistrationControllerDto userRegistrationControllerDto = userMapper.map(userRegistrationViewDto);
-            userService.insertUser(userRegistrationControllerDto);
             resp.sendRedirect(LOGIN_URL);
         } else {
-            req.setAttribute(NAME_ATTRIBUTE_ERRORS, result.getLoadErrors());
+            req.setAttribute(NAME_ATTRIBUTE_ERRORS, result);
             doGet(req, resp);
         }
     }

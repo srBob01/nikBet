@@ -58,6 +58,10 @@ public class UserRepository implements BaseRepository<Long, User> {
                                                     " password, phoneNumber, email, birthDate, accountBalance, role, salt" +
                                                     " FROM users WHERE idUser = ?;";
     //language=PostgreSQL
+    private static final String SELECT_ALL_USERS_AND_ADMINS = "SELECT iduser, nickname, firstname, lastname, patronymic," +
+                                                              " password, phonenumber, email, birthdate, accountbalance, role, salt" +
+                                                              " FROM users ORDER BY iduser;";
+    //language=PostgreSQL
     private static final String SELECT_ALL_USERS = "SELECT iduser, nickname, firstname, lastname, patronymic," +
                                                    " password, phonenumber, email, birthdate, accountbalance, role, salt" +
                                                    " FROM users WHERE role = 'USER' ORDER BY iduser;";
@@ -108,9 +112,17 @@ public class UserRepository implements BaseRepository<Long, User> {
 
     @Override
     public List<User> selectAll() { //SELECT_ALL_USERS
+        return selectAllHelp(SELECT_ALL_USERS_AND_ADMINS);
+    }
+
+    public List<User> selectAllOnlyUser() {
+        return selectAllHelp(SELECT_ALL_USERS);
+    }
+
+    private List<User> selectAllHelp(String select) { //SELECT_ALL_USERS
         List<User> users = new ArrayList<>();
         try (Connection connection = myConnectionGetter.get();
-             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_USERS);
+             PreparedStatement preparedStatement = connection.prepareStatement(select);
              ResultSet rs = preparedStatement.executeQuery()) {
             while (rs.next()) {
                 users.add(mapResultSetToUser(rs));

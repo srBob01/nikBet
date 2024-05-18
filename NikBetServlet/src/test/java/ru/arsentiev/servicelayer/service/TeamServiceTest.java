@@ -1,11 +1,7 @@
 package ru.arsentiev.servicelayer.service;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import ru.arsentiev.dto.team.controller.TeamControllerDto;
 import ru.arsentiev.entity.Team;
 import ru.arsentiev.mapper.TeamMapper;
@@ -17,22 +13,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
 class TeamServiceTest {
-    private static List<Team> teams;
-    private static List<TeamControllerDto> expectedDtoList;
-    @Mock
+    private final List<Team> teams;
+    private final List<TeamControllerDto> expectedDtoList;
     private TeamRepository teamRepository;
-    @Mock
-    private TeamMapper teamMapper;
-    @InjectMocks
+    private final TeamMapper teamMapper;
     private TeamService teamService;
 
-    @BeforeAll
-    static void setUp() {
+    {
+        teamMapper = new TeamMapper();
         teams = Arrays.asList(
                 Team.builder().idTeam(1).title("Team A").abbreviation("TA").build(),
                 Team.builder().idTeam(2).title("Team B").abbreviation("TB").build()
@@ -42,13 +34,15 @@ class TeamServiceTest {
                 .collect(Collectors.toList());
     }
 
+    @BeforeEach
+    void createService() {
+        teamRepository = mock(TeamRepository.class);
+        teamService = new TeamService(teamRepository, teamMapper);
+    }
+
     @Test
     void selectAllTeam_Valid() {
         when(teamRepository.selectAll()).thenReturn(teams);
-        when(teamMapper.map(any(Team.class))).thenAnswer(invocation -> {
-            Team team = invocation.getArgument(0);
-            return new TeamControllerDto(team.getIdTeam(), team.getTitle());
-        });
 
         List<TeamControllerDto> result = teamService.selectAllTeam();
 

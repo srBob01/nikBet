@@ -16,6 +16,8 @@ public class CheckManager {
     private static final PasswordCheck passwordCheck;
     @Getter
     private static final PhoneNumberCheck phoneNumberCheck;
+    @Getter
+    private static final EmptyCheck emptyCheck;
 
     static {
         localDateFormatter = DateFormatterManager.getLocalDateFormatter();
@@ -23,5 +25,6 @@ public class CheckManager {
         nameCheck = new NameCheck();
         passwordCheck = new PasswordCheck();
         phoneNumberCheck = new PhoneNumberCheck();
+        emptyCheck = new EmptyCheck();
     }
 }

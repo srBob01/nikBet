@@ -5,20 +5,21 @@ import ru.arsentiev.processing.dateformatter.LocalDateFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Optional;
 
-public class DateCheck {
+public class DateCheck implements Check {
     private final LocalDateFormatter localDateFormatter;
 
     public DateCheck(LocalDateFormatter localDateFormatter) {
         this.localDateFormatter = localDateFormatter;
     }
 
-    public boolean isCorrect(String date) {
+    @Override
+    public boolean isInvalid(String str) {
         try {
-            return Optional.of(date)
+            return Optional.of(str)
                     .map(localDateFormatter::format)
-                    .isPresent();
+                    .isEmpty();
         } catch (DateTimeParseException e) {
-            return false;
+            return true;
         }
     }
 }
